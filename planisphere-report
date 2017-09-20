@@ -1,0 +1,83 @@
+#!/usr/bin/python
+
+import os
+import sys
+import argparse
+import platform
+import json
+import glob
+import re
+import subprocess
+
+def get_machine_info():
+    system, node, release, version, machine, processor = platform.uname()
+    info = {'data': {}}
+    data = info['data']
+    data['os_family'] = system
+    data['hostname'] = node
+    if data['os_family'] == 'Linux':
+        info['key'] = safe_read('/etc/machine-id') or safe_read('/var/lib/dbus/machine-id')
+        # Planisphere strips out MAC addresses that are all 0's or have the
+        # local bit set, so we don't have to worry about that here.
+        data['mac_addresses'] = [open(fn, 'r').read().strip() for fn in glob.iglob('/sys/class/net/*/address')]
+        data['mac_addresses'] = filter(None, data['mac_addresses']) # remove empty strings
+        data['manufacturer'] = safe_read('/sys/class/dmi/id/sys_vendor')
+        data['model'] = safe_read('/sys/class/dmi/id/product_name')
+        data['serial'] = safe_read('/sys/class/dmi/id/product_serial')
+        data['os_fullname'] = read_osname()
+        if data['os_fullname'] and re.search("fedora|red hat", data['os_fullname'], re.IGNORECASE):
+            data['installed_software'] = retrieve_packages_rpm()
+        elif data['os_fullname'] and re.search("debian|ubuntu|raspbian", data['os_fullname'], re.IGNORECASE):
+            data['installed_software'] = retrieve_packages_apt()
+
+    return info
+
+def read_osname():
+    try:
+        for line in open('/etc/os-release', 'r'):
+            key, val = line.split('=',2)
+            if key == 'PRETTY_NAME':
+                val = val.strip()
+                if val[0] == '"' and val[-1] == '"':
+                    val = val[1:-1]
+                return val
+    except IOError:
+        return
+
+def retrieve_packages_apt():
+    output = subprocess.check_output(['apt', 'list', '--installed'])
+    packages = []
+    for line in output.splitlines():
+        name, extra = line.split('/', 1)
+        repo, version, extra = line.split(' ', 2)
+        packages.append(name, version)
+    return packages
+
+def retrieve_packages_rpm():
+    output = subprocess.check_output(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'])
+    return [line.split(' ', 2) for line in output.splitlines()]
+
+
+def safe_read(fn):
+    try:
+        results = open(fn, 'r').read().strip()
+    except IOError:
+        results = None
+    return results
+
+def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dry-run', help="Print data that would be sent to planisphere", action="store_true")
+    args = parser.parse_args()
+
+    info = get_machine_info()
+
+    if args.dry_run:
+        print json.dumps(info, sort_keys=True, indent=4)
+    else:
+        json.dumps(info)
+
+
+if __name__ == "__main__":
+    main()
