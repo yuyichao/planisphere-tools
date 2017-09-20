@@ -102,10 +102,13 @@ def read_osname():
                     val = val[1:-1]
                 return val
     except IOError:
-        return
+        pass
+
+    # Now try /etc/system-release
+    return safe_read('/etc/system-release')
 
 def retrieve_packages_apt():
-    output = subprocess.check_output(['apt', 'list', '--installed'])
+    output = subprocess.Popen(['apt', 'list', '--installed'], stdout=subprocess.PIPE).communicate()[0]
     packages = []
     for line in output.splitlines():
         if line == 'Listing...':
@@ -116,7 +119,7 @@ def retrieve_packages_apt():
     return packages
 
 def retrieve_packages_rpm():
-    output = subprocess.check_output(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'])
+    output = subprocess.Popen(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'], stdout=subprocess.PIPE).communicate()[0]
     return [line.split(' ', 2) for line in output.splitlines()]
 
 
