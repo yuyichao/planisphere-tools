@@ -9,6 +9,63 @@ import glob
 import re
 import subprocess
 
+def get_linux_arm_info(data):
+    # These boards don't tend to use DMI, so its a bit trickier to get good
+    # HW info.
+
+    # This comes from http://elinux.org/RPi_HardwareHistory
+    raspberry_models = {
+        '0002': 'B',
+        '0003': 'B',
+        '0004': 'B',
+        '0005': 'B',
+        '0006': 'B',
+        '0007': 'A',
+        '0008': 'A',
+        '0009': 'A',
+        '000d': 'B',
+        '000e': 'B',
+        '000f': 'B',
+        '0010': 'B+',
+        '0011': 'Compute Module 1',
+        '0012': 'A+',
+        '0013': 'B+',
+        '0014': 'Compute Module 1',
+        '0015': 'A+',
+        'a01040': '2 Model B',
+        'a21041': '2 Model B',
+        'a21041': '2 Model B',
+        'a22042': '2 Model B',
+        '900021': 'A+',
+        '900032': 'B+',
+        '900092': 'Zero',
+        '900093': 'Zero',
+        '920093': 'Zero',
+        '9000c1': 'Zero W',
+        'a02082': '3 Model B',
+        'a020a0': 'Compute Module 3',
+        'a22082': '3 Model B',
+        'a32082': '3 Model B',
+    }
+    for mac in data['mac_addresses']:
+        if mac.startswith('b8:27:eb'):
+            # its a raspberry pi
+            data['manufacturer'] = 'Raspberry Pi'
+            for line in open('/proc/cpuinfo', 'r'):
+                line = line.strip()
+                if line == '':
+                    continue
+                key, value = line.split(':', 1)
+                key = key.strip()
+                if key == 'Revision':
+                    try:
+                        data['model'] = raspberry_models[value.strip()]
+                    except KeyError:
+                        pass
+                elif key == 'Serial':
+                    data['serial'] = value.strip()
+
+
 def get_machine_info():
     system, node, release, version, machine, processor = platform.uname()
     info = {'data': {}}
@@ -30,6 +87,9 @@ def get_machine_info():
         elif data['os_fullname'] and re.search("debian|ubuntu|raspbian", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_apt()
 
+        if machine == 'armv7l':
+            get_linux_arm_info(data)
+
     return info
 
 def read_osname():
@@ -48,9 +108,11 @@ def retrieve_packages_apt():
     output = subprocess.check_output(['apt', 'list', '--installed'])
     packages = []
     for line in output.splitlines():
+        if line == 'Listing...':
+            continue
         name, extra = line.split('/', 1)
         repo, version, extra = line.split(' ', 2)
-        packages.append(name, version)
+        packages.append([name, version])
     return packages
 
 def retrieve_packages_rpm():
