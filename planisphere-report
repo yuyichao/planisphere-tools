@@ -12,6 +12,25 @@ import urllib2
 import time
 import ConfigParser
 
+# Using chassis types as defined in https://www.dmtf.org/sites/default/files/standards/documents/DSP0119.pdf section 3.3.4.1
+chassis_type_map = {
+    '3': 'desktop',
+    '4': 'desktop',
+    '5': 'desktop',
+    '6': 'desktop',
+    '7': 'desktop',
+    '8': 'laptop',
+    '9': 'laptop',
+    '10': 'laptop',
+    '11': 'laptop',
+    '13': 'desktop',
+    '14': 'laptop',
+    '17': 'server_physical',
+    '21': 'laptop',
+    '23': 'server_physical',
+    '25': 'server_physical', # blade
+}
+
 def get_linux_arm_info(data):
     # These boards don't tend to use DMI, so its a bit trickier to get good
     # HW info.
@@ -87,6 +106,10 @@ def get_machine_info():
         data['manufacturer'] = safe_read('/sys/class/dmi/id/sys_vendor')
         data['model'] = safe_read('/sys/class/dmi/id/product_name')
         data['serial'] = safe_read('/sys/class/dmi/id/product_serial')
+        try:
+            data['device_type'] = chassis_type_map[safe_read('/sys/class/dmi/id/chassis_type')]
+        except KeyError:
+            pass
         data['os_fullname'] = read_osname()
         if data['os_fullname'] and re.search("fedora|red hat", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_rpm()
