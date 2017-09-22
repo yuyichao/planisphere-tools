@@ -10,6 +10,7 @@ import re
 import subprocess
 import urllib2
 import time
+import ConfigParser
 
 def get_linux_arm_info(data):
     # These boards don't tend to use DMI, so its a bit trickier to get good
@@ -95,18 +96,22 @@ def get_machine_info():
         if machine == 'armv7l':
             get_linux_arm_info(data)
 
+        # Add serial to key
+        if info['key'] and data['serial']:
+            info['key'] = '%s-%s' % (data['serial'], info['key'])
+
     return info
 
-def post_results(info, verbose):
-    if not os.access('/etc/planisphere-report-key', os.R_OK):
-        print >> sys.stderr, 'Error: Cannot read /etc/planisphere-report-key'
+def post_results(info, config, verbose):
+    if not os.access(config['key-file'], os.R_OK):
+        print >> sys.stderr, 'Error: Cannot read %s' % (config['key-file'])
         sys.exit(5)
-    key = open('/etc/planisphere-report-key', 'r').read().strip()
+    key = open(config['key-file'], 'r').read().strip()
     if not key:
-        print >> sys.stderr, 'Error: /etc/planisphere-report-key cannot be empty'
+        print >> sys.stderr, 'Error: %s cannot be empty' % (config['key-file'])
         sys.exit(6)
 
-    req = urllib2.Request('https://planisphere-test.oit.duke.edu/self_report')
+    req = urllib2.Request(config['url'])
     req.add_header('Content-Type', 'application/json')
     req.add_header('PLANISPHERE-REPORT-KEY', key)
     try:
@@ -163,18 +168,33 @@ def safe_read(fn):
     return results
 
 def main():
-
+    # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dry-run', help="Print data that would be sent to planisphere, but don't send it", action="store_true")
     parser.add_argument('-v', '--verbose', help="Print success output after posting to planisphere", action="store_true")
     args = parser.parse_args()
 
+    # Parse config
+    overrides = {}
+    config = {
+        'key-file': '/etc/planisphere-report-key',
+        'url': 'https://planisphere.oit.duke.edu/self_report',
+    }
+    parser = ConfigParser.RawConfigParser()
+    parser.read('/etc/planisphere-report')
+    if parser.has_section('config'):
+        config.update(parser.items('config'))
+    if parser.has_section('overrides'):
+        overrides.update(parser.items('overrides'))
+
     info = get_machine_info()
+    # Apply overrides
+    info['data'].update(overrides)
 
     if args.dry_run:
         print json.dumps(info, sort_keys=True, indent=4)
     else:
-        post_results(info, args.verbose)
+        post_results(info, config, args.verbose)
 
 
 if __name__ == "__main__":
