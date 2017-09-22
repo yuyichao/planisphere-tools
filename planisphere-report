@@ -8,6 +8,7 @@ import json
 import glob
 import re
 import subprocess
+import urllib2
 
 def get_linux_arm_info(data):
     # These boards don't tend to use DMI, so its a bit trickier to get good
@@ -92,6 +93,33 @@ def get_machine_info():
 
     return info
 
+def post_results(info, verbose):
+    if not os.access('/etc/planisphere-report-key', os.R_OK):
+        print >> sys.stderr, 'Error: Cannot read /etc/planisphere-report-key'
+        sys.exit(5)
+    key = open('/etc/planisphere-report-key', 'r').read().strip()
+    if not key:
+        print >> sys.stderr, 'Error: /etc/planisphere-report-key cannot be empty'
+        sys.exit(6)
+
+    req = urllib2.Request('https://planisphere-test.oit.duke.edu/self_report')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('PLANISPHERE-REPORT-KEY', key)
+    try:
+        response = urllib2.urlopen(req, json.dumps(info))
+        body = response.read()
+    except urllib2.URLError as e:
+        # We still want the body when there's an error
+        body = e.read()
+    results = json.loads(body)
+    if results['status'] == 'success':
+        if verbose:
+            print 'Device URL: %s' % (results['device_url'])
+        sys.exit(0)
+    else:
+        print 'Error from planisphere: %s' % (results['error_msg'])
+        sys.exit(10)
+
 def read_osname():
     try:
         for line in open('/etc/os-release', 'r'):
@@ -133,7 +161,8 @@ def safe_read(fn):
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dry-run', help="Print data that would be sent to planisphere", action="store_true")
+    parser.add_argument('-d', '--dry-run', help="Print data that would be sent to planisphere, but don't send it", action="store_true")
+    parser.add_argument('-v', '--verbose', help="Print success output after posting to planisphere", action="store_true")
     args = parser.parse_args()
 
     info = get_machine_info()
@@ -141,7 +170,7 @@ def main():
     if args.dry_run:
         print json.dumps(info, sort_keys=True, indent=4)
     else:
-        json.dumps(info)
+        post_results(info, args.verbose)
 
 
 if __name__ == "__main__":
