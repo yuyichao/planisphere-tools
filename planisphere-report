@@ -9,6 +9,7 @@ import glob
 import re
 import subprocess
 import urllib2
+import time
 
 def get_linux_arm_info(data):
     # These boards don't tend to use DMI, so its a bit trickier to get good
@@ -69,7 +70,10 @@ def get_linux_arm_info(data):
 
 def get_machine_info():
     system, node, release, version, machine, processor = platform.uname()
-    info = {'data': {}}
+    info = {
+        'last_active': time.strftime('%Y-%m-%d %H:%M:%S %z'),
+        'data': {},
+    }
     data = info['data']
     data['os_family'] = system
     data['hostname'] = node
