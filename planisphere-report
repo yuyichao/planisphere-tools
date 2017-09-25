@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 # Written by Sean Dilda <sean@duke.edu>
 # Copyright 2017 Duke University
@@ -136,6 +136,8 @@ def get_machine_info():
             data['installed_software'] = retrieve_packages_rpm()
         elif data['os_fullname'] and re.search("debian|ubuntu|raspbian", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_apt()
+        elif data['os_fullname'] and re.search("arch", data['os_fullname'], re.IGNORECASE):
+            data['installed_software'] = retrieve_packages_pacman()
 
         if machine == 'armv7l':
             get_linux_arm_info(data)
@@ -201,6 +203,11 @@ def retrieve_packages_apt():
 
 def retrieve_packages_rpm():
     output = subprocess.Popen(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'], stdout=subprocess.PIPE).communicate()[0]
+    return [line.split(' ', 2) for line in output.splitlines()]
+
+
+def retrieve_packages_pacman():
+    output = subprocess.Popen(['pacman', '-Q'], stdout=subprocess.PIPE).communicate()[0]
     return [line.split(' ', 2) for line in output.splitlines()]
 
 
