@@ -132,7 +132,7 @@ def get_machine_info():
         except KeyError:
             pass
         data['os_fullname'] = read_osname()
-        if data['os_fullname'] and re.search("fedora|red hat", data['os_fullname'], re.IGNORECASE):
+        if data['os_fullname'] and re.search("fedora|red hat|centos", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_rpm()
         elif data['os_fullname'] and re.search("debian|ubuntu|raspbian", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_apt()
