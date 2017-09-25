@@ -2,6 +2,16 @@
 
 planisphere-report is a simple python client to planisphere's [self reporting mechanism](https://planisphere.oit.duke.edu/help/self_report).
 
+## Supported Distributions
+
+* Fedora 26+
+* RHEL 6
+* RHEL 7
+* Ubuntu 14
+* Ubuntu 16
+
+Accepting patches for any other distributions..
+
 ## Install
 
 ### 1. Get Self Report key
