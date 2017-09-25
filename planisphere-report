@@ -158,6 +158,7 @@ def post_results(info, config, verbose):
     req = urllib2.Request(config['url'])
     req.add_header('Content-Type', 'application/json')
     req.add_header('PLANISPHERE-REPORT-KEY', key)
+    req.add_header('User-Agent', 'planisphere-report')
     try:
         response = urllib2.urlopen(req, json.dumps(info))
         body = response.read()
