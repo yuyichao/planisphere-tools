@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+IF=$1
+STATUS=$2
+
+case "$2" in
+  up|dhcp4-change)
+    systemctl restart planisphere-report.timer
+    ;;
+esac

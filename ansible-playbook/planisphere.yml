@@ -6,6 +6,8 @@
       clone_dir: ~/planisphere-tools
       log_file: /var/log/planisphere-report.log
       planisphere_keyfile: /etc/planisphere-report-key
+      planisphere_service_file: /etc/systemd/system/planisphere-report.service
+      planisphere_timer_file: /etc/systemd/system/planisphere-report.timer
       planisphere_config:
         - section: config
           name: key-file
@@ -60,3 +62,19 @@
           owner: root
           group: root
           mode: 0755
+
+      - name: Planisphere | Add service file
+        copy:
+          src: "{{ clone_dir }}/systemd/planisphere-report.service"
+          dest: "{{ planisphere_service_file }}"
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Planisphere | Add timer file
+        copy:
+          src: "{{ clone_dir }}/systemd/planisphere-report.timer"
+          dest: "{{ planisphere_timer_file }}"
+          owner: root
+          group: root
+          mode: 0644
