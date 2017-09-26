@@ -134,6 +134,8 @@ def get_machine_info():
         data['os_fullname'] = read_osname()
         if data['os_fullname'] and re.search("fedora|red hat|centos", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_rpm()
+        elif data['os_fullname'] and re.search("wheezy", data['os_fullname'], re.IGNORECASE):
+            data['installed_software'] = retrieve_packages_dpkg()
         elif data['os_fullname'] and re.search("debian|ubuntu|raspbian", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_apt()
         elif data['os_fullname'] and re.search("arch", data['os_fullname'], re.IGNORECASE):
@@ -206,6 +208,9 @@ def retrieve_packages_rpm():
     output = subprocess.Popen(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'], stdout=subprocess.PIPE).communicate()[0]
     return [line.split(' ', 2) for line in output.splitlines()]
 
+def retrieve_packages_dpkg():
+    output = subprocess.Popen(['dpkg-query', '-W'], stdout=subprocess.PIPE).communicate()[0]
+    return [line.split('\t', 2) for line in output.splitlines()]
 
 def retrieve_packages_pacman():
     output = subprocess.Popen(['pacman', '-Q'], stdout=subprocess.PIPE).communicate()[0]
