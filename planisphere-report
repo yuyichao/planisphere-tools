@@ -226,9 +226,10 @@ def safe_read(fn):
 
 def main():
     # Parse arguments
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d', '--dry-run', help="Print data that would be sent to planisphere, but don't send it", action="store_true")
     parser.add_argument('-v', '--verbose', help="Print success output after posting to planisphere", action="store_true")
+    parser.add_argument('-c', '--config', help="Override the default config file location", default="/etc/planisphere-report")
     args = parser.parse_args()
 
     # Parse config
@@ -238,7 +239,7 @@ def main():
         'url': 'https://planisphere.oit.duke.edu/self_report',
     }
     parser = ConfigParser.RawConfigParser()
-    parser.read('/etc/planisphere-report')
+    parser.read(args.config)
     if parser.has_section('config'):
         config.update(parser.items('config'))
     if parser.has_section('overrides'):
