@@ -2,6 +2,7 @@
   - hosts: all
 
     vars:
+      bin_file: /usr/local/bin/planisphere-report
       clone_dir: ~/planisphere-tools
       log_file: /var/log/planisphere-report.log
       planisphere_keyfile: /etc/planisphere-report-key
@@ -17,6 +18,14 @@
           version: master
           dest: "{{ clone_dir }}"
           depth: 1
+
+      - name: Planisphere | Copy client file 
+        copy:
+          src: "{{ clone_dir }}/planisphere-report"
+          dest: "{{ bin_file }}"
+          owner: root
+          group: root
+          mode: 0755
 
       - name: Planisphere | Add keyfile
         copy:
