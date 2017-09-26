@@ -1,0 +1,62 @@
+---
+  - hosts: all
+
+    vars:
+      bin_file: /usr/local/bin/planisphere-report
+      clone_dir: ~/planisphere-tools
+      log_file: /var/log/planisphere-report.log
+      planisphere_keyfile: /etc/planisphere-report-key
+      planisphere_config:
+        - section: config
+          name: key-file
+          value: "{{ planisphere_keyfile }}"
+
+    tasks:
+      - name: Planisphere | Clone Planisphere-Tools
+        git:
+          repo: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools.git
+          version: master
+          dest: "{{ clone_dir }}"
+          depth: 1
+
+      - name: Planisphere | Copy client file
+        copy:
+          src: "{{ clone_dir }}/planisphere-report"
+          dest: "{{ bin_file }}"
+          owner: root
+          group: root
+          mode: 0755
+
+      - name: Planisphere | Add keyfile
+        copy:
+          content: "{{ planisphere_key }}"
+          dest: "{{ planisphere_keyfile }}"
+          owner: root
+          group: root
+          mode: 0600
+
+      - name: Planisphere | Add config file
+        ini_file:
+          path: /etc/planisphere-report
+          section: "{{ item.section }}"
+          option: "{{ item.name }}"
+          value: "{{ item.value }}"
+          mode: 0600
+        with_items: "{{ planisphere_config }}"
+
+      - name: Planisphere | Add logfile
+        copy:
+          content: ""
+          dest: "{{ log_file }}"
+          force: no
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Planisphere | Create daily cronjob
+        template:
+          src: planisphere-daily.cron.j2
+          dest: /etc/cron.daily/planisphere-daily.cron
+          owner: root
+          group: root
+          mode: 0755
