@@ -31,7 +31,7 @@ The planisphere-report config and overrides can be setup using the plansiphere_c
           name: key-file
           value: "{{ planisphere_keyfile }}"
         - section: overrides
-          name: user
+          name: username
           value: chris
         - section: overrides
           name: serial
