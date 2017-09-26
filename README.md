@@ -5,10 +5,11 @@ planisphere-report is a simple python client to planisphere's [self reporting me
 ## Supported Distributions
 
 * Fedora 26+
-* RHEL 6
-* RHEL 7
+* RHEL/Scientific/CentOS 6
+* RHEL/Scientific/CentOS 7
 * Ubuntu 14
 * Ubuntu 16
+* Arch Linux
 
 Accepting patches for any other distributions..
 
