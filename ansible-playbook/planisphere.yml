@@ -2,19 +2,13 @@
   - hosts: all
 
     vars:
-      clone_dir: /home/chris/Projects/planisphere-tools
+      clone_dir: ~/planisphere-tools
       log_file: /var/log/planisphere-report.log
       planisphere_keyfile: /etc/planisphere-report-key
       planisphere_config:
         - section: config
           name: key-file
           value: "{{ planisphere_keyfile }}"
-        - section: overrides
-          name: user
-          value: clc0317
-        - section: overrides
-          name: serial
-          value: R90LSP84
 
     tasks:
       - name: Planisphere | Clone Planisphere-Tools
