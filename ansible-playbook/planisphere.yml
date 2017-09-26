@@ -19,7 +19,7 @@
           dest: "{{ clone_dir }}"
           depth: 1
 
-      - name: Planisphere | Copy client file 
+      - name: Planisphere | Copy client file
         copy:
           src: "{{ clone_dir }}/planisphere-report"
           dest: "{{ bin_file }}"
@@ -43,7 +43,7 @@
           value: "{{ item.value }}"
           mode: 0600
         with_items: "{{ planisphere_config }}"
-      
+
       - name: Planisphere | Add logfile
         copy:
           content: ""
