@@ -14,7 +14,7 @@ Install and configure the Planishpere client for Linux with Ansible
 
 Variables to configure the Planisphere client are included in the planisphere.yml file.  Required variables are:
 
-* use_systemd_timer: (bool) whether to use a systemd timer or a daily cron job (see: [the systemd readme](master/systemd/README.md))
+* use_systemd_timer: (bool) whether to use a systemd timer or a daily cron job (see: [the systemd readme](systemd/README.md))
 * bin_file: where to place the planisphere client script
 * clone_dir: where to find the planisphere tools repo clone (ie: path for the client script)
 * log_file: where to log output from the nightly cron
