@@ -1,5 +1,9 @@
 [Unit]
 Description=Planisphere report
+# Only run twice every hour
+# TODO: this is slightly undesirable when timers fail due to rate limiting, they revert back to waiting a full 24 hours
+StartLimitInterval=3600
+StartLimitBurst=2
 
 [Service]
 Type=oneshot
