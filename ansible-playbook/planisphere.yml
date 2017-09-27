@@ -37,7 +37,7 @@
           dest: "{{ planisphere_keyfile }}"
           owner: root
           group: root
-          mode: 0644
+          mode: 0600
 
       - name: Planisphere | Add config file
         ini_file:
@@ -45,7 +45,7 @@
           section: "{{ item.section }}"
           option: "{{ item.name }}"
           value: "{{ item.value }}"
-          mode: 0644
+          mode: 0600
         with_items: "{{ planisphere_config }}"
 
       - name: Planisphere | Add logfile
