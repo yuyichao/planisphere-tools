@@ -45,6 +45,7 @@ serial number.
 For laptops, consider calling the script after acquiring a DHCP address so
 planisphere will have an accurate list of external MAC addresses for the laptop.
 
+Alternatively consult [systemd service/timer and DHCP trigger](systemd/) in this repository
 
 ### 4. Config file (optional)
 
