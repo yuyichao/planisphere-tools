@@ -28,8 +28,7 @@ Once you have the key, put it in `/etc/planisphere-report-key`
 For example:
 
 ```
-# echo cdb0b2fd-1f2d-4043-b5c5-cb01f9f41710 > /etc/planisphere-report-key
-#
+$ echo YOUR_KEY_HERE | sudo tee /etc/planisphere-report-key
 ```
 
 ### 2. Install the script
