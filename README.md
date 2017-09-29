@@ -7,6 +7,7 @@ planisphere-report is a simple python client to planisphere's [self reporting me
 * Fedora 26+
 * RHEL/Scientific/CentOS 6
 * RHEL/Scientific/CentOS 7
+* Debian 9 (stretch/stable)
 * Ubuntu 14
 * Ubuntu 16
 * Arch Linux
