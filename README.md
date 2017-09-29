@@ -33,7 +33,10 @@ $ echo YOUR_KEY_HERE | sudo tee /etc/planisphere-report-key
 
 ### 2. Install the script
 
-Copy planisphere-report to ```/usr/bin/planisphere-report``` (or wherever you want) and make sure it's executable.
+Copy planisphere-report to ```/usr/local/bin/planisphere-report``` (or wherever you want) and make sure it's executable.
+
+__NOTE:__ If you plan to use this from [systemd](systemd/) and put this somewhere other than /usr/local/bin be sure to
+adjust the path in [the systemd service definition](systemd/planisphere-report.service).
 
 ### 3. Setup a cron job
 
