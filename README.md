@@ -33,11 +33,11 @@ $ echo YOUR_KEY_HERE | sudo tee /etc/planisphere-report-key
 
 ### 2. Install the script
 
-Copy planisphere-report to ```/usr/bin/planisphere-report``` (or wherever you want) and make sure its executable.
+Copy planisphere-report to ```/usr/bin/planisphere-report``` (or wherever you want) and make sure it's executable.
 
 ### 3. Setup a cron job
 
-Add a cronjob to run regularly (ie once a day) to run the script.  This should
+Add a cronjob to run regularly (e.g. once a day) to run the script.  This should
 run as root as linux does not allow non-root users to access the device's
 serial number.
 
