@@ -167,8 +167,11 @@ def post_results(info, config, verbose):
         response = urllib2.urlopen(req, json.dumps(info))
         body = response.read()
     except urllib2.URLError as e:
-        # We still want the body when there's an error
-        body = e.read()
+        if 'read' in dir(e):
+            # We still want the body when there's an error
+            body = e.read()
+        else:
+            raise
     results = json.loads(body)
     if results['status'] == 'success':
         if verbose:
