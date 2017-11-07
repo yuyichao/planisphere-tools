@@ -1,0 +1,133 @@
+---
+  - hosts: all
+
+    vars:
+      use_systemd_timer: true
+      bin_file: /usr/local/bin/planisphere-report
+      clone_dir: ~/planisphere-tools
+      log_file: /var/log/planisphere-report.log
+      service_file: /etc/systemd/system/planisphere-report.service
+      timer_file: /etc/systemd/system/planisphere-report.timer
+      cron_file: /etc/cron.daily/planisphere-daily.cron
+      planisphere_keyfile: /etc/planisphere-report-key
+      planisphere_config:
+        - section: config
+          name: key-file
+          value: "{{ planisphere_keyfile }}"
+
+    tasks:
+      - name: Planisphere | Clone Planisphere-Tools
+        git:
+          repo: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools.git
+          version: master
+          dest: "{{ clone_dir }}"
+          depth: 1
+
+      - name: Planisphere | Copy client file
+        copy:
+          src: "{{ clone_dir }}/planisphere-report"
+          dest: "{{ bin_file }}"
+          owner: root
+          group: root
+          mode: 0755
+
+      - name: Planisphere | Add keyfile
+        copy:
+          content: "{{ planisphere_key }}"
+          dest: "{{ planisphere_keyfile }}"
+          owner: root
+          group: root
+          mode: 0600
+
+      - name: Planisphere | Add config file
+        ini_file:
+          path: /etc/planisphere-report
+          section: "{{ item.section }}"
+          option: "{{ item.name }}"
+          value: "{{ item.value }}"
+          mode: 0600
+        with_items: "{{ planisphere_config }}"
+
+      - name: Planisphere | Add logfile
+        copy:
+          content: ""
+          dest: "{{ log_file }}"
+          force: no
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Planisphere | Add service file
+        copy:
+          src: "{{ clone_dir }}/systemd/planisphere-report.service"
+          dest: "{{ service_file }}"
+          owner: root
+          group: root
+          mode: 0644
+        when: use_systemd_timer == true
+
+      - name: Planisphere | Add timer file
+        copy:
+          src: "{{ clone_dir }}/systemd/planisphere-report.timer"
+          dest: "{{ timer_file }}"
+          owner: root
+          group: root
+          mode: 0644
+        when: use_systemd_timer == true
+
+      - name: Planisphere | enable timer
+        systemd:
+          name: planisphere-report.timer
+          state: started
+          enabled: yes
+          daemon_reload: yes
+        when: use_systemd_timer == true
+
+      - name: Planisphere | remove cron file
+        file:
+          path: "{{ cron_file }}"
+          state: absent
+        when: use_systemd_timer == true
+
+      - name: Planisphere | Create daily cronjob
+        template:
+          src: planisphere-daily.cron.j2
+          dest: "{{ cron_file }}"
+          owner: root
+          group: root
+          mode: 0755
+        when: use_systemd_timer == false
+
+      - name: Planisphere | check if timer file exists
+        stat:
+          path: "{{ service_file }}"
+        register: timer_file_check
+        when: use_systemd_timer == false
+
+      - name: Planisphere | disable timer
+        systemd:
+          name: planisphere-report.timer
+          state: stopped
+          enabled: no
+        when: ( use_systemd_timer == false and timer_file_check.stat.exists )
+
+      - name: Planisphere | remove service file
+        file:
+          path: "{{ service_file }}"
+          state: absent
+        notify:
+          - systemd daemon-reload
+        when: use_systemd_timer == false
+
+      - name: Planisphere | remove timer file
+        file:
+          path: "{{ timer_file }}"
+          state: absent
+        notify:
+          - systemd daemon-reload
+        when: use_systemd_timer == false
+
+    handlers:
+      - name: systemd daemon-reload
+        command: systemctl daemon-reload
+

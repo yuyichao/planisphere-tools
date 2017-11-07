@@ -7,6 +7,7 @@ planisphere-report is a simple python client to planisphere's [self reporting me
 * Fedora 26+
 * RHEL/Scientific/CentOS 6
 * RHEL/Scientific/CentOS 7
+* Debian 9 (stretch/stable)
 * Ubuntu 14
 * Ubuntu 16
 * Arch Linux
@@ -28,23 +29,26 @@ Once you have the key, put it in `/etc/planisphere-report-key`
 For example:
 
 ```
-# echo cdb0b2fd-1f2d-4043-b5c5-cb01f9f41710 > /etc/planisphere-report-key
-#
+$ echo YOUR_KEY_HERE | sudo tee /etc/planisphere-report-key
 ```
 
 ### 2. Install the script
 
-Copy planisphere-report to ```/usr/bin/planisphere-report``` (or wherever you want) and make sure its executable.
+Copy planisphere-report to ```/usr/local/bin/planisphere-report``` (or wherever you want) and make sure it's executable.
+
+__NOTE:__ If you plan to use this from [systemd](systemd/) and put this somewhere other than /usr/local/bin be sure to
+adjust the path in [the systemd service definition](systemd/planisphere-report.service).
 
 ### 3. Setup a cron job
 
-Add a cronjob to run regularly (ie once a day) to run the script.  This should
+Add a cronjob to run regularly (e.g. once a day) to run the script.  This should
 run as root as linux does not allow non-root users to access the device's
 serial number.
 
 For laptops, consider calling the script after acquiring a DHCP address so
 planisphere will have an accurate list of external MAC addresses for the laptop.
 
+Alternatively consult [systemd service/timer and DHCP trigger](systemd/) in this repository
 
 ### 4. Config file (optional)
 

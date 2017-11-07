@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+IF=$1
+STATUS=$2
+MAXIMUM_FREQUENCY=1800 # this job will not fire unless this many seconds have elapsed since the last run
+
+case "$2" in
+    up|dhcp4-change)
+        LAST_RUN_AGO=$(bc <<< "$(date +%s) - $(date +%s -d "$(systemctl show --value -p ExecMainExitTimestamp planisphere-report.service)")")
+        if [ ${LAST_RUN_AGO} -gt ${MAXIMUM_FREQUENCY} ]; then
+            logger "Scheduling planisphere report"
+            systemctl restart planisphere-report.timer
+        fi
+    ;;
+esac

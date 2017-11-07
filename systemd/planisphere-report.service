@@ -1,0 +1,7 @@
+[Unit]
+Description=Planisphere report
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/planisphere-report
+User=root
