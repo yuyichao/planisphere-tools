@@ -140,6 +140,8 @@ def get_machine_info():
             data['installed_software'] = retrieve_packages_apt()
         elif data['os_fullname'] and re.search("arch", data['os_fullname'], re.IGNORECASE):
             data['installed_software'] = retrieve_packages_pacman()
+        elif data['os_fullname'] and re.search("guix", data['os_fullname'], re.IGNORECASE):
+            data['installed_software'] = retrieve_packages_guix()
 
         if machine == 'armv7l':
             get_linux_arm_info(data)
@@ -219,6 +221,9 @@ def retrieve_packages_pacman():
     output = subprocess.Popen(['pacman', '-Q'], stdout=subprocess.PIPE).communicate()[0]
     return [line.split(' ', 2) for line in output.splitlines()]
 
+def retrieve_packages_guix():
+    output = subprocess.Popen(['guix-installed'], stdout=subprocess.PIPE).communicate()[0]
+    return [line.split('\t', 2) for line in output.splitlines()]
 
 def safe_read(fn):
     try:
