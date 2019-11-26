@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Written by Sean Dilda <sean@duke.edu>
 # Copyright 2017 2019 Duke University
@@ -29,9 +29,15 @@ import json
 import glob
 import re
 import subprocess
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import time
-import ConfigParser
+import configparser
+
+class BytesEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return obj.decode('utf-8')
+        return json.JSONEncoder.default(self, obj)
 
 # Using chassis types as defined in https://www.dmtf.org/sites/default/files/standards/documents/DSP0119.pdf section 3.3.4.1
 chassis_type_map = {
@@ -123,7 +129,7 @@ def get_machine_info():
         # Planisphere strips out MAC addresses that are all 0's or have the
         # local bit set, so we don't have to worry about that here.
         data['mac_addresses'] = [open(fn, 'r').read().strip() for fn in glob.iglob('/sys/class/net/*/address')]
-        data['mac_addresses'] = filter(None, data['mac_addresses']) # remove empty strings
+        data['mac_addresses'] = [_f for _f in data['mac_addresses'] if _f] # remove empty strings
         data['manufacturer'] = safe_read('/sys/class/dmi/id/sys_vendor')
         data['model'] = safe_read('/sys/class/dmi/id/product_name')
         data['serial'] = safe_read('/sys/class/dmi/id/product_serial')
@@ -154,21 +160,21 @@ def get_machine_info():
 
 def post_results(info, config, verbose):
     if not os.access(config['key-file'], os.R_OK):
-        print >> sys.stderr, 'Error: Cannot read %s' % (config['key-file'])
+        print('Error: Cannot read %s' % (config['key-file']), file=sys.stderr)
         sys.exit(5)
     key = open(config['key-file'], 'r').read().strip()
     if not key:
-        print >> sys.stderr, 'Error: %s cannot be empty' % (config['key-file'])
+        print('Error: %s cannot be empty' % (config['key-file']), file=sys.stderr)
         sys.exit(6)
 
-    req = urllib2.Request(config['url'])
+    req = urllib.request.Request(config['url'])
     req.add_header('Content-Type', 'application/json')
     req.add_header('PLANISPHERE-REPORT-KEY', key)
     req.add_header('User-Agent', 'planisphere-report')
     try:
-        response = urllib2.urlopen(req, json.dumps(info))
+        response = urllib.request.urlopen(req, json.dumps(info, cls=BytesEncoder).encode('utf-8'))
         body = response.read()
-    except urllib2.URLError as e:
+    except urllib.error.URLError as e:
         if 'read' in dir(e):
             # We still want the body when there's an error
             body = e.read()
@@ -177,10 +183,10 @@ def post_results(info, config, verbose):
     results = json.loads(body)
     if results['status'] == 'success':
         if verbose:
-            print 'Device URL: %s' % (results['device_url'])
+            print('Device URL: %s' % (results['device_url']))
         sys.exit(0)
     else:
-        print 'Error from planisphere: %s' % (results['error_msg'])
+        print('Error from planisphere: %s' % (results['error_msg']))
         sys.exit(10)
 
 def read_osname():
@@ -211,7 +217,7 @@ def retrieve_packages_apt():
 
 def retrieve_packages_rpm():
     output = subprocess.Popen(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'], stdout=subprocess.PIPE).communicate()[0]
-    return [line.split(' ', 2) for line in output.splitlines()]
+    return [line.split(b' ', 2) for line in output.splitlines()]
 
 def retrieve_packages_dpkg():
     output = subprocess.Popen(['dpkg-query', '-W'], stdout=subprocess.PIPE).communicate()[0]
@@ -246,7 +252,7 @@ def main():
         'key-file': '/etc/planisphere-report-key',
         'url': 'https://planisphere.oit.duke.edu/self_report',
     }
-    parser = ConfigParser.RawConfigParser()
+    parser = configparser.RawConfigParser()
     parser.read(args.config)
     if parser.has_section('config'):
         config.update(parser.items('config'))
@@ -258,7 +264,7 @@ def main():
     info['data'].update(overrides)
 
     if args.dry_run:
-        print json.dumps(info, sort_keys=True, indent=4)
+        print(json.dumps(info, sort_keys=True, indent=4, cls=BytesEncoder))
     else:
         post_results(info, config, args.verbose)
 
