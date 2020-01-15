@@ -58,6 +58,9 @@ chassis_type_map = {
     '25': 'server_physical', # blade
 }
 
+def get_command_output(cmd):
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode()
+
 def get_linux_arm_info(data):
     # These boards don't tend to use DMI, so its a bit trickier to get good
     # HW info.
@@ -205,7 +208,7 @@ def read_osname():
     return safe_read('/etc/system-release')
 
 def retrieve_packages_apt():
-    output = subprocess.Popen(['apt', 'list', '--installed'], stdout=subprocess.PIPE).communicate()[0]
+    output = get_command_output(['apt', 'list', '--installed'])
     packages = []
     for line in output.splitlines():
         if line == 'Listing...':
@@ -216,19 +219,19 @@ def retrieve_packages_apt():
     return packages
 
 def retrieve_packages_rpm():
-    output = subprocess.Popen(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'], stdout=subprocess.PIPE).communicate()[0]
-    return [line.split(b' ', 2) for line in output.splitlines()]
+    output = get_command_output(['rpm', '-qa', '--qf', '%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n'])
+    return [line.split(' ', 2) for line in output.splitlines()]
 
 def retrieve_packages_dpkg():
-    output = subprocess.Popen(['dpkg-query', '-W'], stdout=subprocess.PIPE).communicate()[0]
+    output = get_command_output(['dpkg-query', '-W'])
     return [line.split('\t', 2) for line in output.splitlines()]
 
 def retrieve_packages_pacman():
-    output = subprocess.Popen(['pacman', '-Q'], stdout=subprocess.PIPE).communicate()[0]
+    output = get_command_output(['pacman', '-Q'])
     return [line.split(' ', 2) for line in output.splitlines()]
 
 def retrieve_packages_guix():
-    output = subprocess.Popen(['guix-installed'], stdout=subprocess.PIPE).communicate()[0]
+    output = get_command_output(['guix-installed'])
     return [line.split('\t', 2) for line in output.splitlines()]
 
 def safe_read(fn):
