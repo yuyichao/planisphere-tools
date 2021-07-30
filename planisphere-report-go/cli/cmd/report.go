@@ -47,7 +47,7 @@ var reportCmd = &cobra.Command{
 		if err != nil {
 			log.Warning("Could not detect memory size: ", err)
 		}
-		memoryMB := memory / 1024
+		memoryMB := memory / 1024 / 1024
 		payload.Data.MemoryMB = memoryMB
 
 		// Detect Serial Number
