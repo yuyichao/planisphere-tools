@@ -1,19 +1,17 @@
 package cmd
 
 import (
-	"C"
 	"net"
 	"os"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
-)
-import (
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 )
 
 // reportCmd represents the report command
@@ -76,7 +74,6 @@ var reportCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(reportCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -87,6 +84,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	reportCmd.Flags().BoolP("dryrun", "d", false, "Do a dry run, don't actually submit to planisphere")
+	rootCmd.AddCommand(reportCmd)
 }
 
 func getSysctl(target string) (int64, error) {

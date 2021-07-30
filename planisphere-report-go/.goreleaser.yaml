@@ -5,7 +5,7 @@ gitlab_urls:
 builds:
   - env:
       - CGO_ENABLED=0
-    main: ./cli
+    main: ./cli/
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
