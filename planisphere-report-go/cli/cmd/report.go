@@ -51,7 +51,7 @@ var reportCmd = &cobra.Command{
 		payload.Data.MemoryMB = memoryMB
 
 		// Detect Serial Number
-		serial, err := GetIORegValue("IOPlatformExpertDevice", "IOPlatformUUID")
+		serial, err := GetIORegValue("IOPlatformExpertDevice", "IOPlatformSerialNumber")
 		if err != nil {
 			log.Warning("Could not detect serial: ", err)
 		}
