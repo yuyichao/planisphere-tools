@@ -7,6 +7,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
-	gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.1
+	gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.2
 	go.hein.dev/go-version v0.1.0
 )
