@@ -1,0 +1,36 @@
+---
+gitlab_urls:
+  api: https://gitlab.oit.duke.edu/api/v4/
+  download: https://gitlab.oit.duke.edu
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: ./cli
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags: >
+      -s -w
+      -X gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/cli/cmd.date={{ .CommitTimestamp }}
+      -X gitlab.oit.duke.edu/devil-ops/planisphere-tools/planiphere-report-go/cli/cmd.version={{ .Tag }}
+      -X gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/cli/cmd.commit={{ .ShortCommit }}'
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    ignore:
+      - goos: darwin
+        goarch: '386'
+    binary: 'planisphere-report'
+archives:
+  - format: tar.gz
+    name_template: 'planisphere-report-{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    replacements:
+      darwin: macOS
+checksum:
+  name_template: 'planisphere-report-{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+snapshot:
+  name_template: "{{ .Tag }}-snapshot"
+changelog:
+  skip: true
