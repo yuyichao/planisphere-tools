@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 		// Key is gonna be required
 		planisphereKey = viper.GetString("key")
 		if planisphereKey == "" {
-			log.Fatal("Must set your Cartographer Key")
+			log.Fatal("Must set your Planisphere Key in the config file or env. See README.md for details")
 		}
 		log.Debug("Using Key: ", planisphereKey)
 
