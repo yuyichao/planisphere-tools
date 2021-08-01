@@ -189,7 +189,6 @@ func GetPSApplicationData() (SPApplicationData, error) {
 		return s, err
 	}
 	return s, nil
-
 }
 
 func GetMemory() (int64, error) {
@@ -287,7 +286,6 @@ func GetIORegValue(tree, item string) (string, error) {
 		}
 	}
 	return "", nil
-
 }
 
 func GetIORegTree(tree string) (map[string]string, error) {
@@ -314,7 +312,6 @@ func GetIORegTree(tree string) (map[string]string, error) {
 		r[key] = value
 	}
 	return r, nil
-
 }
 
 func GetDiskEncryptionStatus() (bool, error) {
