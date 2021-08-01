@@ -3,14 +3,16 @@ stages:
   - test
   - release
 
-unit_tests:
+# Need to run this on all oses, or at least linux for this to work
+.unit_tests:
   stage: test
   image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
   script:
     - cd planisphere-report-go
     - go test gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers
 
-coverage:
+# Need to run this on all oses, or at least linux for this to work
+.coverage:
   stage: test
   image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
   script:
