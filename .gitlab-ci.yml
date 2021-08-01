@@ -8,7 +8,14 @@ unit_tests:
   image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
   script:
     - cd planisphere-report-go
-    - go test ./...
+    - go test gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers
+
+coverage:
+  stage: test
+  script:
+    - cd planisphere-report-go
+    - go get ./...
+    - go test -v gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers -coverprofile .testCoverage.txt
 
 release:
   stage: release
