@@ -15,6 +15,7 @@ import (
 Only platform specific stuff should be in here. If it's more generic than a
 given platform, please include it in the NewLookup function
 */
+// ApplyPlatformDetections Do some stuff here
 func ApplyPlatformDetections(l *Lookuper) error {
 
 	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
@@ -140,7 +141,6 @@ type SPSoftwareData struct {
 		KernelVersion   string `json:"kernel_version,omitempty"`
 		LocalHostName   string `json:"local_host_name,omitempty"`
 		OsVersion       string `json:"os_version,omitempty"`
-		SecureVm        string `json:"secure_vm,omitempty"`
 		SystemIntegrity string `json:"system_integrity,omitempty"`
 		Uptime          string `json:"uptime,omitempty"`
 		UserName        string `json:"user_name,omitempty"`
