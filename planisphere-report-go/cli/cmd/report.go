@@ -31,6 +31,9 @@ var reportCmd = &cobra.Command{
 			log.Fatal("Could not initialize Lookuper 😭☠️")
 		}
 
+		// Add version to extra data
+		l.Payload.ExtraData["selfreport_version"] = version
+
 		// Print payload
 		out, _ := yaml.Marshal(l.Payload)
 

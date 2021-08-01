@@ -3,7 +3,6 @@ package helpers
 
 import (
 	"encoding/json"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -12,19 +11,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
-	l := &Lookuper{
-		Overrides: overrides,
-	}
+/*
+Only platform specific stuff should be in here. If it's more generic than a
+given platform, please include it in the NewLookup function
+*/
+func ApplyPlatformDetections(l *Lookuper) error {
 
 	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
 	if err != nil {
-		return nil, err
-	}
-
-	// Here are some things that can only be set in the overrides section
-	if departmentKey, ok := l.Overrides["department_key"]; ok {
-		l.Payload.Data.DepartmentKey = departmentKey.(string)
+		return err
 	}
 
 	// Disk encryption state
@@ -36,32 +31,6 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 			log.Warning("Could not detect disk encryption state: ", err)
 		}
 		l.Payload.Data.DiskEncrypted = encrypted
-	}
-
-	// Hostname Field
-	if hostname, ok := l.Overrides["hostname"]; ok {
-		l.Payload.Data.Hostname = hostname.(string)
-	} else {
-		hostname, err := os.Hostname()
-		if err != nil {
-			log.Warning("Could not detect hostname: ", err)
-		}
-		l.Payload.Data.Hostname = hostname
-	}
-
-	// Mac Addresses Field
-	// "Most Dope"
-	//   - Mac Miller ✌️
-	if macAddresses, ok := l.Overrides["mac_addresses"]; ok {
-		for _, item := range macAddresses.([]interface{}) {
-			l.Payload.Data.MacAddresses = append(l.Payload.Data.MacAddresses, item.(string))
-		}
-	} else {
-		macs, err := getMacAddr()
-		if err != nil {
-			log.Warning("Could not detect mac_addresses: ", err)
-		}
-		l.Payload.Data.MacAddresses = macs
 	}
 
 	// Memory
@@ -122,7 +91,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 	// OS Data here
 	softData, err := GetPSoftwareData()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if osVersion, ok := l.Overrides["os_version"]; ok {
@@ -151,7 +120,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 	} else {
 		apps, err := GetInstalledSoftware()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		l.Payload.Data.InstalledSoftware = apps
 	}
@@ -160,7 +129,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 	l.Payload.LastActive = time.Now()
 
 	// Mmmm, return data
-	return l, nil
+	return nil
 }
 
 type SPSoftwareData struct {
