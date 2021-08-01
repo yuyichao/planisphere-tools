@@ -2,6 +2,14 @@
 stages:
   - test
   - release
+
+unit_tests:
+  stage: test
+  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
+  script:
+    - cd planisphere-report-go
+    - go test ./...
+
 release:
   stage: release
   image:
