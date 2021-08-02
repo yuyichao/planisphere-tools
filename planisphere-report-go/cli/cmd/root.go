@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -91,6 +89,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		log.Debug(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		log.Debug("Using config file:", viper.ConfigFileUsed())
 	}
 }
