@@ -443,8 +443,8 @@ github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9de
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
-gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.2 h1:wPndl+VDxw4A+Wc2rxUZXqWGWT0AJBRh23kbmGU2uvE=
-gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.2/go.mod h1:78SKX0YhMGun1uIuFnihCWZmh6EqaXIV9INgiacK7Qk=
+gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.3 h1:V5gTToHlo6EigfDqky1uqOydRNgmoMydtVcAmev2QBs=
+gitlab.oit.duke.edu/devil-ops/planisphere-sdk v0.1.3/go.mod h1:78SKX0YhMGun1uIuFnihCWZmh6EqaXIV9INgiacK7Qk=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=

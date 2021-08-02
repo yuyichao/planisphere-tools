@@ -1,0 +1,16 @@
+---
+version: '3'
+tasks:
+  prep:
+    deps:
+      - test
+      - doc
+  deeplint:
+    cmds:
+      - golangci-lint run --enable-all
+  test:
+    cmds:
+      - go test gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers
+  cover:
+    cmds:
+      - go test -coverprofile=/tmp/gocover $(go list ./... | grep -v example) && go tool cover -html=/tmp/gocover
