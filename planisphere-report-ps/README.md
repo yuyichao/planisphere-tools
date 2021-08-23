@@ -37,7 +37,7 @@ run as SYSTEM as Windows does not allow non-Administrator users to access the de
 For laptops, consider calling the script after acquiring a DHCP address so
 planisphere will have an accurate list of external MAC addresses for the laptop.
 
-For more information, see [SCHEDULE](SCHEDULE.md) in this repository.
+For more information, see [SCHEDULE](planisphere-report-ps/SCHEDULE.md) in this repository.
 
 ### 4. Config file (optional)
 
