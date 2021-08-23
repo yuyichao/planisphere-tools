@@ -111,37 +111,46 @@ Function Send-PSReport {
             $SelfReportIni = $null
         }
     }
-    # SelfReportKey param? 
-    if (!(Test-StringVar $SelfReportKey)) {
-        # No? SelfReportKeyFile param?
-        if (!(Test-StringVar $SelfReportKeyFile)) {
-            # No? In ConfigFile as KeyFile?
-            if (!(Test-StringVar $SelfReportIni.config.keyfile)) {
-                # No? In ConfigFile as Key?
-                if (!(Test-StringVar $SelfReportIni.config.key)) {
-                    #Throw an error... we need a key from somewhere...
-                    Throw "Missing Self Report Key. Exiting..."
-                } else {
-                    $SelfReportKey = $SelfReportIni.config.key.Trim()
-                }
-            } else {
-                if (Test-Path $SelfReportIni.config.keyfile) {
-                    $SelfReportKey = Get-Content $SelfReportIni.config.keyfile -First 1
-                } else {
-                    #Throw an error... we need a key from somewhere...
-                    Throw "Missing Self Report Key. Exiting..."
-                }
-            }
+    # Who's got the SelfReportKey? 
+    if (Test-StringVar $SelfReportKey) {
+        # if passed as a param, use it
+        # (which requires no additional action)
+        Continue
+    } elseif (Test-StringVar $SelfReportKeyFile) {
+        # or, if passed a keyfile param...
+        if (Test-Path $SelfReportKeyFile) {
+            # ...and it exists, use it
+            $SelfReportKey = Get-Content $SelfReportKeyFile -First 1
         } else {
-            if (Test-Path $SelfReportKeyFile) {
-                $SelfReportKey = Get-Content $SelfReportKeyFile -First 1
-            } else {
-                #Throw an error... we need a key from somewhere...
-                Throw "Missing Self Report Key. Exiting..."
-            }
+            # passed a non-existent keyfile, throw an error
+            "Passed keyfile does not exist. Exiting..."
         }
-    } 
-    # Else use the value passed via param, no changes necessary
+    } elseif (Test-StringVar $SelfReportIni.config.key) {
+        # or, if it exists, use the key in the INI file
+        $SelfReportKey = $SelfReportIni.config.key.Trim()
+    } elseif (Test-StringVar $SelfReportIni.config.keyfile) {
+        # or, if there's a keyfile in the INI...
+        if (Test-Path $SelfReportIni.config.keyfile) {
+            # ...and it exists, use it
+            $SelfReportKey = Get-Content $SelfReportIni.config.keyfile -First 1
+        } else {
+            # passed a non-existent keyfile, throw an error
+            "INI keyfile does not exist. Exiting..."
+        }
+    } elseif (Test-Path "/etc/planisphere-report-key") {
+        # or, if it exists, use the default keyfile
+        $SelfReportKey = Get-Content "/etc/planisphere-report-key" -First 1
+    } elseif (Test-Path "/etc/planisphere-report-key.txt") {
+        # or, if it exists, use the default keyfile, TXT-style
+        $SelfReportKey = Get-Content "/etc/planisphere-report-key.txt" -First 1
+    } else {
+        # or throw an error... we need a key from somewhere...
+        Throw "Missing Self Report Key. Exiting..."
+    }
+    if (!(Test-IsGuid $SelfReportKey)) {
+        # Key not in the proper format, throw an error
+        Throw "Invalid Self Report Key parameter. Exiting..."
+    }
     
     # Most of the info we want is available from Get-CompuetrInfo
     $info = Get-ComputerInfo
@@ -188,9 +197,9 @@ Function Send-PSReport {
     # https://windowsserver.uservoice.com/forums/301869-powershell/suggestions/37195837-get-computerinfo-typo-in-csphyicallyinstalledmemor
     $installed_memory = [int]((&{If(Test-StringVar $info.CsPhysicallyInstalledMemory) {$info.CsPhysicallyInstalledMemory} Else {$info.CsPhyicallyInstalledMemory}}) / 1024)
 
-    # If a UserName was not defined in a parameter...
+    # If a UserName was not defined in a param...
     if (!(Test-StringVar $UserName)) {
-        # ...analyze Security Event Log data for most frequent non-machine login in last week
+        # ...analyze Security Event Log data for most frequent non-machine logins in the last week
         Try {
             # the FilterXPath is SOOOO much faster than going through them in PowerShell. srsly.
             $Events = Get-WinEvent -LogName "Security" -FilterXPath '
@@ -280,7 +289,8 @@ Function Send-PSReport {
     if ($null -ne $SelfReportIni.config.url) { $url = $SelfReportIni.config.url }
     
     if ($Test) {
-        $response = $json
+        $response ="report-key: $SelfReportKey`n"
+        $response += $json
         $response
     } else {
 #            try {
@@ -327,4 +337,20 @@ function Test-StringVar ([string]$StringVar) {
     } else {
         $true
     }
+}
+
+function Test-IsGuid {
+# Lifted from https://pscustomobject.github.io/powershell/functions/PowerShell-Validate-Guid/
+    [OutputType([bool])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$ObjectGuid
+    )
+
+    # Define verification regex
+    [regex]$guidRegex = '(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$'
+
+    # Check guid against regex
+    return $ObjectGuid -match $guidRegex
 }
