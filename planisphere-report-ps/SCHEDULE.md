@@ -22,7 +22,7 @@ To schedule the planisphere-report.ps1 script using Windows Task Scheduler:
     + For a DHCP-based trigger:
         + Change **Begin the task**  to ***On an event***.
         + Select **Basic** under **Settings**.
-        + Change the **Log** to ***Microsoft-Windows-DHCP Client Events/Admin8**.
+        + Change the **Log** to ***Microsoft-Windows-DHCP Client Events/Admin***.
         + Change the **Source** to ***Dhcp-Client***.
         + Enter an **Event ID** of ***50067***.
         + Select **OK**.
