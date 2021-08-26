@@ -1,13 +1,13 @@
 # planisphere-report-ps
 
-planisphere-report-ps is a simple PowerShell client to planisphere's [self reporting mechanism](https://planisphere.oit.duke.edu/help/self_report).
+planisphere-report.ps1 is a simple PowerShell client to Planisphere's [self reporting mechanism](https://planisphere.oit.duke.edu/help/self_report).
 
 ## Supported Distributions
 
 * Windows PowerShell
-* Microsoft PowerShell running on Windwos
+* Microsoft PowerShell running on Windows
 
-Accepting patches for any other distributions..
+Accepting patches for any other distributions.
 
 ## Install
 
@@ -25,12 +25,12 @@ Once you have the key, you have several options:
     ```
     PS C:\> "YOUR_KEY_HERE" | Out-File /etc/planisphere-report-key
     ```
-+ Put it in a planisphere-report.ini settings file, either directly or as a path to a file.
-+ Pass it as an optional parameter, either directly or as a path to a file.
++ Put it in a planisphere-report settings file, either directly or as a path to a keyfile.
++ Pass it as an optional parameter, either directly or as a path to a keyfile.
 
 ### 2. Install the script
 
-Copy planisphere-report to ```/usr/local/bin/planisphere-report``` or ```C:\scripts\``` (or wherever you want).
+Copy planisphere-report.ps1 to ```/usr/local/bin/``` or ```C:\scripts\``` (or wherever you want).
 
 ### 3. Setup a Scheduled Task
 
@@ -42,9 +42,9 @@ For more information, see [SCHEDULE](planisphere-report-ps/SCHEDULE.md) in this 
 
 ### 4. Config file (optional)
 
-If you want to further configure how ```planisphere-report-ps``` runs, you can create a config file as ```/etc/planisphere-report``` or pass the location of a different file as a script parameter.
+If you want to further configure how ```planisphere-report.ps1``` runs, you can create a config file as ```/etc/planisphere-report``` or pass a different location of a config file as a script parameter.
 
-The config file is a simple ini file, everything in the file is optional. If there is a ```[config]``` section, it will change some basic operating parameters. If there's an ```[overrides]``` section, it'll override some of the values detected by ```planisphere-report``` or add in options that ```planisphere-report``` can't detect on its own. See https://planisphere.oit.duke.edu/help/self_report for more details on the values that can be set in overrides.
+The config file is a simple ini file, everything in the file is optional. If there is a ```[config]``` section, it will change some basic operating parameters. If there's an ```[overrides]``` section, it'll override some of the values detected by ```planisphere-report.ps1``` or add in options that ```planisphere-report.ps1``` can't detect on its own. See https://planisphere.oit.duke.edu/help/self_report for more details on the values that can be set in overrides.
 
 Example:
 
