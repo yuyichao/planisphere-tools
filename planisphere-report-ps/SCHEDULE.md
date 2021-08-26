@@ -11,12 +11,12 @@ To schedule the planisphere-report.ps1 script using Windows Task Scheduler:
     + For a daily schedule:
         + Leave **Begin the task** set to ***On a schedule***.
         + Select **Daily** under **Settings**.
-        + Change the **Start** if you'd like to start on a prticular day or (more importantly) at a particular hour.
+        + Change the **Start** if you'd like to start on a particular day or (more importantly) at a particular hour.
         + Select **OK**.
     + For an hourly schedule:
         + Leave **Begin the task** set to ***On a schedule***.
         + Select **Daily** under **Settings**.
-        + Change the **Start** if you'd like to start on a prticular day or (more importantly) at a particular hour.
+        + Change the **Start** if you'd like to start on a particular day or (more importantly) at a particular hour.
         + Select the **checkbox** next to **Repeat task every**, leaving the values set to ***1 hour*** for a duration of ***1 day***.
         + Select **OK**.
     + For a DHCP-based trigger:
