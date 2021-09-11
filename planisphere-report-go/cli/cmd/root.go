@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"os"
+	"strings"
+
+	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -79,9 +82,26 @@ func initConfig() {
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
+		// Now look in /etc
+		viper.AddConfigPath("/etc/")
+		viper.SetConfigName("planisphere-report")
+		viper.ReadInConfig()
+
 		// Search config in home directory with name ".planisphere-report" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".planisphere-report")
+		viper.MergeInConfig()
+
+		// If no key is yet set, load it in from a file
+		if viper.GetString("key") == "" {
+			dat, err := os.ReadFile("/etc/planisphere_key_file")
+			if err != nil {
+				log.Warning("Must set a key either in a config file or /etc/planisphere_key_file")
+				log.Fatal(err)
+			} else {
+				viper.Set("key", strings.TrimSpace(string(dat)))
+			}
+		}
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

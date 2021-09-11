@@ -1,6 +1,26 @@
 # Planisphere Report Go
 
+## Installing
+
+Make sure you have the devil-ops tap intstalled with:
+
+```
+brew tap devil-ops/devil-ops git@gitlab.oit.duke.edu:devil-ops/homebrew-devil-ops.git
+```
+
+Install using:
+
+```
+brew install planisphere-report
+```
+
+## About
+
 Do some minimal setup by adding a `~/.planisphere-report.yaml`
+
+Configuration can also be added to `/etc/planisphere-report.[extension]`
+
+For backwards compatibility, you can also add your key as a text string in `/etc/planisphere_key_file`
 
 These can also be set with ENV vars using a prefix of `PLANISPHEREREPORT_`, example:
 ```
