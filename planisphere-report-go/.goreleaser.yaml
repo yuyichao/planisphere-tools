@@ -41,4 +41,4 @@ brews:
       name: homebrew-devil-ops
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     description: "Planisphere Self Report"
-    homepage: "https://gitlab.oit.duke.edu/devil-ops/planisphere-tools"
+    homepage: "https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
