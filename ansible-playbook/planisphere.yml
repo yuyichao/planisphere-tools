@@ -19,7 +19,7 @@
       - name: Planisphere | Clone Planisphere-Tools
         git:
           repo: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools.git
-          version: master
+          version: main
           dest: "{{ clone_dir }}"
           depth: 1
 
