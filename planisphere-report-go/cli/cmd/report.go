@@ -28,6 +28,7 @@ var reportCmd = &cobra.Command{
 
 		l, err := helpers.NewLookuper(overrides)
 		if err != nil {
+			log.Warning(err)
 			log.Fatal("Could not initialize Lookuper 😭☠️")
 		}
 

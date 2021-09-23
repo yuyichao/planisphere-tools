@@ -16,6 +16,8 @@ builds:
       -X gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/cli/cmd.commit={{ .ShortCommit }}'
     goos:
       - darwin
+      - freebsd
+      - linux
     goarch:
       - amd64
       - arm64
@@ -45,3 +47,10 @@ brews:
     homepage: "https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
     install: |
       bin.install "planisphere-report"
+nfpms:
+  - id: packages
+    bindir: /usr/bin
+    formats:
+      - deb
+      - rpm
+      - apk
