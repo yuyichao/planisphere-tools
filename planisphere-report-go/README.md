@@ -52,3 +52,69 @@ overrides:
         hello: world
 ```
 
+## Expanding to new Platforms
+
+We've tried to abstract everthing we can in to the `lookup.go` file. The more
+specific platform info can be found in the platform specific files, such as
+`linux.go`, `darwin.go`, etc. If you would like to add your own OS here and
+flesh out the collection bits, we'd love a pull request!
+
+A starting point for the platform `foo` could be something like the following in
+`foo.go`:
+
+```go
+func ApplyPlatformDetections(l *Lookuper) error {
+    // Do initializing bits here
+    return nil
+}
+func setSerial(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setManufacturer(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setModel(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setDiskEncrypted(l *Lookuper) (bool, error) {
+	// TODO: Implement this
+	return false, errors.New("Not yet implemented")
+}
+
+func setMemory(l *Lookuper) (uint64, error) {
+	// TODO: Implement this
+	return 0, errors.New("Not yet implemented")
+}
+
+func setOSFamily(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setDeviceType(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setOSFullName(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setUsername(l *Lookuper) (string, error) {
+	// TODO: Implement this
+	return "", errors.New("Not yet implemented")
+}
+
+func setInstalledSoftware(l *Lookuper) ([][]string, error) {
+	// TODO: Implement this
+	return nil, errors.New("Not yet implemented")
+
+}
+```

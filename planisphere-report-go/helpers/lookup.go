@@ -90,11 +90,56 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 	}
 
 	// Now
+	var err error
 	l.Payload.LastActive = time.Now()
 
-	err := ApplyPlatformDetections(l)
+	err = ApplyPlatformDetections(l)
 	if err != nil {
 		return nil, err
+	}
+
+	l.Payload.LastActive = time.Now()
+
+	// Do the platformy stuff
+	err = setPlatformSerialWrapper(l, setSerial)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setManufacturerWrapper(l, setManufacturer)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setModelWrapper(l, setModel)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setDiskEncryptedWrapper(l, setDiskEncrypted)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setMemoryWrapper(l, setMemory)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setOSFamilyWrapper(l, setOSFamily)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setOSFullNameWrapper(l, setOSFullName)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setDeviceTypeWrapper(l, setDeviceType)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setUsernameWrapper(l, setUsername)
+	if err != nil {
+		log.Warning(err)
+	}
+	err = setInstalledSoftwareWrapper(l, setInstalledSoftware)
+	if err != nil {
+		log.Warning(err)
 	}
 
 	// Return
@@ -118,4 +163,179 @@ func getMacAddr() ([]string, error) {
 		}
 	}
 	return as, nil
+}
+
+func setPlatformSerialWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["serial"]; ok {
+		l.Payload.Data.Serial = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.Serial = item
+		}
+	}
+
+	return nil
+
+}
+
+func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["manufacturer"]; ok {
+		l.Payload.Data.Manufacturer = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.Manufacturer = item
+		}
+	}
+
+	return nil
+
+}
+
+func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["model"]; ok {
+		l.Payload.Data.Model = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.Model = item
+		}
+	}
+
+	return nil
+
+}
+
+func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (bool, error)) error {
+	if item, ok := l.Overrides["disk_encrypted"]; ok {
+		l.Payload.Data.DiskEncrypted = item.(bool)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.DiskEncrypted = item
+		}
+	}
+
+	return nil
+
+}
+
+// Memory
+// "All aloooooone in the moooooon liiiiiight"
+//   - 😺
+func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (uint64, error)) error {
+	if item, ok := l.Overrides["memory_mb"]; ok {
+		l.Payload.Data.MemoryMB = uint64(item.(int))
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.MemoryMB = item
+		}
+	}
+
+	return nil
+
+}
+
+// Operating System Stuff
+// "I don't have friends, I got Family"
+//   - Dominic Toretto 🚗💨
+func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["os_family"]; ok {
+		l.Payload.Data.OsFamily = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.OsFamily = item
+		}
+	}
+
+	return nil
+
+}
+
+func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["device_type"]; ok {
+		l.Payload.Data.DeviceType = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.DeviceType = item
+		}
+	}
+
+	return nil
+
+}
+
+func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["os_fullname"]; ok {
+		l.Payload.Data.OsFullname = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.OsFullname = item
+		}
+	}
+
+	return nil
+
+}
+
+func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+	if item, ok := l.Overrides["username"]; ok {
+		l.Payload.Data.Username = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.Username = item
+		}
+	}
+
+	return nil
+
+}
+
+func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) ([][]string, error)) error {
+
+	// Not sure why someone would wanna override this, but just in case...
+	if installedSoftware, ok := l.Overrides["installed_software"]; ok {
+		for _, item := range installedSoftware.([]interface{}) {
+			pieces := []string{}
+			for _, piece := range item.([]interface{}) {
+				pieces = append(pieces, piece.(string))
+			}
+			itemPair := []string{pieces[0], pieces[1]}
+			l.Payload.Data.InstalledSoftware = append(l.Payload.Data.InstalledSoftware, itemPair)
+		}
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		} else {
+			l.Payload.Data.InstalledSoftware = item
+		}
+	}
+
+	return nil
+
 }

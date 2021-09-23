@@ -1,12 +1,14 @@
-// go:build darwin
+//go:build darwin
+// +build darwin
+
 package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -14,120 +16,10 @@ import (
 /*
 Only platform specific stuff should be in here. If it's more generic than a
 given platform, please include it in the NewLookup function
+Is there anything we actually want to do here globally?
 */
 // ApplyPlatformDetections Do some stuff here
 func ApplyPlatformDetections(l *Lookuper) error {
-
-	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
-	if err != nil {
-		return err
-	}
-
-	// Disk encryption state
-	if encrypted, ok := l.Overrides["disk_encrypted"]; ok {
-		l.Payload.Data.DiskEncrypted = encrypted.(bool)
-	} else {
-		encrypted, err := GetDiskEncryptionStatus()
-		if err != nil {
-			log.Warning("Could not detect disk encryption state: ", err)
-		}
-		l.Payload.Data.DiskEncrypted = encrypted
-	}
-
-	// Memory
-	// "All aloooooone in the moooooon liiiiiight"
-	//   - 😺
-	if memory, ok := l.Overrides["memory_mb"]; ok {
-		m := int64(memory.(int))
-
-		l.Payload.Data.MemoryMB = uint64(m)
-	} else {
-		memory, err := GetMemory()
-		if err != nil {
-			log.Warning("Could not detect memory")
-		}
-		l.Payload.Data.MemoryMB = uint64(memory)
-	}
-
-	// Detect Serial Number
-	if serial, ok := l.Overrides["serial"]; ok {
-		l.Payload.Data.Serial = serial.(string)
-	} else {
-		l.Payload.Data.Serial = ioregExpert["IOPlatformSerialNumber"]
-	}
-
-	// Operating System Stuff
-	// "I don't have friends, I got Family"
-	//   - Dominic Toretto 🚗💨
-	if osFamily, ok := l.Overrides["os_family"]; ok {
-		l.Payload.Data.OsFamily = osFamily.(string)
-	} else {
-		l.Payload.Data.OsFamily = "macOS"
-	}
-
-	// Manufacturer
-	if manufacturer, ok := l.Overrides["manufacturer"]; ok {
-		l.Payload.Data.Manufacturer = manufacturer.(string)
-	} else {
-		l.Payload.Data.Manufacturer = ioregExpert["manufacturer"]
-	}
-
-	// Model
-	if model, ok := l.Overrides["model"]; ok {
-		l.Payload.Data.Model = model.(string)
-	} else {
-		l.Payload.Data.Model = ioregExpert["product-name"]
-	}
-
-	// What kind of device is this?
-	// TODO: Flesh this out more
-	if deviceType, ok := l.Overrides["model"]; ok {
-		l.Payload.Data.DeviceType = deviceType.(string)
-	} else {
-		if strings.Contains(l.Payload.Data.Model, "MacBook") {
-			l.Payload.Data.DeviceType = "laptop"
-		}
-	}
-
-	// OS Data here
-	softData, err := GetPSoftwareData()
-	if err != nil {
-		return err
-	}
-
-	if osVersion, ok := l.Overrides["os_version"]; ok {
-		l.Payload.Data.OsFullname = osVersion.(string)
-	} else {
-		l.Payload.Data.OsFullname = softData.SPSoftwareDataType[0].OsVersion
-	}
-
-	// Username, cool to override
-	if username, ok := l.Overrides["username"]; ok {
-		l.Payload.Data.Username = username.(string)
-	} else {
-		l.Payload.Data.Username = softData.SPSoftwareDataType[0].UserName
-	}
-
-	// Not sure why someone would wanna override this, but just in case...
-	if installedSoftware, ok := l.Overrides["installed_software"]; ok {
-		for _, item := range installedSoftware.([]interface{}) {
-			pieces := []string{}
-			for _, piece := range item.([]interface{}) {
-				pieces = append(pieces, piece.(string))
-			}
-			itemPair := []string{pieces[0], pieces[1]}
-			l.Payload.Data.InstalledSoftware = append(l.Payload.Data.InstalledSoftware, itemPair)
-		}
-	} else {
-		apps, err := GetInstalledSoftware()
-		if err != nil {
-			return err
-		}
-		l.Payload.Data.InstalledSoftware = apps
-	}
-
-	// When last active?
-	l.Payload.LastActive = time.Now()
 
 	// Mmmm, return data
 	return nil
@@ -326,4 +218,93 @@ func GetDiskEncryptionStatus() (bool, error) {
 	} else {
 		return false, nil
 	}
+}
+
+func setSerial(l *Lookuper) (string, error) {
+	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
+	if err != nil {
+		return "", err
+	}
+	return ioregExpert["IOPlatformSerialNumber"], nil
+}
+
+func setManufacturer(l *Lookuper) (string, error) {
+	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
+	if err != nil {
+		return "", err
+	}
+	return ioregExpert["manufacturer"], nil
+
+}
+
+func setModel(l *Lookuper) (string, error) {
+	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
+	if err != nil {
+		return "", err
+	}
+	return ioregExpert["product-name"], nil
+
+}
+
+func setDiskEncrypted(l *Lookuper) (bool, error) {
+
+	encrypted, err := GetDiskEncryptionStatus()
+	if err != nil {
+		log.Warning("Could not detect disk encryption state: ", err)
+	}
+	return encrypted, nil
+
+}
+
+func setMemory(l *Lookuper) (uint64, error) {
+
+	memory, err := GetMemory()
+	if err != nil {
+		log.Warning("Could not detect memory")
+	}
+	return uint64(memory), nil
+
+}
+
+func setOSFamily(l *Lookuper) (string, error) {
+
+	return "macOS", nil
+
+}
+
+func setDeviceType(l *Lookuper) (string, error) {
+	if strings.Contains(l.Payload.Data.Model, "MacBook") {
+		return "laptop", nil
+	} else {
+		return "", errors.New("Unknown type of mac")
+	}
+
+}
+
+func setOSFullName(l *Lookuper) (string, error) {
+	softData, err := GetPSoftwareData()
+	if err != nil {
+		return "", err
+	}
+
+	return softData.SPSoftwareDataType[0].OsVersion, nil
+
+}
+
+func setUsername(l *Lookuper) (string, error) {
+	softData, err := GetPSoftwareData()
+	if err != nil {
+		return "", err
+	}
+	return softData.SPSoftwareDataType[0].UserName, nil
+
+}
+
+func setInstalledSoftware(l *Lookuper) ([][]string, error) {
+	apps, err := GetInstalledSoftware()
+	if err != nil {
+		return nil, err
+	}
+	return apps, nil
+
 }
