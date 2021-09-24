@@ -63,7 +63,7 @@ var reportCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Println("Submitted report, thanks for keeping Duke Safe! ❤️")
+			fmt.Println("Submitted report, thanks for keeping Duke Safe! ❤️")
 		}
 
 	},
