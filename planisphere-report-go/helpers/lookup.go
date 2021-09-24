@@ -100,6 +100,13 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 
 	l.Payload.LastActive = time.Now()
 
+	/*
+		platformItems := []func(*Lookuper, func(*Lookuper, interface{}) error){}
+		platformItems = append(platformItems, setPlatformSerialWrapper(l, setSerial))
+		log.Println(platformItems)
+	*/
+	//platformItems = append(platformItems, setPlatformSerialWrapper(l, setSerial))
+
 	// Do the platformy stuff
 	err = setPlatformSerialWrapper(l, setSerial)
 	if err != nil {
@@ -165,7 +172,7 @@ func getMacAddr() ([]string, error) {
 	return as, nil
 }
 
-func setPlatformSerialWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setPlatformSerialWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["serial"]; ok {
 		l.Payload.Data.Serial = item.(string)
 	} else {
@@ -173,15 +180,13 @@ func setPlatformSerialWrapper(l *Lookuper, f func(fl *Lookuper) (string, error))
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.Serial = item
+			l.Payload.Data.Serial = item.(string)
 		}
 	}
-
 	return nil
-
 }
 
-func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["manufacturer"]; ok {
 		l.Payload.Data.Manufacturer = item.(string)
 	} else {
@@ -189,7 +194,7 @@ func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) e
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.Manufacturer = item
+			l.Payload.Data.Manufacturer = item.(string)
 		}
 	}
 
@@ -197,7 +202,7 @@ func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) e
 
 }
 
-func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["model"]; ok {
 		l.Payload.Data.Model = item.(string)
 	} else {
@@ -205,7 +210,7 @@ func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.Model = item
+			l.Payload.Data.Model = item.(string)
 		}
 	}
 
@@ -213,7 +218,7 @@ func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
 
 }
 
-func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (bool, error)) error {
+func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["disk_encrypted"]; ok {
 		l.Payload.Data.DiskEncrypted = item.(bool)
 	} else {
@@ -221,7 +226,7 @@ func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (bool, error)) er
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.DiskEncrypted = item
+			l.Payload.Data.DiskEncrypted = item.(bool)
 		}
 	}
 
@@ -232,7 +237,7 @@ func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (bool, error)) er
 // Memory
 // "All aloooooone in the moooooon liiiiiight"
 //   - 😺
-func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (uint64, error)) error {
+func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["memory_mb"]; ok {
 		l.Payload.Data.MemoryMB = uint64(item.(int))
 	} else {
@@ -240,7 +245,7 @@ func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (uint64, error)) error {
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.MemoryMB = item
+			l.Payload.Data.MemoryMB = item.(uint64)
 		}
 	}
 
@@ -251,7 +256,7 @@ func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (uint64, error)) error {
 // Operating System Stuff
 // "I don't have friends, I got Family"
 //   - Dominic Toretto 🚗💨
-func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["os_family"]; ok {
 		l.Payload.Data.OsFamily = item.(string)
 	} else {
@@ -259,7 +264,7 @@ func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.OsFamily = item
+			l.Payload.Data.OsFamily = item.(string)
 		}
 	}
 
@@ -267,7 +272,7 @@ func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error
 
 }
 
-func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["device_type"]; ok {
 		l.Payload.Data.DeviceType = item.(string)
 	} else {
@@ -275,7 +280,7 @@ func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) err
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.DeviceType = item
+			l.Payload.Data.DeviceType = item.(string)
 		}
 	}
 
@@ -283,7 +288,7 @@ func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) err
 
 }
 
-func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["os_fullname"]; ok {
 		l.Payload.Data.OsFullname = item.(string)
 	} else {
@@ -291,7 +296,7 @@ func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) err
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.OsFullname = item
+			l.Payload.Data.OsFullname = item.(string)
 		}
 	}
 
@@ -299,7 +304,7 @@ func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) err
 
 }
 
-func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error {
+func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	if item, ok := l.Overrides["username"]; ok {
 		l.Payload.Data.Username = item.(string)
 	} else {
@@ -307,7 +312,7 @@ func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.Username = item
+			l.Payload.Data.Username = item.(string)
 		}
 	}
 
@@ -315,7 +320,7 @@ func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (string, error)) error
 
 }
 
-func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) ([][]string, error)) error {
+func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 
 	// Not sure why someone would wanna override this, but just in case...
 	if installedSoftware, ok := l.Overrides["installed_software"]; ok {
@@ -332,7 +337,7 @@ func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) ([][]string, 
 		if err != nil {
 			return err
 		} else {
-			l.Payload.Data.InstalledSoftware = item
+			l.Payload.Data.InstalledSoftware = item.([][]string)
 		}
 	}
 
