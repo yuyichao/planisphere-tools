@@ -50,7 +50,15 @@ brews:
 nfpms:
   - id: packages
     bindir: /usr/bin
+    package_name: planisphere-report
     formats:
       - deb
       - rpm
       - apk
+    contents:
+      - src: packaging/systemd/planisphere-report.service
+        dst: /etc/systemd/system/planisphere-report.service
+      - src: packaging/systemd/planisphere-report.timer
+        dst: /etc/systemd/system/planisphere-report.timer
+    scripts:
+      postinstall: "packaging/scripts/postinstall.sh"

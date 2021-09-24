@@ -1,0 +1,7 @@
+[Unit]
+Description=Planisphere report in Go
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/planisphere-report report
+User=root
