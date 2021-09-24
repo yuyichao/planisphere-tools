@@ -23,7 +23,7 @@ var Verbose bool
 var rootCmd = &cobra.Command{
 	Use:   "planisphere-report",
 	Short: "Self report tool for Planisphere",
-	Long:  `Self report tool for Planisphere. Currently only supported on Macos`,
+	Long:  `Self report tool for Planisphere. Currently supported on macOS, Linux and FreeBSD`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

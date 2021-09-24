@@ -83,9 +83,13 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 	// Extra data
 	l.Payload.ExtraData = map[string]string{}
 	if extraData, ok := l.Overrides["extra_data"]; ok {
-		for k, v := range extraData.(map[string]interface{}) {
-			log.Println(k, v)
-			l.Payload.ExtraData[k] = v.(string)
+		extras, ok := extraData.(map[string]interface{})
+		if ok {
+			for k, v := range extras {
+				l.Payload.ExtraData[k] = v.(string)
+			}
+		} else {
+			log.Warning("No extra_data to parse, yet extra_data section exists")
 		}
 	}
 
