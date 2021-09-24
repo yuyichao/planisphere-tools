@@ -57,8 +57,10 @@ nfpms:
       - apk
     contents:
       - src: packaging/systemd/planisphere-report.service
-        dst: /etc/systemd/system/planisphere-report.service
+        dst: /usr/lib/systemd/system/planisphere-report.service
       - src: packaging/systemd/planisphere-report.timer
-        dst: /etc/systemd/system/planisphere-report.timer
+        dst: /usr/lib/systemd/system/planisphere-report.timer
     scripts:
       postinstall: "packaging/scripts/postinstall.sh"
+      preremove: "packaging/scripts/preremove.sh"
+      postremove: "packaging/scripts/postremove.sh"
