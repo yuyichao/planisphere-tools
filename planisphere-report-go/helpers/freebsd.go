@@ -18,18 +18,42 @@ func ApplyPlatformDetections(l *Lookuper) error {
 	return nil
 }
 func setSerial(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Serial not yet implemented")
+	cmdPath, err := exec.LookPath("dmidecode")
+	if err != nil {
+		return "", errors.New("dmidecode is needed to look up serial number")
+	}
+	cmdOut, err := exec.Command(cmdPath, "-s", "system-serial-number").Output()
+	if err != nil {
+		return "", errors.New("Issue running dmidecode to get the serial number")
+	}
+	trimmed := strings.Trim(string(cmdOut), "\n")
+	return trimmed, nil
 }
 
 func setManufacturer(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Manufacturer not yet implemented")
+	cmdPath, err := exec.LookPath("dmidecode")
+	if err != nil {
+		return "", errors.New("dmidecode is needed to look up manufacturer")
+	}
+	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-manufacturer").Output()
+	if err != nil {
+		return "", errors.New("Issue running dmidecode to get the chassis-manufacturer")
+	}
+	trimmed := strings.Trim(string(cmdOut), "\n")
+	return trimmed, nil
 }
 
 func setModel(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Model not yet implemented")
+	cmdPath, err := exec.LookPath("dmidecode")
+	if err != nil {
+		return "", errors.New("dmidecode is needed to look up model")
+	}
+	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-version").Output()
+	if err != nil {
+		return "", errors.New("Issue running dmidecode to get the chassis-version")
+	}
+	trimmed := strings.Trim(string(cmdOut), "\n")
+	return trimmed, nil
 }
 
 func setDiskEncrypted(l *Lookuper) (interface{}, error) {
@@ -57,8 +81,16 @@ func setOSFamily(l *Lookuper) (interface{}, error) {
 }
 
 func setDeviceType(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("DeviceType not yet implemented")
+	cmdPath, err := exec.LookPath("dmidecode")
+	if err != nil {
+		return "", errors.New("dmidecode is needed to look up model")
+	}
+	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-type").Output()
+	if err != nil {
+		return "", errors.New("Issue running dmidecode to get the chassis-type")
+	}
+	trimmed := strings.Trim(string(cmdOut), "\n")
+	return trimmed, nil
 }
 
 func setOSFullName(l *Lookuper) (interface{}, error) {
