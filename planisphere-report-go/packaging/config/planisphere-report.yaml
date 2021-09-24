@@ -1,0 +1,8 @@
+---
+key: YOUR-API-KEY
+# Uncomment this to use planisphere-test
+# url: https://planisphere-test.oit.duke.edu/self_report
+
+## Override specific values here
+# overrides:
+#     username: someNetID
