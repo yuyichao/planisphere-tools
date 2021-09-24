@@ -19,7 +19,14 @@ given platform, please include it in the NewLookup function
 Is there anything we actually want to do here globally?
 */
 // ApplyPlatformDetections Do some stuff here
+var ioregExpert map[string]string
+
 func ApplyPlatformDetections(l *Lookuper) error {
+	var err error
+	ioregExpert, err = GetIORegTree("IOPlatformExpertDevice")
+	if err != nil {
+		return err
+	}
 
 	// Mmmm, return data
 	return nil
@@ -207,46 +214,30 @@ func GetIORegTree(tree string) (map[string]string, error) {
 }
 
 func GetDiskEncryptionStatus() (bool, error) {
-	out, err := exec.Command("/usr/bin/fdesetup", "isactive").Output()
-	if err != nil {
-		return false, err
-	}
-	outS := string(out)
-	outS = strings.TrimRight(outS, "\n")
-	if outS == "true" {
+	// Note fdsetup fails if the encryption is inactive
+	_, err := exec.Command("/usr/bin/fdesetup", "isactive").Output()
+	if err == nil {
 		return true, nil
 	} else {
 		return false, nil
 	}
 }
 
-func setSerial(l *Lookuper) (string, error) {
-	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
-	if err != nil {
-		return "", err
-	}
+func setSerial(l *Lookuper) (interface{}, error) {
 	return ioregExpert["IOPlatformSerialNumber"], nil
 }
 
-func setManufacturer(l *Lookuper) (string, error) {
-	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
-	if err != nil {
-		return "", err
-	}
+func setManufacturer(l *Lookuper) (interface{}, error) {
 	return ioregExpert["manufacturer"], nil
 
 }
 
-func setModel(l *Lookuper) (string, error) {
-	ioregExpert, err := GetIORegTree("IOPlatformExpertDevice")
-	if err != nil {
-		return "", err
-	}
+func setModel(l *Lookuper) (interface{}, error) {
 	return ioregExpert["product-name"], nil
 
 }
 
-func setDiskEncrypted(l *Lookuper) (bool, error) {
+func setDiskEncrypted(l *Lookuper) (interface{}, error) {
 
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
@@ -256,7 +247,7 @@ func setDiskEncrypted(l *Lookuper) (bool, error) {
 
 }
 
-func setMemory(l *Lookuper) (uint64, error) {
+func setMemory(l *Lookuper) (interface{}, error) {
 
 	memory, err := GetMemory()
 	if err != nil {
@@ -266,13 +257,13 @@ func setMemory(l *Lookuper) (uint64, error) {
 
 }
 
-func setOSFamily(l *Lookuper) (string, error) {
+func setOSFamily(l *Lookuper) (interface{}, error) {
 
 	return "macOS", nil
 
 }
 
-func setDeviceType(l *Lookuper) (string, error) {
+func setDeviceType(l *Lookuper) (interface{}, error) {
 	if strings.Contains(l.Payload.Data.Model, "MacBook") {
 		return "laptop", nil
 	} else {
@@ -281,7 +272,7 @@ func setDeviceType(l *Lookuper) (string, error) {
 
 }
 
-func setOSFullName(l *Lookuper) (string, error) {
+func setOSFullName(l *Lookuper) (interface{}, error) {
 	softData, err := GetPSoftwareData()
 	if err != nil {
 		return "", err
@@ -291,16 +282,31 @@ func setOSFullName(l *Lookuper) (string, error) {
 
 }
 
-func setUsername(l *Lookuper) (string, error) {
-	softData, err := GetPSoftwareData()
+func setUsername(l *Lookuper) (interface{}, error) {
+	/*
+		softData, err := GetPSoftwareData()
+		if err != nil {
+			return "", err
+		}
+		return softData.SPSoftwareDataType[0].UserName, nil
+	*/
+	out, err := exec.Command("/usr/bin/last").Output()
 	if err != nil {
-		return "", err
+		log.Warning("Error running 'last' to determine the real user")
 	}
-	return softData.SPSoftwareDataType[0].UserName, nil
+	for _, line := range strings.Split(string(out), "\n") {
+		pieces := strings.Split(line, " ")
+		for _, piece := range pieces {
+			if piece != "root" {
+				return piece, nil
+			}
+		}
+	}
+	return "", errors.New("Could not find a non-root user")
 
 }
 
-func setInstalledSoftware(l *Lookuper) ([][]string, error) {
+func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	apps, err := GetInstalledSoftware()
 	if err != nil {
 		return nil, err

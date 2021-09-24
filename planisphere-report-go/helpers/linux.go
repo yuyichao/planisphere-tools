@@ -103,33 +103,33 @@ func GetInstalledSoftware() ([][]string, error) {
 	return softwareTable, nil
 }
 
-func setSerial(l *Lookuper) (string, error) {
+func setSerial(l *Lookuper) (interface{}, error) {
 	return si.Product.Serial, nil
 }
 
-func setManufacturer(l *Lookuper) (string, error) {
+func setManufacturer(l *Lookuper) (interface{}, error) {
 	return si.Product.Vendor, nil
 }
 
-func setModel(l *Lookuper) (string, error) {
+func setModel(l *Lookuper) (interface{}, error) {
 	return si.Product.Name, nil
 }
 
-func setDiskEncrypted(l *Lookuper) (bool, error) {
+func setDiskEncrypted(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return false, errors.New("Not yet implemented")
 }
 
-func setMemory(l *Lookuper) (uint64, error) {
+func setMemory(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return 0, errors.New("Not yet implemented")
 }
 
-func setOSFamily(l *Lookuper) (string, error) {
+func setOSFamily(l *Lookuper) (interface{}, error) {
 	return "Linux", nil
 }
 
-func setDeviceType(l *Lookuper) (string, error) {
+func setDeviceType(l *Lookuper) (interface{}, error) {
 	if _, ok := ChassisType[si.Chassis.Type]; ok {
 		return ChassisType[si.Chassis.Type], nil
 	} else {
@@ -137,11 +137,11 @@ func setDeviceType(l *Lookuper) (string, error) {
 	}
 }
 
-func setOSFullName(l *Lookuper) (string, error) {
+func setOSFullName(l *Lookuper) (interface{}, error) {
 	return si.OS.Name, nil
 }
 
-func setUsername(l *Lookuper) (string, error) {
+func setUsername(l *Lookuper) (interface{}, error) {
 	u, err := user.Current()
 	if err != nil {
 		return "", err
@@ -149,7 +149,7 @@ func setUsername(l *Lookuper) (string, error) {
 	return u.Username, nil
 }
 
-func setInstalledSoftware(l *Lookuper) ([][]string, error) {
+func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	apps, err := GetInstalledSoftware()
 	if err != nil {
 		return nil, err

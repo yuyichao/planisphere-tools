@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"reflect"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -35,10 +36,27 @@ var reportCmd = &cobra.Command{
 		// Add version to extra data
 		l.Payload.ExtraData["selfreport_version"] = version
 
-		// Print payload
-		out, _ := yaml.Marshal(l.Payload)
+		// Print payload when in verbose mode
+		if Verbose {
+			out, _ := yaml.Marshal(l.Payload)
+			fmt.Println(string(out))
 
-		fmt.Println(string(out))
+		} else {
+			// In normal mode, just show a summary
+			e := reflect.ValueOf(&l.Payload.Data).Elem()
+			for i := 0; i < e.NumField(); i++ {
+				varName := e.Type().Field(i).Name
+				varValue := e.Field(i).Interface()
+				switch name := varName; name {
+				case "InstalledSoftware":
+					fmt.Printf("%v: %v items\n", varName, len(varValue.([][]string)))
+				default:
+					fmt.Printf("%v: %v\n", varName, varValue)
+
+				}
+			}
+
+		}
 
 		if !dryrun {
 			err := l.Payload.Submit(planisphereKey)
