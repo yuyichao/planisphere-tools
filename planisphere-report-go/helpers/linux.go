@@ -5,6 +5,7 @@ package helpers
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"os/user"
 	"strings"
@@ -108,10 +109,40 @@ func setSerial(l *Lookuper) (interface{}, error) {
 }
 
 func setManufacturer(l *Lookuper) (interface{}, error) {
+	// Is it a Raspberry Pi?
+	for _, mac := range l.Payload.Data.MacAddresses {
+		if strings.HasPrefix(mac, "b8:27:eb") {
+			return "Raspberry Pi", nil
+
+		}
+
+	}
 	return si.Product.Vendor, nil
 }
 
 func setModel(l *Lookuper) (interface{}, error) {
+	// Is it a Raspberry Pi?
+	for _, mac := range l.Payload.Data.MacAddresses {
+		if strings.HasPrefix(mac, "b8:27:eb") {
+			cpuDat, err := os.ReadFile("/proc/cpuinfo")
+			if err != nil {
+				log.Warning(err)
+				continue
+			}
+			trimmed := strings.Trim(string(cpuDat), "\n")
+			for _, line := range strings.Split(trimmed, "\n") {
+				pieces := strings.SplitN(line, ":", 2)
+				key := strings.TrimSpace(pieces[0])
+				value := strings.TrimSpace(pieces[1])
+				if key == "Revision" {
+					if _, ok := RaspberryPiModels[value]; ok {
+						return RaspberryPiModels[value], nil
+					}
+				}
+			}
+		}
+
+	}
 	return si.Product.Name, nil
 }
 
