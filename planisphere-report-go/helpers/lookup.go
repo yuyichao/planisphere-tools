@@ -344,3 +344,12 @@ func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) (interface{},
 	return nil
 
 }
+
+func ContainsString(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
