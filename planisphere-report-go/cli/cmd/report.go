@@ -55,6 +55,7 @@ var reportCmd = &cobra.Command{
 
 				}
 			}
+			fmt.Printf("ExtraData: %+v\n", l.Payload.ExtraData)
 
 		}
 
