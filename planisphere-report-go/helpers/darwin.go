@@ -264,9 +264,11 @@ func setOSFamily(l *Lookuper) (interface{}, error) {
 }
 
 func setDeviceType(l *Lookuper) (interface{}, error) {
+	WaitForChecked("model")
 	if strings.Contains(l.Payload.Data.Model, "MacBook") {
 		return "laptop", nil
 	} else {
+		log.Fatalf("UGH< FATAL no model '%v' %v", l.Payload.Data.Model, CheckedItems)
 		return "", errors.New("Unknown type of mac")
 	}
 
@@ -283,13 +285,6 @@ func setOSFullName(l *Lookuper) (interface{}, error) {
 }
 
 func setUsername(l *Lookuper) (interface{}, error) {
-	/*
-		softData, err := GetPSoftwareData()
-		if err != nil {
-			return "", err
-		}
-		return softData.SPSoftwareDataType[0].UserName, nil
-	*/
 	out, err := exec.Command("/usr/bin/last").Output()
 	if err != nil {
 		log.Warning("Error running 'last' to determine the real user")
