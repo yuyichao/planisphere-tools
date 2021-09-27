@@ -51,6 +51,7 @@ nfpms:
   - id: packages
     bindir: /usr/bin
     package_name: planisphere-report
+    maintainer: Drew Stinnett <drew.stinnett@duke.edu>
     formats:
       - deb
       - rpm
