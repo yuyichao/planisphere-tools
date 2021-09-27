@@ -53,4 +53,4 @@ release:
     GIT_DEPTH: 0
   script:
     - cd planisphere-report-go
-    - goreleaser release --rm-dist
+    - GITLAB_TOKEN=$CI_JOB_TOKEN goreleaser release --rm-dist
