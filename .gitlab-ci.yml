@@ -40,7 +40,8 @@ lint:
 release:
   stage: release
   image:
-    name: goreleaser/goreleaser:v0.179.0
+    #name: goreleaser/goreleaser:v0.179.0
+    name: goreleaser/goreleaser:v0.180.2
     entrypoint: ['']
   services:
     - name: docker:dind
