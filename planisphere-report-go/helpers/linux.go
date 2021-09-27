@@ -53,11 +53,15 @@ func GetInstalledSoftware() ([][]string, error) {
 		}
 		trimmed := strings.Trim(string(cmdOut), "\n")
 		for _, line := range strings.Split(trimmed, "\n") {
-			pieces := strings.Split(line, " ")
-			name := pieces[0]
-			version := pieces[1]
+			pieces := strings.Split(line, "\t")
+			if len(pieces) != 2 {
+				log.Warningf("Got weird line from dpkg: %v", line)
+			} else {
+				name := pieces[0]
+				version := pieces[1]
 
-			softwareTable = append(softwareTable, []string{name, version})
+				softwareTable = append(softwareTable, []string{name, version})
+			}
 		}
 	} else {
 		log.Println("No dpkg-query command installed")
@@ -148,12 +152,12 @@ func setModel(l *Lookuper) (interface{}, error) {
 
 func setDiskEncrypted(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
-	return false, errors.New("Not yet implemented")
+	return false, errors.New("DiskEncrypted Not yet implemented")
 }
 
 func setMemory(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
-	return 0, errors.New("Not yet implemented")
+	return 0, errors.New("Memory yet implemented")
 }
 
 func setOSFamily(l *Lookuper) (interface{}, error) {
