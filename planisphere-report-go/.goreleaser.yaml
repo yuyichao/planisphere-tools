@@ -70,22 +70,23 @@ brews:
           <key>StandardErrorPath</key>
           <string>/usr/local/var/log/planisphere-report.err</string>
           <key>StartInterval</key>
-          <integer>3600</integer>
+          <integer>300</integer>
       </dict>
       </plist>
     caveats: |
       Please make sure to update your configuration file with your Planisphere
       Self Report Key and any overrides or extra data before (re)starting the
-      service (via sudo launchctl or by restarting your computer):
+      service (via brew services or by restarting your computer):
       
           sudo vi /etc/planisphere-report.yaml
-          sudo launchctl unload /Library/LaunchDaemons/com.duke.planisphere.report.plist
-          sudo launchctl load /Library/LaunchDaemons/com.duke.planisphere.report.plist
+          brew services start planisphere-report
+          brew services stop planisphere-report
 
       Log files are available at
-          /var/log/planisphere-report.log
+        /usr/local/var/log/planisphere-report.log
       and
-          /var/log/planisphere-report.err
+        /usr/local/var/log/planisphere-report.err
+        
 nfpms:
   - id: packages
     bindir: /usr/bin
