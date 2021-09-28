@@ -40,7 +40,7 @@ Do some minimal setup by adding a `~/.planisphere-report.yaml`
 
 Configuration can also be added to `/etc/planisphere-report.[extension]`
 
-For backwards compatibility, you can also add your key as a text string in `/etc/planisphere_key_file`
+For backwards compatibility, you can also add your key as a text string in `/etc/planisphere-report-key`
 
 These can also be set with ENV vars using a prefix of `PLANISPHEREREPORT_`, example:
 ```

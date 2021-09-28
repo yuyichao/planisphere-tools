@@ -78,9 +78,15 @@ brews:
       Self Report Key and any overrides or extra data before (re)starting the
       service (via brew services or by restarting your computer):
       
-          sudo vi /etc/planisphere-report.yaml
-          brew services start planisphere-report
-          brew services stop planisphere-report
+          $ sudo vi /etc/planisphere-report.yaml
+          $ brew services start planisphere-report
+          $ brew services stop planisphere-report
+
+      Note: If you are having issues starting the brew service, run the following to clean out previous versions:
+      
+        $ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.planisphere-report.plist
+      
+      Not sure why this is sometimes needed, but like...patches welcome! 😁
 
       Log files are available at
         /usr/local/var/log/planisphere-report.log
