@@ -6,6 +6,7 @@ package helpers
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -162,4 +163,14 @@ func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	}
 	return apps, nil
 
+}
+
+func setHostname(l *Lookuper) (interface{}, error) {
+	// Hostname Field
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+
+	}
+	return hostname, nil
 }

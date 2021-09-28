@@ -94,13 +94,34 @@ func initConfig() {
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
-			dat, err := os.ReadFile("/etc/planisphere_key_file")
-			if err != nil {
-				log.Warning("Must set a key either in a config file or /etc/planisphere_key_file")
-				log.Fatal(err)
-			} else {
-				viper.Set("key", strings.TrimSpace(string(dat)))
+			var possibleKeyFiles = []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
+			for _, pkf := range possibleKeyFiles {
+				dat, err := os.ReadFile(pkf)
+				if err == nil {
+					viper.Set("key", strings.TrimSpace(string(dat)))
+					break
+				}
 			}
+		}
+		if viper.GetString("key") == "" {
+			log.Fatal(`Could not find your planisphere key. Please set it in one of the following ways:
+
+In your planisphere-report.yaml file, use:
+
+Option 1:
+
+---
+key: your-key
+
+Option 2:
+
+Set the key contents in either  /etc/planisphere_key_file or /etc/planisphere-report-key
+
+Option 3:
+
+Use an environment variable like:
+
+$ export PLANISPHERE_REPORT_KEY=your-key`)
 		}
 	}
 

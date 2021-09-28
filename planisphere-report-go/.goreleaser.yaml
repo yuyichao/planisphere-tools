@@ -51,6 +51,42 @@ brews:
     homepage: "https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
     install: |
       bin.install "planisphere-report"
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+          <key>Label</key>
+          <string>com.duke.planisphere.report</string>
+          <key>ProgramArguments</key>
+          <array>
+              <string>/usr/local/bin/planisphere-report</string>
+              <string>report</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>StandardOutPath</key>
+          <string>/usr/local/var/log/planisphere-report.log</string>
+          <key>StandardErrorPath</key>
+          <string>/usr/local/var/log/planisphere-report.err</string>
+          <key>StartInterval</key>
+          <integer>3600</integer>
+      </dict>
+      </plist>
+    caveats: |
+      Please make sure to update your configuration file with your Planisphere
+      Self Report Key and any overrides or extra data before (re)starting the
+      service (via brew services or by restarting your computer):
+      
+          sudo vi /etc/planisphere-report.yaml
+          brew services start planisphere-report
+          brew services stop planisphere-report
+
+      Log files are available at
+        /usr/local/var/log/planisphere-report.log
+      and
+        /usr/local/var/log/planisphere-report.err
+        
 nfpms:
   - id: packages
     bindir: /usr/bin

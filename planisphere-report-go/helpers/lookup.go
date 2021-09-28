@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"net"
-	"os"
 	"sync"
 	"time"
 
@@ -13,8 +12,7 @@ import (
 var CheckedItems []string
 var checkedItemsMutex sync.Mutex
 
-/*
-Lookuper will do the more advanced lookups. Using a custom struct for this so we
+/* Lookuper will do the more advanced lookups. Using a custom struct for this so we
 don't have to make duplicate system calls to look at the system_profiler
 */
 type Lookuper struct {
@@ -68,7 +66,6 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"SupportGroupName", setSupportGroupNameWrapper, nil, nil},
 		{"UsageType", setUsageTypeWrapper, nil, nil},
 		{"Status", setStatusWrapper, nil, nil},
-		{"Hosname", setHostnameWrapper, nil, nil},
 		{"MacAddressses", setMacAddressesWrapper, nil, nil},
 		{"ExtraData", setExtraDataWrapper, nil, nil},
 		{"InstalledSoftware", nil, setInstalledSoftwareWrapper, setInstalledSoftware},
@@ -80,6 +77,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"OSFullName", nil, setOSFullNameWrapper, setOSFullName},
 		{"DeviceType", nil, setDeviceTypeWrapper, setDeviceType},
 		{"Username", nil, setUsernameWrapper, setUsername},
+		{"Hostname", nil, setHostnameWrapper, setHostname},
 	}
 
 	var wg1 sync.WaitGroup
@@ -282,6 +280,22 @@ func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) 
 
 }
 
+func setHostnameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
+	defer MarkChecked("hostname")
+
+	// Hostname Field
+	if hostname, ok := l.Overrides["hostname"]; ok {
+		l.Payload.Data.Hostname = hostname.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		}
+		l.Payload.Data.Hostname = item.(string)
+	}
+	return nil
+}
+
 func setInstanceKeyWrapper(l *Lookuper) {
 	defer MarkChecked("instance_key")
 	if instanceKey, ok := l.Overrides["instance_key"]; ok {
@@ -321,20 +335,6 @@ func setStatusWrapper(l *Lookuper) {
 	// Status: deployed, rma, etc
 	if status, ok := l.Overrides["status"]; ok {
 		l.Payload.Data.Status = status.(string)
-	}
-}
-func setHostnameWrapper(l *Lookuper) {
-	defer MarkChecked("hostname")
-
-	// Hostname Field
-	if hostname, ok := l.Overrides["hostname"]; ok {
-		l.Payload.Data.Hostname = hostname.(string)
-	} else {
-		hostname, err := os.Hostname()
-		if err != nil {
-			log.Warning("Could not detect hostname: ", err)
-		}
-		l.Payload.Data.Hostname = hostname
 	}
 }
 
