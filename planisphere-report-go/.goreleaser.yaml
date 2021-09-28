@@ -66,9 +66,9 @@ brews:
           <key>RunAtLoad</key>
           <true/>
           <key>StandardOutPath</key>
-          <string>/var/log/planisphere-report.log</string>
+          <string>/usr/local/var/log/planisphere-report.log</string>
           <key>StandardErrorPath</key>
-          <string>/var/log/planisphere-report.err</string>
+          <string>/usr/local/var/log/planisphere-report.err</string>
           <key>StartInterval</key>
           <integer>3600</integer>
       </dict>
