@@ -57,7 +57,7 @@ brews:
       uplist version="1.0">
       <dict>
           <key>Label</key>
-          <string>com.duke.planisphere.report</string>
+          <string>homebrew.mxcl.planisphere-report</string>
           <key>ProgramArguments</key>
           <array>
               <string>/usr/local/bin/planisphere-report</string>
