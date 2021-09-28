@@ -309,3 +309,12 @@ func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	return apps, nil
 
 }
+
+func setHostname(l *Lookuper) (interface{}, error) {
+	out, err := exec.Command("/usr/sbin/scutil", "--get", "LocalHostName").Output()
+	if err != nil {
+		log.Warning("Error running 'scutil --get LocalHostName' to determine the hostname")
+	}
+	trimmed := strings.Trim(string(out), "\n")
+	return trimmed, nil
+}
