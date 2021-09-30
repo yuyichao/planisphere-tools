@@ -85,12 +85,14 @@ func initConfig() {
 		// Now look in /etc
 		viper.AddConfigPath("/etc/")
 		viper.SetConfigName("planisphere-report")
-		viper.ReadInConfig()
+		err = viper.ReadInConfig()
+		log.Debug(err)
 
 		// Search config in home directory with name ".planisphere-report" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".planisphere-report")
-		viper.MergeInConfig()
+		err = viper.MergeInConfig()
+		log.Debug(err)
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
