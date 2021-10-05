@@ -66,12 +66,10 @@ var reportCmd = &cobra.Command{
 			}
 			fmt.Println("Submitted report, thanks for keeping Duke Safe! ❤️")
 		}
-
 	},
 }
 
 func init() {
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

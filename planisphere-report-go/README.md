@@ -127,11 +127,6 @@ func setOSFullName(l *Lookuper) (interface{}, error) {
 	return "", errors.New("OSFullName not yet implemented")
 }
 
-func setUsername(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Username not yet implemented")
-}
-
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return nil, errors.New("InstalledSoftware not yet implemented")

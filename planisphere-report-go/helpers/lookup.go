@@ -53,6 +53,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"SupportGroupID", setSupportGroupIDWrapper, nil, nil},
 		{"SupportGroupName", setSupportGroupNameWrapper, nil, nil},
 		{"UsageType", setUsageTypeWrapper, nil, nil},
+		{"Username", setUsernameWrapper, nil, nil},
 		{"Status", setStatusWrapper, nil, nil},
 		{"MacAddressses", setMacAddressesWrapper, nil, nil},
 		{"ExtraData", setExtraDataWrapper, nil, nil},
@@ -64,7 +65,6 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"OSFamily", nil, setOSFamilyWrapper, setOSFamily},
 		{"OSFullName", nil, setOSFullNameWrapper, setOSFullName},
 		{"DeviceType", nil, setDeviceTypeWrapper, setDeviceType},
-		{"Username", nil, setUsernameWrapper, setUsername},
 		{"Hostname", nil, setHostnameWrapper, setHostname},
 	}
 
@@ -236,21 +236,6 @@ func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)
 	return nil
 }
 
-func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
-	defer MarkChecked("username")
-	if item, ok := l.Overrides["username"]; ok {
-		l.Payload.Data.Username = item.(string)
-	} else {
-		item, err := f(l)
-		if err != nil {
-			return err
-		}
-		l.Payload.Data.Username = item.(string)
-	}
-
-	return nil
-}
-
 func setHostnameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
 	defer MarkChecked("hostname")
 
@@ -301,6 +286,14 @@ func setUsageTypeWrapper(l *Lookuper) {
 	// Usage Type
 	if usageType, ok := l.Overrides["usage_type"]; ok {
 		l.Payload.Data.UsageType = usageType.(string)
+	}
+}
+
+func setUsernameWrapper(l *Lookuper) {
+	defer MarkChecked("username")
+
+	if usageType, ok := l.Overrides["username"]; ok {
+		l.Payload.Data.Username = usageType.(string)
 	}
 }
 

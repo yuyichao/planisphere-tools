@@ -13,8 +13,10 @@ import (
 
 var cfgFile string
 
-var planisphereKey string
-var planisphereURL string
+var (
+	planisphereKey string
+	planisphereURL string
+)
 
 // Verbose Logging
 var Verbose bool
@@ -28,7 +30,7 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		//planisphereKey := viper.GetString("key")
+		// planisphereKey := viper.GetString("key")
 		// Are we talky?
 		if Verbose {
 			log.SetLevel(log.DebugLevel)
@@ -47,7 +49,6 @@ var rootCmd = &cobra.Command{
 			planisphereURL = "https://planisphere.oit.duke.edu/self_report"
 		}
 		log.Debug("Using URL: ", planisphereURL)
-
 	},
 }
 
@@ -96,7 +97,7 @@ func initConfig() {
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
-			var possibleKeyFiles = []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
+			possibleKeyFiles := []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
 			for _, pkf := range possibleKeyFiles {
 				dat, err := os.ReadFile(pkf)
 				if err == nil {

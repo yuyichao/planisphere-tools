@@ -268,22 +268,6 @@ func setOSFullName(l *Lookuper) (interface{}, error) {
 	return softData.SPSoftwareDataType[0].OsVersion, nil
 }
 
-func setUsername(l *Lookuper) (interface{}, error) {
-	out, err := exec.Command("/usr/bin/last").Output()
-	if err != nil {
-		log.Warning("Error running 'last' to determine the real user")
-	}
-	for _, line := range strings.Split(string(out), "\n") {
-		pieces := strings.Split(line, " ")
-		for _, piece := range pieces {
-			if piece != "root" {
-				return piece, nil
-			}
-		}
-	}
-	return "", errors.New("Could not find a non-root user")
-}
-
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 	apps, err := GetInstalledSoftware()
 	if err != nil {
