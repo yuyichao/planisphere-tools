@@ -163,9 +163,8 @@ func setOSFamily(l *Lookuper) (interface{}, error) {
 func setDeviceType(l *Lookuper) (interface{}, error) {
 	if _, ok := ChassisType[si.Chassis.Type]; ok {
 		return ChassisType[si.Chassis.Type], nil
-	} else {
-		return "", errors.New("Unknown Device Type")
 	}
+	return "", errors.New("Unknown Device Type")
 }
 
 func setOSFullName(l *Lookuper) (interface{}, error) {
