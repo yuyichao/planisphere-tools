@@ -10,6 +10,7 @@ import (
 )
 
 var CheckedItems []string
+
 var checkedItemsMutex sync.Mutex
 
 /* Lookuper will do the more advanced lookups. Using a custom struct for this so we
@@ -19,19 +20,6 @@ type Lookuper struct {
 	Overrides map[string]interface{}
 	Payload   planisphere.SelfReportPayload
 	// Things we know we have looked up here
-}
-
-// Use this to hold custom platform functional stuff
-// This will help us loop through and do things in parallel
-type platformSetter struct {
-	name      string
-	wrapper   func(*Lookuper, func(fl *Lookuper) (interface{}, error)) error
-	platformF func(*Lookuper) (interface{}, error)
-}
-
-type genericSetter struct {
-	name    string
-	wrapper func(*Lookuper)
 }
 
 type setter struct {
@@ -65,6 +53,7 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"SupportGroupID", setSupportGroupIDWrapper, nil, nil},
 		{"SupportGroupName", setSupportGroupNameWrapper, nil, nil},
 		{"UsageType", setUsageTypeWrapper, nil, nil},
+		{"Username", setUsernameWrapper, nil, nil},
 		{"Status", setStatusWrapper, nil, nil},
 		{"MacAddressses", setMacAddressesWrapper, nil, nil},
 		{"ExtraData", setExtraDataWrapper, nil, nil},
@@ -76,7 +65,6 @@ func NewLookuper(overrides map[string]interface{}) (*Lookuper, error) {
 		{"OSFamily", nil, setOSFamilyWrapper, setOSFamily},
 		{"OSFullName", nil, setOSFullNameWrapper, setOSFullName},
 		{"DeviceType", nil, setDeviceTypeWrapper, setDeviceType},
-		{"Username", nil, setUsernameWrapper, setUsername},
 		{"Hostname", nil, setHostnameWrapper, setHostname},
 	}
 
@@ -131,9 +119,8 @@ func setPlatformSerialWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, er
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.Serial = item.(string)
 		}
+		l.Payload.Data.Serial = item.(string)
 	}
 	return nil
 }
@@ -146,13 +133,11 @@ func setManufacturerWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, erro
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.Manufacturer = item.(string)
 		}
+		l.Payload.Data.Manufacturer = item.(string)
 	}
 
 	return nil
-
 }
 
 func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
@@ -163,13 +148,11 @@ func setModelWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) err
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.Model = item.(string)
 		}
+		l.Payload.Data.Model = item.(string)
 	}
 
 	return nil
-
 }
 
 func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
@@ -180,13 +163,11 @@ func setDiskEncryptedWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, err
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.DiskEncrypted = item.(bool)
 		}
+		l.Payload.Data.DiskEncrypted = item.(bool)
 	}
 
 	return nil
-
 }
 
 // Memory
@@ -200,13 +181,11 @@ func setMemoryWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) er
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.MemoryMB = item.(uint64)
 		}
+		l.Payload.Data.MemoryMB = item.(uint64)
 	}
 
 	return nil
-
 }
 
 // Operating System Stuff
@@ -220,13 +199,11 @@ func setOSFamilyWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) 
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.OsFamily = item.(string)
 		}
+		l.Payload.Data.OsFamily = item.(string)
 	}
 
 	return nil
-
 }
 
 func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
@@ -237,13 +214,11 @@ func setDeviceTypeWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.DeviceType = item.(string)
 		}
+		l.Payload.Data.DeviceType = item.(string)
 	}
 
 	return nil
-
 }
 
 func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
@@ -254,30 +229,11 @@ func setOSFullNameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.OsFullname = item.(string)
 		}
+		l.Payload.Data.OsFullname = item.(string)
 	}
 
 	return nil
-
-}
-
-func setUsernameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
-	defer MarkChecked("username")
-	if item, ok := l.Overrides["username"]; ok {
-		l.Payload.Data.Username = item.(string)
-	} else {
-		item, err := f(l)
-		if err != nil {
-			return err
-		} else {
-			l.Payload.Data.Username = item.(string)
-		}
-	}
-
-	return nil
-
 }
 
 func setHostnameWrapper(l *Lookuper, f func(fl *Lookuper) (interface{}, error)) error {
@@ -302,6 +258,7 @@ func setInstanceKeyWrapper(l *Lookuper) {
 		l.Payload.Key = instanceKey.(string)
 	}
 }
+
 func setDepartmentKeyWrapper(l *Lookuper) {
 	defer MarkChecked("department_key")
 	if departmentKey, ok := l.Overrides["department_key"]; ok {
@@ -315,18 +272,28 @@ func setSupportGroupIDWrapper(l *Lookuper) {
 		l.Payload.Data.SupportGroupId = uint64(supportGroupID.(int))
 	}
 }
+
 func setSupportGroupNameWrapper(l *Lookuper) {
 	defer MarkChecked("support_group_name")
 	if supportGroupName, ok := l.Overrides["support_group_name"]; ok {
 		l.Payload.Data.SupportGroupName = supportGroupName.(string)
 	}
 }
+
 func setUsageTypeWrapper(l *Lookuper) {
 	defer MarkChecked("usage_type")
 
 	// Usage Type
 	if usageType, ok := l.Overrides["usage_type"]; ok {
 		l.Payload.Data.UsageType = usageType.(string)
+	}
+}
+
+func setUsernameWrapper(l *Lookuper) {
+	defer MarkChecked("username")
+
+	if usageType, ok := l.Overrides["username"]; ok {
+		l.Payload.Data.Username = usageType.(string)
 	}
 }
 
@@ -390,11 +357,9 @@ func setInstalledSoftwareWrapper(l *Lookuper, f func(fl *Lookuper) (interface{},
 		item, err := f(l)
 		if err != nil {
 			return err
-		} else {
-			l.Payload.Data.InstalledSoftware = item.([][]string)
 		}
+		l.Payload.Data.InstalledSoftware = item.([][]string)
 	}
 
 	return nil
-
 }

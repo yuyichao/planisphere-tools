@@ -13,8 +13,10 @@ import (
 
 var cfgFile string
 
-var planisphereKey string
-var planisphereURL string
+var (
+	planisphereKey string
+	planisphereURL string
+)
 
 // Verbose Logging
 var Verbose bool
@@ -28,7 +30,7 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		//planisphereKey := viper.GetString("key")
+		// planisphereKey := viper.GetString("key")
 		// Are we talky?
 		if Verbose {
 			log.SetLevel(log.DebugLevel)
@@ -47,7 +49,6 @@ var rootCmd = &cobra.Command{
 			planisphereURL = "https://planisphere.oit.duke.edu/self_report"
 		}
 		log.Debug("Using URL: ", planisphereURL)
-
 	},
 }
 
@@ -85,16 +86,18 @@ func initConfig() {
 		// Now look in /etc
 		viper.AddConfigPath("/etc/")
 		viper.SetConfigName("planisphere-report")
-		viper.ReadInConfig()
+		err = viper.ReadInConfig()
+		log.Debug(err)
 
 		// Search config in home directory with name ".planisphere-report" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".planisphere-report")
-		viper.MergeInConfig()
+		err = viper.MergeInConfig()
+		log.Debug(err)
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
-			var possibleKeyFiles = []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
+			possibleKeyFiles := []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
 			for _, pkf := range possibleKeyFiles {
 				dat, err := os.ReadFile(pkf)
 				if err == nil {

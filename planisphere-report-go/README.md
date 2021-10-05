@@ -57,13 +57,13 @@ key: foo
 ## Here are some examples:
 overrides:
     instance_key: "foo"
-    os_family: "Fast and Furious"
+    os_family: "macOS"
     memory_mb: 50000
     username: Joe User
-    department_key: heyo
+    department_key: abcd
     status: deployed
     support_group_id: 5
-    support_group_name: ssi_systems
+    support_group_name: some_group
     usage_type: self_managed
     installed_software:
         - - "foo"
@@ -125,11 +125,6 @@ func setDeviceType(l *Lookuper) (interface{}, error) {
 func setOSFullName(l *Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return "", errors.New("OSFullName not yet implemented")
-}
-
-func setUsername(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Username not yet implemented")
 }
 
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
