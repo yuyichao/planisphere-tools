@@ -70,7 +70,6 @@ func GetPSoftwareData() (SPSoftwareData, error) {
 		return s, err
 	}
 	return s, nil
-
 }
 
 // This is like...Application level data...my cool person
@@ -91,8 +90,6 @@ func GetPSApplicationData() (SPApplicationData, error) {
 }
 
 func GetMemory() (int64, error) {
-
-	// Memory here
 	memory, err := GetSysctl("hw.memsize")
 	if err != nil {
 		return 0, err
@@ -100,7 +97,6 @@ func GetMemory() (int64, error) {
 	memoryMB := memory / 1024 / 1024
 
 	return memoryMB, nil
-
 }
 
 func GetInstalledSoftware() ([][]string, error) {
@@ -160,6 +156,7 @@ func GetSysctl(target string) (int64, error) {
 	}
 	return v, nil
 }
+
 func GetIORegValue(tree, item string) (string, error) {
 	out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
 	if err != nil {
@@ -218,9 +215,8 @@ func GetDiskEncryptionStatus() (bool, error) {
 	_, err := exec.Command("/usr/bin/fdesetup", "isactive").Output()
 	if err == nil {
 		return true, nil
-	} else {
-		return false, nil
 	}
+	return false, nil
 }
 
 func setSerial(l *Lookuper) (interface{}, error) {
@@ -229,49 +225,38 @@ func setSerial(l *Lookuper) (interface{}, error) {
 
 func setManufacturer(l *Lookuper) (interface{}, error) {
 	return ioregExpert["manufacturer"], nil
-
 }
 
 func setModel(l *Lookuper) (interface{}, error) {
 	return ioregExpert["product-name"], nil
-
 }
 
 func setDiskEncrypted(l *Lookuper) (interface{}, error) {
-
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
 		log.Warning("Could not detect disk encryption state: ", err)
 	}
 	return encrypted, nil
-
 }
 
 func setMemory(l *Lookuper) (interface{}, error) {
-
 	memory, err := GetMemory()
 	if err != nil {
 		log.Warning("Could not detect memory")
 	}
 	return uint64(memory), nil
-
 }
 
 func setOSFamily(l *Lookuper) (interface{}, error) {
-
 	return "macOS", nil
-
 }
 
 func setDeviceType(l *Lookuper) (interface{}, error) {
 	WaitForChecked("model")
 	if strings.Contains(l.Payload.Data.Model, "MacBook") {
 		return "laptop", nil
-	} else {
-		log.Fatalf("UGH< FATAL no model '%v' %v", l.Payload.Data.Model, CheckedItems)
-		return "", errors.New("Unknown type of mac")
 	}
-
+	return "", errors.New("Unknown type of mac")
 }
 
 func setOSFullName(l *Lookuper) (interface{}, error) {
@@ -281,24 +266,6 @@ func setOSFullName(l *Lookuper) (interface{}, error) {
 	}
 
 	return softData.SPSoftwareDataType[0].OsVersion, nil
-
-}
-
-func setUsername(l *Lookuper) (interface{}, error) {
-	out, err := exec.Command("/usr/bin/last").Output()
-	if err != nil {
-		log.Warning("Error running 'last' to determine the real user")
-	}
-	for _, line := range strings.Split(string(out), "\n") {
-		pieces := strings.Split(line, " ")
-		for _, piece := range pieces {
-			if piece != "root" {
-				return piece, nil
-			}
-		}
-	}
-	return "", errors.New("Could not find a non-root user")
-
 }
 
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
@@ -307,7 +274,6 @@ func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 		return nil, err
 	}
 	return apps, nil
-
 }
 
 func setHostname(l *Lookuper) (interface{}, error) {

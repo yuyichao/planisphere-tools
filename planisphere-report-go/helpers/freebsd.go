@@ -18,6 +18,7 @@ func ApplyPlatformDetections(l *Lookuper) error {
 	// Do initializing bits here
 	return nil
 }
+
 func setSerial(l *Lookuper) (interface{}, error) {
 	cmdPath, err := exec.LookPath("dmidecode")
 	if err != nil {
@@ -104,22 +105,6 @@ func setOSFullName(l *Lookuper) (interface{}, error) {
 	return trimmed, nil
 }
 
-func setUsername(l *Lookuper) (interface{}, error) {
-	out, err := exec.Command("/usr/bin/last").Output()
-	if err != nil {
-		log.Warning("Error running 'last' to determine the real user")
-	}
-	ignoreUsers := []string{"root", "shutdown", ""}
-	for _, line := range strings.Split(string(out), "\n") {
-		pieces := strings.Split(line, " ")
-		piece := pieces[0]
-		if !ContainsString(ignoreUsers, piece) {
-			return piece, nil
-		}
-	}
-	return "", errors.New("Could not find a non-root user")
-}
-
 type BSDSoftware struct {
 	Name    string `json:"name,omitempty"`
 	Version string `json:"version,omitempty"`
@@ -162,7 +147,6 @@ func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 		return nil, err
 	}
 	return apps, nil
-
 }
 
 func setHostname(l *Lookuper) (interface{}, error) {
@@ -170,7 +154,6 @@ func setHostname(l *Lookuper) (interface{}, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return nil, err
-
 	}
 	return hostname, nil
 }

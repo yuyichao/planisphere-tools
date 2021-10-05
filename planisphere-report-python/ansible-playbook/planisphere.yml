@@ -25,7 +25,7 @@
 
       - name: Planisphere | Copy client file
         copy:
-          src: "{{ clone_dir }}/planisphere-report"
+          src: "{{ clone_dir }}/planisphere-report-python/planisphere-report"
           dest: "{{ bin_file }}"
           owner: root
           group: root
@@ -52,14 +52,14 @@
         copy:
           content: ""
           dest: "{{ log_file }}"
-          force: no
+          force: false
           owner: root
           group: root
           mode: 0644
 
       - name: Planisphere | Add service file
         copy:
-          src: "{{ clone_dir }}/systemd/planisphere-report.service"
+          src: "{{ clone_dir }}/planisphere-report-python/systemd/planisphere-report.service"
           dest: "{{ service_file }}"
           owner: root
           group: root
@@ -68,7 +68,7 @@
 
       - name: Planisphere | Add timer file
         copy:
-          src: "{{ clone_dir }}/systemd/planisphere-report.timer"
+          src: "{{ clone_dir }}/planisphere-report-python/systemd/planisphere-report.timer"
           dest: "{{ timer_file }}"
           owner: root
           group: root
@@ -79,8 +79,8 @@
         systemd:
           name: planisphere-report.timer
           state: started
-          enabled: yes
-          daemon_reload: yes
+          enabled: true
+          daemon_reload: true
         when: use_systemd_timer == true
 
       - name: Planisphere | remove cron file
@@ -108,7 +108,7 @@
         systemd:
           name: planisphere-report.timer
           state: stopped
-          enabled: no
+          enabled: false
         when: ( use_systemd_timer == false and timer_file_check.stat.exists )
 
       - name: Planisphere | remove service file
@@ -130,4 +130,3 @@
     handlers:
       - name: systemd daemon-reload
         command: systemctl daemon-reload
-

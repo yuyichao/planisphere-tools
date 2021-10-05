@@ -7,7 +7,6 @@ import (
 	"errors"
 	"os"
 	"os/exec"
-	"os/user"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -117,9 +116,7 @@ func setManufacturer(l *Lookuper) (interface{}, error) {
 	for _, mac := range l.Payload.Data.MacAddresses {
 		if strings.HasPrefix(mac, "b8:27:eb") {
 			return "Raspberry Pi", nil
-
 		}
-
 	}
 	return si.Product.Vendor, nil
 }
@@ -145,7 +142,6 @@ func setModel(l *Lookuper) (interface{}, error) {
 				}
 			}
 		}
-
 	}
 	return si.Product.Name, nil
 }
@@ -167,21 +163,12 @@ func setOSFamily(l *Lookuper) (interface{}, error) {
 func setDeviceType(l *Lookuper) (interface{}, error) {
 	if _, ok := ChassisType[si.Chassis.Type]; ok {
 		return ChassisType[si.Chassis.Type], nil
-	} else {
-		return "", errors.New("Unknown Device Type")
 	}
+	return "", errors.New("Unknown Device Type")
 }
 
 func setOSFullName(l *Lookuper) (interface{}, error) {
 	return si.OS.Name, nil
-}
-
-func setUsername(l *Lookuper) (interface{}, error) {
-	u, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return u.Username, nil
 }
 
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
@@ -190,7 +177,6 @@ func setInstalledSoftware(l *Lookuper) (interface{}, error) {
 		return nil, err
 	}
 	return apps, nil
-
 }
 
 func setHostname(l *Lookuper) (interface{}, error) {
@@ -198,7 +184,6 @@ func setHostname(l *Lookuper) (interface{}, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return nil, err
-
 	}
 	return hostname, nil
 }

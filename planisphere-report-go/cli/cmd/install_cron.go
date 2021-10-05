@@ -37,7 +37,8 @@ var installCronCmd = &cobra.Command{
 		log.Println("Creating cron:")
 		fmt.Println(content)
 
-		err = os.WriteFile(cronFile, []byte(content), 0644)
+		err = os.WriteFile(cronFile, []byte(content), 0o644)
+
 		cobra.CheckErr(err)
 		log.Println("Successfully installed cron! If it's not to your liking, feel free to edit.")
 	},

@@ -40,7 +40,7 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}-snapshot"
 changelog:
-  skip: true
+  skip: false
 brews:
   - tap:
       owner: devil-ops

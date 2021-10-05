@@ -40,7 +40,7 @@ func WaitForChecked(item string) {
 			sort.Strings(ci)
 			log.Debugf("Waiting for %v to be checked...so far found: %v", item, ci)
 			if ctx.Err() != nil {
-				log.Warning("Timed out waiting for %v to be checked", item)
+				log.Warningf("Timed out waiting for %v to be checked", item)
 				break
 			}
 		} else {

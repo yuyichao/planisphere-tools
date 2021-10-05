@@ -12,7 +12,6 @@ func TestNewLookuper(t *testing.T) {
 	if err != nil {
 		t.Error("Could successfully create a NewLookuper")
 	}
-
 }
 
 func TestGenericLookupOverrides(t *testing.T) {
@@ -81,5 +80,4 @@ func TestOSSpecificLookupOverrides(t *testing.T) {
 	if l.Payload.Data.Model != "Bruno" {
 		t.Error("Did not properly override Model")
 	}
-
 }

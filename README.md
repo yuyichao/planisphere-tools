@@ -1,75 +1,29 @@
-# planisphere-report
+# Planisphere Tools
 
-planisphere-report is a simple python client to planisphere's [self reporting mechanism](https://planisphere.oit.duke.edu/help/self_report).
+## Planisphere Report
 
-## Supported Distributions
+Planisphere Report is an Open Source tool you can use for meeting the Endpoint Management policy.
 
-* Arch Linux
-* Debian 9 (stretch/stable)
-* Fedora 26+
-* GNU Guix
-* RHEL/Scientific/CentOS 6
-* RHEL/Scientific/CentOS 7
-* Ubuntu 14
-* Ubuntu 16
+*Note that you will also still need Crowdstrike installed.*
 
-Accepting patches for any other distributions..
+## Planisphere Report for Windows
 
-## Install
+This is a powershell script that you can use to send required data up to
+Planisphere. Further instructions [here](./planisphere-report-ps/README.md)
 
-### 1. Get Self Report key
+## Planisphere Report for Linux/macOS/FreeBSD
 
-If the device is managed by a Support Group, go to the page for the Support
-Group in planisphere and get the self report key for that Support Group.
+This is a go program, packaged up as a binary or deb/rpm/pkg. Further
+instructions [here](./planisphere-report-go/README.md)
 
-If the device is self managed by you, go to planisphere, click the 'My Profile'
-link at the top of the page and get your self report key.
+## Planisphere Report Python - *DEPRECATED*
 
-Once you have the key, put it in `/etc/planisphere-report-key`
+This is the original script that did the planisphere reporting. Super awesome,
+but still in python2, so we are trying to migrate users of this over to the go
+version above. Futher instructions [here](./planisphere-report-python/README.md)
 
-For example:
+# Contributing
 
-```
-$ echo YOUR_KEY_HERE | sudo tee /etc/planisphere-report-key
-```
-
-### 2. Install the script
-
-Copy planisphere-report to ```/usr/local/bin/planisphere-report``` (or wherever you want) and make sure it's executable.
-
-__NOTE:__ If you plan to use this from [systemd](systemd/) and put this somewhere other than /usr/local/bin be sure to
-adjust the path in [the systemd service definition](systemd/planisphere-report.service).
-
-### 3. Setup a cron job
-
-Add a cronjob to run regularly (e.g. once a day) to run the script.  This should
-run as root as linux does not allow non-root users to access the device's
-serial number.
-
-For laptops, consider calling the script after acquiring a DHCP address so
-planisphere will have an accurate list of external MAC addresses for the laptop.
-
-Alternatively consult [systemd service/timer and DHCP trigger](systemd/) in this repository
-
-### 4. Config file (optional)
-
-If you want to further configure how ```planisphere-report``` runs, you can
-create a config file as ```/etc/planisphere-report```
-
-The config file is a simple ini file, everything in the file is optional.  If
-there is a ```[config]``` section, it will change some basic operating parameters.
-If there's a ```[overrides]``` section, it'll override some of the values detected
-by ```planisphere-report``` or add in options that ```planisphere-report``` cann't
-detect on its own.   See https://planisphere.oit.duke.edu/help/self_report for more
-details on the values that can be set in overrides.
-
-Example:
-
-```
-[config]
-url = https://planisphere.oit.duke.edu/self_report
-key-file = /etc/planisphere-report-key
-
-[overrides]
-username = sean
-```
+Do you have a use case that isn't covered by the existing solutions? We would
+love to hear back from you. Feel free to submit issues or even merge request.
+Thanks for helping to keep Duke safe! ❤️
