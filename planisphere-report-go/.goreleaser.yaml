@@ -6,6 +6,7 @@ release:
   gitlab:
     owner: devil-ops
     name: planisphere-tools
+project_name: planisphere-report
 builds:
   - env:
       - CGO_ENABLED=0
