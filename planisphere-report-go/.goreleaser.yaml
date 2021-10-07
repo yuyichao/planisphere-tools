@@ -92,15 +92,57 @@ brews:
         /usr/local/var/log/planisphere-report.log
       and
         /usr/local/var/log/planisphere-report.err
-        
 nfpms:
-  - id: packages
+  - id: rpms
     bindir: /usr/bin
-    package_name: planisphere-report
+    license: MIT
+    description: Planisphere Self Report Tool
+    vendor: Duke University
+    section: admin
+    priority: optional
+    homepage: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools
+    maintainer: Drew Stinnett <drew.stinnett@duke.edu>
+    formats:
+      - rpm
+    contents:
+      - src: packaging/systemd/planisphere-report.service
+        dst: /usr/lib/systemd/system/planisphere-report.service
+      - src: packaging/systemd/planisphere-report.timer
+        dst: /usr/lib/systemd/system/planisphere-report.timer
+    scripts:
+      postinstall: "packaging/scripts/postinstall.sh"
+      preremove: "packaging/scripts/preremove.sh"
+      postremove: "packaging/scripts/postremove.sh"
+  - id: debs
+    bindir: /usr/bin
+    license: MIT
+    description: Planisphere Self Report Tool
+    vendor: Duke University
+    section: admin
+    priority: optional
+    homepage: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools
     maintainer: Drew Stinnett <drew.stinnett@duke.edu>
     formats:
       - deb
-      - rpm
+    contents:
+      - src: packaging/systemd/planisphere-report.service
+        dst: /usr/lib/systemd/system/planisphere-report.service
+      - src: packaging/systemd/planisphere-report.timer
+        dst: /usr/lib/systemd/system/planisphere-report.timer
+    scripts:
+      postinstall: "packaging/scripts/postinstall.sh"
+      preremove: "packaging/scripts/preremove.sh"
+      postremove: "packaging/scripts/postremove.sh"
+  - id: apks
+    bindir: /usr/bin
+    license: MIT
+    description: Planisphere Self Report Tool
+    vendor: Duke University
+    section: admin
+    priority: optional
+    homepage: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools
+    maintainer: Drew Stinnett <drew.stinnett@duke.edu>
+    formats:
       - apk
     contents:
       - src: packaging/systemd/planisphere-report.service
@@ -111,3 +153,20 @@ nfpms:
       postinstall: "packaging/scripts/postinstall.sh"
       preremove: "packaging/scripts/preremove.sh"
       postremove: "packaging/scripts/postremove.sh"
+uploads:
+  - name: production-rpm
+    target: https://oneget.oit.duke.edu/rpm/devil-ops-rpms/
+    method: PUT
+    mode: archive
+    custom_headers:
+      X-ApiKey: "{{ .Env.ONEGET_KEY }}"
+    ids:
+      - rpms
+  - name: production-deb
+    target: https://oneget.oit.duke.edu/debian-packages/upload/devil-ops-debs/main/
+    method: PUT
+    mode: archive
+    custom_headers:
+      X-ApiKey: "{{ .Env.ONEGET_KEY }}"
+    ids:
+      - debs
