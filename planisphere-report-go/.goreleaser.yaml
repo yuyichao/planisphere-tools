@@ -30,6 +30,8 @@ builds:
       - goos: darwin
         goarch: '386'
     binary: 'planisphere-report'
+universal_binaries:
+  - replace: false
 archives:
   - format: tar.gz
     name_template: 'planisphere-report-{{ .Version }}_{{ .Os }}_{{ .Arch }}'
