@@ -6,13 +6,13 @@
 
 Make sure you have the devil-ops tap intstalled with:
 
-```
+```bash
 brew tap devil-ops/devil-ops git@gitlab.oit.duke.edu:devil-ops/homebrew-devil-ops.git
 ```
 
 Install using:
 
-```
+```bash
 brew install planisphere-report
 ```
 
@@ -27,12 +27,11 @@ Download the appropriate binary from the releases page
 
 Put the `planisphere-report` binary in an appropriate path, such as `/usr/local/bin`, and run:
 
-```
+```bash
 planisphere-report install cron
 ```
 
 This will set up a cronjob to run at a random hour and minute daily.
-
 
 ## About
 
@@ -43,7 +42,8 @@ Configuration can also be added to `/etc/planisphere-report.[extension]`
 For backwards compatibility, you can also add your key as a text string in `/etc/planisphere-report-key`
 
 These can also be set with ENV vars using a prefix of `PLANISPHEREREPORT_`, example:
-```
+
+```bash
 export PLANISPHEREREPORT_KEY=foo
 ```
 
@@ -88,48 +88,48 @@ func ApplyPlatformDetections(l *Lookuper) error {
     return nil
 }
 func setSerial(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Serial not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("Serial not yet implemented")
 }
 
 func setManufacturer(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Manufacturer not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("Manufacturer not yet implemented")
 }
 
 func setModel(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("Model not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("Model not yet implemented")
 }
 
 func setDiskEncrypted(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return false, errors.New("DiskEncrypted not yet implemented")
+    // TODO: Implement this
+    return false, errors.New("DiskEncrypted not yet implemented")
 }
 
 func setMemory(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return 0, errors.New("Memory not yet implemented")
+    // TODO: Implement this
+    return 0, errors.New("Memory not yet implemented")
 }
 
 func setOSFamily(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("OSFamily not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("OSFamily not yet implemented")
 }
 
 func setDeviceType(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("DeviceType not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("DeviceType not yet implemented")
 }
 
 func setOSFullName(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return "", errors.New("OSFullName not yet implemented")
+    // TODO: Implement this
+    return "", errors.New("OSFullName not yet implemented")
 }
 
 func setInstalledSoftware(l *Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return nil, errors.New("InstalledSoftware not yet implemented")
+    // TODO: Implement this
+    return nil, errors.New("InstalledSoftware not yet implemented")
 
 }
 ```
