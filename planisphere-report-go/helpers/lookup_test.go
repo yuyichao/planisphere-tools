@@ -3,15 +3,14 @@ package helpers_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 )
 
 func TestNewLookuper(t *testing.T) {
 	overrides := map[string]interface{}{}
 	_, err := helpers.NewLookuper(overrides)
-	if err != nil {
-		t.Error("Could successfully create a NewLookuper")
-	}
+	require.NoError(t, err)
 }
 
 func TestGenericLookupOverrides(t *testing.T) {
@@ -25,29 +24,13 @@ func TestGenericLookupOverrides(t *testing.T) {
 		"hostname":           "sumhost.local",
 	}
 	l, _ := helpers.NewLookuper(overrides)
-	if l.Payload.Key != "ringo" {
-		t.Error("Did not properly override InstanceKey")
-	}
-
-	if l.Payload.Data.DepartmentKey != "foo" {
-		t.Error("Did not properly override DepartmentKey")
-	}
-
-	if l.Payload.Data.SupportGroupId != 42 {
-		t.Error("Did not properly override SupportGroupId")
-	}
-	if l.Payload.Data.SupportGroupName != "Marty" {
-		t.Error("Did not properly override SupportGroupName")
-	}
-	if l.Payload.Data.UsageType != "server" {
-		t.Error("Did not properly override UsageType")
-	}
-	if l.Payload.Data.Status != "deployed" {
-		t.Error("Did not properly override Status")
-	}
-	if l.Payload.Data.Hostname != "sumhost.local" {
-		t.Error("Did not properly override Hostname")
-	}
+	require.Equal(t, "ringo", l.Payload.Key)
+	require.Equal(t, "foo", l.Payload.Data.DepartmentKey)
+	require.Equal(t, int(42), int(l.Payload.Data.SupportGroupId))
+	require.Equal(t, "Marty", l.Payload.Data.SupportGroupName)
+	require.Equal(t, "server", l.Payload.Data.UsageType)
+	require.Equal(t, "deployed", l.Payload.Data.Status)
+	require.Equal(t, "sumhost.local", l.Payload.Data.Hostname)
 }
 
 func TestOSSpecificLookupOverrides(t *testing.T) {
@@ -61,23 +44,10 @@ func TestOSSpecificLookupOverrides(t *testing.T) {
 	}
 	l, _ := helpers.NewLookuper(overrides)
 
-	if l.Payload.Data.Manufacturer != "ACME Inc." {
-		t.Error("Did not properly override Manufactuer")
-	}
-	if !l.Payload.Data.DiskEncrypted {
-		t.Error("Did not properly override Disk Encryption")
-	}
-
-	if l.Payload.Data.MemoryMB != 500 {
-		t.Error("Did not properly override MemoryMB")
-	}
-	if l.Payload.Data.Serial != "ABC-123" {
-		t.Error("Did not properly override Serial")
-	}
-	if l.Payload.Data.OsFamily != "Toretto" {
-		t.Error("Did not properly override OSFamily")
-	}
-	if l.Payload.Data.Model != "Bruno" {
-		t.Error("Did not properly override Model")
-	}
+	require.Equal(t, "ACME Inc.", l.Payload.Data.Manufacturer)
+	require.True(t, l.Payload.Data.DiskEncrypted)
+	require.Equal(t, int(500), int(l.Payload.Data.MemoryMB))
+	require.Equal(t, "ABC-123", l.Payload.Data.Serial)
+	require.Equal(t, "Toretto", l.Payload.Data.OsFamily)
+	require.Equal(t, "Bruno", l.Payload.Data.Model)
 }
