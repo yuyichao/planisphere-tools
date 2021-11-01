@@ -6,18 +6,18 @@ stages:
 # Need to run this on all oses, or at least linux for this to work
 .unit_tests:
   stage: test
-  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
+  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
   script:
     - cd planisphere-report-go
     - go test gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers
 
 # Need to run this on all oses, or at least linux for this to work
-.coverage:
+coverage:
   stage: test
-  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.16
+  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
   script:
     - cd planisphere-report-go
-    - go get ./...
+    - go mod tidy
     - go test -v gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers -coverprofile .testCoverage.txt
 
 lint:
