@@ -4,7 +4,7 @@ stages:
   - release
 
 # Need to run this on all oses, or at least linux for this to work
-.unit_tests:
+unit_tests:
   stage: test
   image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
   script:
