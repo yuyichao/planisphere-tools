@@ -2,8 +2,7 @@
 gitlab_urls:
   api: https://gitlab.oit.duke.edu/api/v4/
   download: https://gitlab.oit.duke.edu
-release:
-  gitlab:
+release: gitlab:
     owner: devil-ops
     name: planisphere-tools
 project_name: planisphere-report
@@ -80,15 +79,15 @@ brews:
       Please make sure to update your configuration file with your Planisphere
       Self Report Key and any overrides or extra data before (re)starting the
       service (via brew services or by restarting your computer):
-      
+
           $ sudo vi /etc/planisphere-report.yaml
           $ brew services start planisphere-report
           $ brew services stop planisphere-report
 
       Note: If you are having issues starting the brew service, run the following to clean out previous versions:
-      
+
         $ launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.planisphere-report.plist
-      
+
       Not sure why this is sometimes needed, but like...patches welcome! 😁
 
       Log files are available at
@@ -165,11 +164,11 @@ uploads:
       X-ApiKey: "{{ .Env.ONEGET_KEY }}"
     ids:
       - rpms
-  - name: production-deb
-    target: https://oneget.oit.duke.edu/debian-packages/upload/devil-ops-debs/main/
-    method: PUT
-    mode: archive
-    custom_headers:
-      X-ApiKey: "{{ .Env.ONEGET_KEY }}"
-    ids:
-      - debs
+# - name: production-deb
+#   target: https://oneget.oit.duke.edu/debian-packages/upload/devil-ops-debs/main/
+#   method: PUT
+#   mode: archive
+#   custom_headers:
+#     X-ApiKey: "{{ .Env.ONEGET_KEY }}"
+#   ids:
+#     - debs
