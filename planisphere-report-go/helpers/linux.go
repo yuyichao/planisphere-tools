@@ -31,13 +31,11 @@ func GetInstalledSoftware() ([][]string, error) {
 		if err != nil {
 			log.Warning("Could not do an rpm listing even though the rpm command exists")
 		}
-		trimmed := strings.Trim(string(rpmOut), "\n")
-		for _, line := range strings.Split(trimmed, "\n") {
-			pieces := strings.Split(line, " ")
-			name := pieces[0]
-			version := pieces[1]
-
-			softwareTable = append(softwareTable, []string{name, version})
+		rpmSoftware, err := ParseRPMOutput(rpmOut)
+		if err != nil {
+			log.Warning("Could not parse the rpm output")
+		} else {
+			softwareTable = append(softwareTable, rpmSoftware...)
 		}
 	} else {
 		log.Println("No rpm command installed")
