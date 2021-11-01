@@ -40,7 +40,7 @@ lint:
 release:
   stage: release
   image:
-    name: image-mirror-prod-registry.cloud.duke.edu/goreleaser/goreleaser:v0.182.1
+    name: image-mirror-prod-registry.cloud.duke.edu/goreleaser/goreleaser:latest
     entrypoint: ['']
   services:
     - name: docker:dind

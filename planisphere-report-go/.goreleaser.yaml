@@ -2,7 +2,8 @@
 gitlab_urls:
   api: https://gitlab.oit.duke.edu/api/v4/
   download: https://gitlab.oit.duke.edu
-  release: gitlab:
+release:
+  gitlab:
     owner: devil-ops
     name: planisphere-tools
 project_name: planisphere-report
