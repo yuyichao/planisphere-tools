@@ -40,6 +40,8 @@ For laptops, consider additionally calling the script after acquiring a DHCP add
 
 For more information, see [SCHEDULE](planisphere-report-ps/SCHEDULE.md) in this repository.
 
+You can also view, download, modify (if necessary), and import a [Windows Task Scheduler XML file](planisphere-report-ps/planisphere-report-ps__hourly__DHCP_.xml) with the recommended settings already configured.
+
 ### 4. Config file (optional)
 
 If you want to further configure how ```planisphere-report.ps1``` runs, you can create a config file as ```/etc/planisphere-report``` or pass a different location of a config file as a script parameter.
