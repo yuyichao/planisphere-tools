@@ -40,7 +40,7 @@ For laptops, consider additionally calling the script after acquiring a DHCP add
 
 For more information, see [SCHEDULE](planisphere-report-ps/SCHEDULE.md) in this repository.
 
-You can also view, download, modify (if necessary), and import a [Windows Task Scheduler XML file](planisphere-report-ps/planisphere-report-ps__hourly__DHCP_.xml) with the recommended settings already configured.
+You can also view, download, modify (if necessary), and import a [Windows Task Scheduler XML file](planisphere-report-ps/planisphere-report-ps__hourly__DHCP_.xml) with the recommended settings already configured. This XML file expects th script to be stored at "C:\usr\local\bin\planisphere-report.ps1". If your script is stored anywhere else, or you have other arguments to pass to the script, you'll need to edit the task either before (as XML) or after (in Task Scheduler) importing it.
 
 ### 4. Config file (optional)
 
