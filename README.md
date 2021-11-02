@@ -8,7 +8,7 @@ Planisphere Report is an Open Source tool you can use for meeting the Endpoint M
 
 ## Planisphere Report for Windows
 
-This is a powershell script that you can use to send required data up to
+This is a PowerShell script that you can use to send required data up to
 Planisphere. Further instructions [here](./planisphere-report-ps/README.md)
 
 ## Planisphere Report for Linux/macOS/FreeBSD
