@@ -1,4 +1,4 @@
-$script_date = "20210823"
+$script_date = "20211102"
 
 Function Send-PSReport {
 <#
@@ -115,7 +115,6 @@ Function Send-PSReport {
     if (Test-StringVar $SelfReportKey) {
         # if passed as a param, use it
         # (which requires no additional action)
-        Continue
     } elseif (Test-StringVar $SelfReportKeyFile) {
         # or, if passed a keyfile param...
         if (Test-Path $SelfReportKeyFile) {
