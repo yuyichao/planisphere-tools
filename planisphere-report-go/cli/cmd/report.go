@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gopkg.in/yaml.v2"
 )
 
@@ -27,7 +28,10 @@ var reportCmd = &cobra.Command{
 
 		overrides := viper.GetStringMap("overrides")
 
-		l, err := helpers.NewLookuper(overrides)
+		c := &lookups.LookuperConfig{
+			Overrides: overrides,
+		}
+		l, err := helpers.NewLookuper(c)
 		if err != nil {
 			log.Warning(err)
 			log.Fatal("Could not initialize Lookuper 😭☠️")

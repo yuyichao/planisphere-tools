@@ -74,62 +74,6 @@ overrides:
 
 ## Expanding to new Platforms
 
-We've tried to abstract everthing we can in to the `lookup.go` file. The more
-specific platform info can be found in the platform specific files, such as
-`linux.go`, `darwin.go`, etc. If you would like to add your own OS here and
-flesh out the collection bits, we'd love a pull request!
-
-A starting point for the platform `foo` could be something like the following in
-`foo.go`:
-
-```go
-func ApplyPlatformDetections(l *Lookuper) error {
-    // Do initializing bits here
-    return nil
-}
-func setSerial(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("Serial not yet implemented")
-}
-
-func setManufacturer(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("Manufacturer not yet implemented")
-}
-
-func setModel(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("Model not yet implemented")
-}
-
-func setDiskEncrypted(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return false, errors.New("DiskEncrypted not yet implemented")
-}
-
-func setMemory(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return 0, errors.New("Memory not yet implemented")
-}
-
-func setOSFamily(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("OSFamily not yet implemented")
-}
-
-func setDeviceType(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("DeviceType not yet implemented")
-}
-
-func setOSFullName(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return "", errors.New("OSFullName not yet implemented")
-}
-
-func setInstalledSoftware(l *Lookuper) (interface{}, error) {
-    // TODO: Implement this
-    return nil, errors.New("InstalledSoftware not yet implemented")
-
-}
-```
+Check out the files in `internal/os`. Create a new folder for your OS, as well
+as some tests. To get going quickly, you can copy from an existing OS we already
+support

@@ -1,10 +1,10 @@
-package helpers_test
+package linux_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/linux"
 )
 
 func TestRPMOutput(t *testing.T) {
@@ -31,7 +31,7 @@ device-mapper-libs 8:1.02.177-10.el8`),
 	}
 
 	for _, test := range tests {
-		o, err := helpers.ParseRPMOutput(test.out)
+		o, err := linux.ParseRPMOutput(test.out)
 		require.NoError(t, err)
 		require.Equal(t, test.expect, o)
 	}
@@ -48,25 +48,7 @@ func TestRPMEmptyOutput(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := helpers.ParseRPMOutput(test.out)
-		require.EqualError(t, err, helpers.ErrEmptyOutput.Error())
-	}
-}
-
-func TestRPMMalformedOutput(t *testing.T) {
-	tests := []struct {
-		out []byte
-	}{
-		// Test lines without versions
-		{out: []byte(`foo
-bar`)},
-		// Test lines with mixed versions and non-versions
-		{out: []byte(`foo
-bar v1.2.3`)},
-	}
-
-	for _, test := range tests {
-		_, err := helpers.ParseRPMOutput(test.out)
-		require.EqualError(t, err, helpers.ErrMalformedRPMOutput.Error())
+		_, err := linux.ParseRPMOutput(test.out)
+		require.EqualError(t, err, linux.ErrEmptyOutput.Error())
 	}
 }

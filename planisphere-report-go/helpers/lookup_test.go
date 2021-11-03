@@ -5,11 +5,15 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
 func TestNewLookuper(t *testing.T) {
 	overrides := map[string]interface{}{}
-	_, err := helpers.NewLookuper(overrides)
+	c := &lookups.LookuperConfig{
+		Overrides: overrides,
+	}
+	_, err := helpers.NewLookuper(c)
 	require.NoError(t, err)
 }
 
@@ -23,7 +27,10 @@ func TestGenericLookupOverrides(t *testing.T) {
 		"status":             "deployed",
 		"hostname":           "sumhost.local",
 	}
-	l, _ := helpers.NewLookuper(overrides)
+	c := &lookups.LookuperConfig{
+		Overrides: overrides,
+	}
+	l, _ := helpers.NewLookuper(c)
 	require.Equal(t, "ringo", l.Payload.Key)
 	require.Equal(t, "foo", l.Payload.Data.DepartmentKey)
 	require.Equal(t, int(42), int(l.Payload.Data.SupportGroupId))
@@ -42,7 +49,10 @@ func TestOSSpecificLookupOverrides(t *testing.T) {
 		"os_family":      "Toretto",
 		"model":          "Bruno",
 	}
-	l, _ := helpers.NewLookuper(overrides)
+	c := &lookups.LookuperConfig{
+		Overrides: overrides,
+	}
+	l, _ := helpers.NewLookuper(c)
 
 	require.Equal(t, "ACME Inc.", l.Payload.Data.Manufacturer)
 	require.True(t, l.Payload.Data.DiskEncrypted)

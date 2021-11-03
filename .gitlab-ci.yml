@@ -9,7 +9,7 @@ unit_tests:
   image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
   script:
     - cd planisphere-report-go
-    - go test gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers
+    - go test ./...
 
 # Need to run this on all oses, or at least linux for this to work
 coverage:
@@ -18,7 +18,7 @@ coverage:
   script:
     - cd planisphere-report-go
     - go mod tidy
-    - go test -v gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers -coverprofile .testCoverage.txt
+    - go test -v ./... -coverprofile .testCoverage.txt
 
 lint:
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine

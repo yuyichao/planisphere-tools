@@ -7,9 +7,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 
 	"github.com/spf13/cobra"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 )
 
 // installCronCmd represents the installCron command
@@ -19,7 +19,7 @@ var installCronCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cronFile, _ := cmd.Flags().GetString("cron-file")
 		force, _ := cmd.Flags().GetBool("force")
-		if helpers.Exists(cronFile) && !force {
+		if util.Exists(cronFile) && !force {
 			log.Fatalf("Cronfile %v already exists. Use -f/--force to overwrite it", cronFile)
 		}
 		// Figure out out path

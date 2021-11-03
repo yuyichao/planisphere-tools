@@ -1,4 +1,4 @@
-package helpers
+package hardware
 
 var ChassisType = map[uint]string{
 	3:  "desktop",
