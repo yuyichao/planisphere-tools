@@ -1,0 +1,36 @@
+---
+name: "CentOS 8"
+command_output:
+  "/usr/sbin/scutil --get LocalHostName": "test-hostname"
+  "dmidecode -s bios-vendor": "VMware, Inc."
+  "dmidecode -s system-product-name": "VMware7,1"
+  "dmidecode -s system-serial-number": "my-awesome-fake-serial"
+  "dmidecode -s chassis-type": "Other"
+  "/usr/bin/rpm -qa --qf %{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}": |
+    mokutil 1:0.3.0-11.el8
+    python3-certbot 1.20.0-1.el8
+    xfce4-session 4.16.0-3.el8
+  "/usr/bin/dpkg-query -W": |
+    vim-common	2:8.1.2269-1ubuntu5.3
+    vim-runtime	2:8.1.2269-1ubuntu5.3
+    vim-tiny	2:8.1.2269-1ubuntu5.3
+    wamerican	2018.04.16-1
+  "/usr/bin/guix-installed":  "foo\t1.2.3\nbar\t4.5.6"
+  "/usr/bin/pacman -Q": |
+    foo 1.2.3
+    bar 4.5.6
+file_contents:
+  "/etc/os-release": |
+    NAME="CentOS Stream"
+    VERSION="8"
+    ID="centos"
+    ID_LIKE="rhel fedora"
+    VERSION_ID="8"
+    PLATFORM_ID="platform:el8"
+    PRETTY_NAME="CentOS Stream 8"
+    ANSI_COLOR="0;31"
+    CPE_NAME="cpe:/o:centos:centos:8"
+    HOME_URL="https://centos.org/"
+    BUG_REPORT_URL="https://bugzilla.redhat.com/"
+    REDHAT_SUPPORT_PRODUCT="Red Hat Enterprise Linux 8"
+    REDHAT_SUPPORT_PRODUCT_VERSION="CentOS Stream"

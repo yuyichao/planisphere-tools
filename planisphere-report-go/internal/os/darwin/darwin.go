@@ -1,7 +1,4 @@
-//go:build darwin
-// +build darwin
-
-package helpers
+package darwin
 
 import (
 	"encoding/json"
@@ -11,7 +8,10 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
+
+type OSLookup struct{}
 
 /*
 Only platform specific stuff should be in here. If it's more generic than a
@@ -21,15 +21,58 @@ Is there anything we actually want to do here globally?
 // ApplyPlatformDetections Do some stuff here
 var ioregExpert map[string]string
 
-func ApplyPlatformDetections(l *Lookuper) error {
+func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
+	lookups.WaitForChecked("model")
+	if strings.Contains(l.Payload.Data.Model, "MacBook") {
+		return "laptop", nil
+	}
+	return "", errors.New("Unknown type of mac")
+}
+
+func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
+	return ioregExpert["product-name"], nil
+}
+
+func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
+	softData, err := GetPSoftwareData(l)
+	if err != nil {
+		return "", err
+	}
+
+	return softData.SPSoftwareDataType[0].OsVersion, nil
+}
+
+func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
+	return "macOS", nil
+}
+
+func (o OSLookup) ApplyPlatformDetections(l *lookups.Lookuper) error {
 	var err error
-	ioregExpert, err = GetIORegTree("IOPlatformExpertDevice")
+	ioregExpert, err = GetIORegTree("IOPlatformExpertDevice", l)
 	if err != nil {
 		return err
 	}
 
 	// Mmmm, return data
 	return nil
+}
+
+func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error) {
+	apps, err := GetInstalledSoftware(l)
+	if err != nil {
+		return nil, err
+	}
+	return apps, nil
+}
+
+func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
+	out, err := l.Commander.Output("/usr/sbin/scutil", "--get", "LocalHostName")
+	if err != nil {
+		log.Warning("Error running 'scutil --get LocalHostName' to determine the hostname")
+		return nil, err
+	}
+	trimmed := strings.Trim(string(out), "\n")
+	return trimmed, nil
 }
 
 type SPSoftwareData struct {
@@ -59,9 +102,9 @@ type SPApplicationData struct {
 }
 
 // This is like...OS data dude...
-func GetPSoftwareData() (SPSoftwareData, error) {
+func GetPSoftwareData(l *lookups.Lookuper) (SPSoftwareData, error) {
 	var s SPSoftwareData
-	out, err := exec.Command("/usr/sbin/system_profiler", "SPSoftwareDataType", "-json").Output()
+	out, err := l.Commander.Output("/usr/sbin/system_profiler", "SPSoftwareDataType", "-json")
 	if err != nil {
 		return s, err
 	}
@@ -73,9 +116,9 @@ func GetPSoftwareData() (SPSoftwareData, error) {
 }
 
 // This is like...Application level data...my cool person
-func GetPSApplicationData() (SPApplicationData, error) {
+func GetPSApplicationData(l *lookups.Lookuper) (SPApplicationData, error) {
 	var s SPApplicationData
-	out, err := exec.Command("/usr/sbin/system_profiler", "SPApplicationsDataType", "-json").Output()
+	out, err := l.Commander.Output("/usr/sbin/system_profiler", "SPApplicationsDataType", "-json")
 	if err != nil {
 		log.Warning("Error converting apps: ", err)
 	}
@@ -89,8 +132,8 @@ func GetPSApplicationData() (SPApplicationData, error) {
 	return s, nil
 }
 
-func GetMemory() (int64, error) {
-	memory, err := GetSysctl("hw.memsize")
+func GetMemory(l *lookups.Lookuper) (int64, error) {
+	memory, err := GetSysctl("hw.memsize", l)
 	if err != nil {
 		return 0, err
 	}
@@ -99,13 +142,13 @@ func GetMemory() (int64, error) {
 	return memoryMB, nil
 }
 
-func GetInstalledSoftware() ([][]string, error) {
+func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	softwareTable := [][]string{}
 
 	/*
 		Homebrew packages reported here
 	*/
-	brewOut, err := exec.Command("/usr/local/bin/brew", "list", "--versions").Output()
+	brewOut, err := l.Commander.Output("/usr/local/bin/brew", "list", "--versions")
 	if err != nil {
 		log.Warning("Homebrew package lookup failed")
 	} else {
@@ -127,7 +170,7 @@ func GetInstalledSoftware() ([][]string, error) {
 		right way to report back is
 	*/
 	// Application Data
-	data, err := GetPSApplicationData()
+	data, err := GetPSApplicationData(l)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +185,8 @@ func GetInstalledSoftware() ([][]string, error) {
 	return softwareTable, nil
 }
 
-func GetSysctl(target string) (int64, error) {
-	out, err := exec.Command("/usr/sbin/sysctl", "-n", target).Output()
+func GetSysctl(target string, l *lookups.Lookuper) (int64, error) {
+	out, err := l.Commander.Output("/usr/sbin/sysctl", "-n", target)
 	if err != nil {
 		return 0, err
 	}
@@ -157,7 +200,8 @@ func GetSysctl(target string) (int64, error) {
 	return v, nil
 }
 
-func GetIORegValue(tree, item string) (string, error) {
+/*
+func GetIORegValue(tree, item string, l *lookups.Lookuper) (string, error) {
 	out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
 	if err != nil {
 		return "", err
@@ -183,10 +227,12 @@ func GetIORegValue(tree, item string) (string, error) {
 	}
 	return "", nil
 }
+*/
 
-func GetIORegTree(tree string) (map[string]string, error) {
+func GetIORegTree(tree string, l *lookups.Lookuper) (map[string]string, error) {
 	r := make(map[string]string)
-	out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
+	// out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
+	out, err := l.Commander.Output("/usr/sbin/ioreg", "-rd1", "-c", tree)
 	if err != nil {
 		return r, err
 	}
@@ -219,19 +265,15 @@ func GetDiskEncryptionStatus() (bool, error) {
 	return false, nil
 }
 
-func setSerial(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
 	return ioregExpert["IOPlatformSerialNumber"], nil
 }
 
-func setManufacturer(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 	return ioregExpert["manufacturer"], nil
 }
 
-func setModel(l *Lookuper) (interface{}, error) {
-	return ioregExpert["product-name"], nil
-}
-
-func setDiskEncrypted(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
 		log.Warning("Could not detect disk encryption state: ", err)
@@ -239,47 +281,19 @@ func setDiskEncrypted(l *Lookuper) (interface{}, error) {
 	return encrypted, nil
 }
 
-func setMemory(l *Lookuper) (interface{}, error) {
-	memory, err := GetMemory()
+func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
+	memory, err := GetMemory(l)
 	if err != nil {
 		log.Warning("Could not detect memory")
 	}
 	return uint64(memory), nil
 }
 
-func setOSFamily(l *Lookuper) (interface{}, error) {
-	return "macOS", nil
-}
-
-func setDeviceType(l *Lookuper) (interface{}, error) {
-	WaitForChecked("model")
-	if strings.Contains(l.Payload.Data.Model, "MacBook") {
-		return "laptop", nil
-	}
-	return "", errors.New("Unknown type of mac")
-}
-
-func setOSFullName(l *Lookuper) (interface{}, error) {
-	softData, err := GetPSoftwareData()
-	if err != nil {
-		return "", err
-	}
-
-	return softData.SPSoftwareDataType[0].OsVersion, nil
-}
-
-func setInstalledSoftware(l *Lookuper) (interface{}, error) {
-	apps, err := GetInstalledSoftware()
-	if err != nil {
-		return nil, err
-	}
-	return apps, nil
-}
-
-func setHostname(l *Lookuper) (interface{}, error) {
-	out, err := exec.Command("/usr/sbin/scutil", "--get", "LocalHostName").Output()
+func GetHostname(l *lookups.Lookuper) (interface{}, error) {
+	out, err := l.Commander.Output("/usr/sbin/scutil", "--get", "LocalHostName")
 	if err != nil {
 		log.Warning("Error running 'scutil --get LocalHostName' to determine the hostname")
+		return nil, err
 	}
 	trimmed := strings.Trim(string(out), "\n")
 	return trimmed, nil

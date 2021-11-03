@@ -1,30 +1,32 @@
-//go:build freebsd
-// +build freebsd
-
-package helpers
+package freebsd
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
-func ApplyPlatformDetections(l *Lookuper) error {
+var ErrDmidecode = fmt.Errorf("Error running dmidecode, ensure it is installed and you are running as root")
+
+type OSLookup struct{}
+
+func (o OSLookup) ApplyPlatformDetections(l *lookups.Lookuper) error {
 	// Do initializing bits here
 	return nil
 }
 
-func setSerial(l *Lookuper) (interface{}, error) {
-	cmdPath, err := exec.LookPath("dmidecode")
+func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
+	cmdPath, err := l.Commander.LookPath("dmidecode")
 	if err != nil {
 		return "", errors.New("dmidecode is needed to look up serial number")
 	}
-	cmdOut, err := exec.Command(cmdPath, "-s", "system-serial-number").Output()
+	cmdOut, err := l.Commander.Output(cmdPath, "-s", "system-serial-number")
 	if err != nil {
 		return "", errors.New("Issue running dmidecode to get the serial number")
 	}
@@ -32,12 +34,12 @@ func setSerial(l *Lookuper) (interface{}, error) {
 	return trimmed, nil
 }
 
-func setManufacturer(l *Lookuper) (interface{}, error) {
-	cmdPath, err := exec.LookPath("dmidecode")
+func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
+	cmdPath, err := l.Commander.LookPath("dmidecode")
 	if err != nil {
 		return "", errors.New("dmidecode is needed to look up manufacturer")
 	}
-	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-manufacturer").Output()
+	cmdOut, err := l.Commander.Output(cmdPath, "-s", "chassis-manufacturer")
 	if err != nil {
 		return "", errors.New("Issue running dmidecode to get the chassis-manufacturer")
 	}
@@ -45,26 +47,22 @@ func setManufacturer(l *Lookuper) (interface{}, error) {
 	return trimmed, nil
 }
 
-func setModel(l *Lookuper) (interface{}, error) {
-	cmdPath, err := exec.LookPath("dmidecode")
+func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
+	out, err := l.Commander.Output("dmidecode", "-s", "chassis-version")
 	if err != nil {
-		return "", errors.New("dmidecode is needed to look up model")
+		return "", ErrDmidecode
 	}
-	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-version").Output()
-	if err != nil {
-		return "", errors.New("Issue running dmidecode to get the chassis-version")
-	}
-	trimmed := strings.Trim(string(cmdOut), "\n")
+	trimmed := strings.Trim(string(out), "\n")
 	return trimmed, nil
 }
 
-func setDiskEncrypted(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return false, errors.New("DiskEcrypted not yet implemented")
 }
 
-func setMemory(l *Lookuper) (interface{}, error) {
-	out, err := exec.Command("/sbin/sysctl", "-n", "vm.kmem_size").Output()
+func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
+	out, err := l.Commander.Output("/sbin/sysctl", "-n", "vm.kmem_size")
 	if err != nil {
 		return 0, err
 	}
@@ -78,16 +76,16 @@ func setMemory(l *Lookuper) (interface{}, error) {
 	return memoryMB, nil
 }
 
-func setOSFamily(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
 	return "FreeBSD", nil
 }
 
-func setDeviceType(l *Lookuper) (interface{}, error) {
-	cmdPath, err := exec.LookPath("dmidecode")
+func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
+	cmdPath, err := l.Commander.LookPath("dmidecode")
 	if err != nil {
 		return "", errors.New("dmidecode is needed to look up model")
 	}
-	cmdOut, err := exec.Command(cmdPath, "-s", "chassis-type").Output()
+	cmdOut, err := l.Commander.Output(cmdPath, "-s", "chassis-type")
 	if err != nil {
 		return "", errors.New("Issue running dmidecode to get the chassis-type")
 	}
@@ -95,9 +93,9 @@ func setDeviceType(l *Lookuper) (interface{}, error) {
 	return trimmed, nil
 }
 
-func setOSFullName(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 	// TODO: Implement this
-	out, err := exec.Command("/bin/freebsd-version").Output()
+	out, err := l.Commander.Output("/bin/freebsd-version")
 	if err != nil {
 		return "", errors.New("Could not run freebsd-version successfully")
 	}
@@ -110,12 +108,12 @@ type BSDSoftware struct {
 	Version string `json:"version,omitempty"`
 }
 
-func GetInstalledSoftware() ([][]string, error) {
+func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	softwareTable := [][]string{}
 
-	cmdPath, err := exec.LookPath("pkg")
+	cmdPath, err := l.Commander.LookPath("pkg")
 	if err == nil {
-		cmdOut, err := exec.Command(cmdPath, "info", "--raw", "-a", "--raw-format", "json-compact").Output()
+		cmdOut, err := l.Commander.Output(cmdPath, "info", "--raw", "-a", "--raw-format", "json-compact")
 		if err != nil {
 			log.Warning("Could not do a pkg info, even though the pkg command exists")
 		}
@@ -141,15 +139,15 @@ func GetInstalledSoftware() ([][]string, error) {
 	return softwareTable, nil
 }
 
-func setInstalledSoftware(l *Lookuper) (interface{}, error) {
-	apps, err := GetInstalledSoftware()
+func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error) {
+	apps, err := GetInstalledSoftware(l)
 	if err != nil {
 		return nil, err
 	}
 	return apps, nil
 }
 
-func setHostname(l *Lookuper) (interface{}, error) {
+func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	// Hostname Field
 	hostname, err := os.Hostname()
 	if err != nil {
