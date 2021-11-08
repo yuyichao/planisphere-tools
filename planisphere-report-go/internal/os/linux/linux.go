@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	ErrEmptyOutput        = fmt.Errorf("Empty output")
-	ErrMalformedRPMOutput = fmt.Errorf("Malformed RPM Output")
+	ErrEmptyOutput            = fmt.Errorf("Empty output")
+	ErrMalformedPackageOutput = fmt.Errorf("Malformed Package Output")
 )
 
 type OSLookup struct{}
@@ -28,90 +28,39 @@ func (o OSLookup) ApplyPlatformDetections(l *lookups.Lookuper) error {
 
 func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	softwareTable := [][]string{}
-
-	// RPMs
-	rpmPath, err := l.Commander.LookPath("rpm")
-	if err == nil {
-		rpmOut, err := l.Commander.Output(rpmPath, "-qa", "--qf", "%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n")
-		if err != nil {
-			log.Warning("Could not do an rpm listing even though the rpm command exists")
-		}
-		rpmSoftware, err := ParseRPMOutput(rpmOut)
-		if err != nil {
-			log.Warning("Could not parse the rpm output")
-		} else {
-			softwareTable = append(softwareTable, rpmSoftware...)
-		}
-	} else {
-		log.Println("No rpm command installed")
+	softwareQueries := [][]string{
+		{"rpm", "-qa", "--qf", "%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n"},
+		{"guix-installed"},
+		{"dpkg-query", "-W"},
+		{"pacman", "-Q"},
 	}
 
-	// DPKG-Query
-	cmdPath, err := l.Commander.LookPath("dpkg-query")
-	if err == nil {
-		cmdOut, err := l.Commander.Output(cmdPath, "-W")
-		if err != nil {
-			log.Warning("Could not do a dpkg-query listing even though the command exists")
-		}
-		trimmed := strings.Trim(string(cmdOut), "\n")
-		for _, line := range strings.Split(trimmed, "\n") {
-			pieces := strings.Split(line, "\t")
-			if len(pieces) != 2 {
-				log.Warningf("Got weird line from dpkg: %v", line)
-			} else {
-				name := pieces[0]
-				version := pieces[1]
-
-				softwareTable = append(softwareTable, []string{name, version})
+	for _, softwareQuery := range softwareQueries {
+		cmd := softwareQuery[0]
+		args := softwareQuery[1:]
+		binPath, err := l.Commander.LookPath(cmd)
+		if err == nil {
+			log.Debug("Running software query: ", softwareQuery)
+			binOut, err := l.Commander.Output(binPath, args...)
+			if err != nil {
+				log.Warningf("Could not do an %v listing even though the rpm command exists", cmd)
 			}
+			binSoftware, err := ParsePackageOutput(binOut)
+			if err != nil {
+				log.Warningf("Could not parse the %v output", cmd)
+			} else {
+				softwareTable = append(softwareTable, binSoftware...)
+			}
+		} else {
+			log.Debugf("No %v command installed\n", cmd)
 		}
-	} else {
-		log.Println("No dpkg-query command installed")
-	}
-
-	// Pacman nom nom nom
-	cmdPath, err = l.Commander.LookPath("pacman")
-	if err == nil {
-		cmdOut, err := l.Commander.Output(cmdPath, "-Q")
-		if err != nil {
-			log.Warning("Could not do a pacman listing even though the command exists")
-		}
-		trimmed := strings.Trim(string(cmdOut), "\n")
-		for _, line := range strings.Split(trimmed, "\n") {
-			pieces := strings.Split(line, " ")
-			name := pieces[0]
-			version := pieces[1]
-
-			softwareTable = append(softwareTable, []string{name, version})
-		}
-	} else {
-		log.Println("No pacman command installed")
-	}
-
-	// Guix
-	cmdPath, err = l.Commander.LookPath("guix-installed")
-	if err == nil {
-		cmdOut, err := l.Commander.Output(cmdPath)
-		if err != nil {
-			log.Warning("Could not do a guix-installed listing even though the command exists")
-		}
-		trimmed := strings.Trim(string(cmdOut), "\n")
-		for _, line := range strings.Split(trimmed, "\n") {
-			pieces := strings.Split(line, "\t")
-			name := pieces[0]
-			version := pieces[1]
-
-			softwareTable = append(softwareTable, []string{name, version})
-		}
-	} else {
-		log.Println("No guix-installed command installed")
 	}
 
 	return softwareTable, nil
 }
 
 func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
-	out, err := l.Slurper.Slurp("/sys/class/dmi/id/product_serial")
+	out, err := l.Commander.Slurp("/sys/class/dmi/id/product_serial")
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +70,13 @@ func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
 
 func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 	// Is it a Raspberry Pi?
+	l.WaitForChecked("mac_addresses")
 	for _, mac := range l.Payload.Data.MacAddresses {
 		if strings.HasPrefix(mac, "b8:27:eb") {
 			return "Raspberry Pi", nil
 		}
 	}
-	out, err := l.Slurper.Slurp("/sys/class/dmi/id/bios_vendor")
+	out, err := l.Commander.Slurp("/sys/class/dmi/id/bios_vendor")
 	if err != nil {
 		return nil, err
 	}
@@ -136,27 +86,29 @@ func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 
 func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 	// Is it a Raspberry Pi?
+	l.WaitForChecked("mac_addresses")
 	for _, mac := range l.Payload.Data.MacAddresses {
 		if strings.HasPrefix(mac, "b8:27:eb") {
-			cpuDat, err := os.ReadFile("/proc/cpuinfo")
+			cpuDat, err := l.Commander.Slurp("/proc/cpuinfo")
 			if err != nil {
 				log.Warning(err)
 				continue
-			}
-			trimmed := strings.Trim(string(cpuDat), "\n")
-			for _, line := range strings.Split(trimmed, "\n") {
-				pieces := strings.SplitN(line, ":", 2)
-				key := strings.TrimSpace(pieces[0])
-				value := strings.TrimSpace(pieces[1])
-				if key == "Revision" {
-					if _, ok := hardware.RaspberryPiModels[value]; ok {
-						return hardware.RaspberryPiModels[value], nil
+			} else {
+				trimmed := strings.Trim(string(cpuDat), "\n")
+				for _, line := range strings.Split(trimmed, "\n") {
+					pieces := strings.SplitN(line, ":", 2)
+					key := strings.TrimSpace(pieces[0])
+					value := strings.TrimSpace(pieces[1])
+					if key == "Revision" {
+						if _, ok := hardware.RaspberryPiModels[value]; ok {
+							return hardware.RaspberryPiModels[value], nil
+						}
 					}
 				}
 			}
 		}
 	}
-	out, err := l.Slurper.Slurp("/sys/class/dmi/id/product_name")
+	out, err := l.Commander.Slurp("/sys/class/dmi/id/product_name")
 	if err != nil {
 		return nil, err
 	}
@@ -170,8 +122,23 @@ func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 }
 
 func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
-	// TODO: Implement this
-	return 0, errors.New("Memory yet implemented")
+	out, err := l.Commander.Slurp("/proc/meminfo")
+	if err != nil {
+		return nil, err
+	}
+	s := bufio.NewScanner(bytes.NewReader(out))
+	reMemTotal := regexp.MustCompile(`^MemTotal:\s+(\d+)\s+.*$`)
+	var memory uint64
+	for s.Scan() {
+		if m := reMemTotal.FindStringSubmatch(s.Text()); m != nil {
+			memory, err = strconv.ParseUint(m[1], 10, 64)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	// Switch to MB here
+	return memory / 1024, err
 }
 
 func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
@@ -179,25 +146,31 @@ func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
 }
 
 func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
-	out, err := l.Slurper.Slurp("/sys/class/dmi/id/chassis_type")
-	if err != nil {
-		return nil, err
-	}
-	cid, err := strconv.ParseUint(strings.TrimSpace(string(out)), 10, 64)
-	if err != nil {
-		return nil, err
-	}
 	var chassisType string
-	if val, ok := hardware.ChassisType[uint(cid)]; ok {
-		chassisType = val
-	} else {
+	l.WaitForChecked("manufacturer")
+	switch l.Payload.Data.Manufacturer {
+	case "Raspberry Pi":
 		chassisType = "Other"
+	default:
+		out, err := l.Commander.Slurp("/sys/class/dmi/id/chassis_type")
+		if err != nil {
+			return nil, err
+		}
+		cid, err := strconv.ParseUint(strings.TrimSpace(string(out)), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		if val, ok := hardware.ChassisType[uint(cid)]; ok {
+			chassisType = val
+		} else {
+			chassisType = "Other"
+		}
 	}
 	return chassisType, nil
 }
 
 func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
-	osb, err := l.Slurper.Slurp("/etc/os-release")
+	osb, err := l.Commander.Slurp("/etc/os-release")
 	if err != nil {
 		return nil, err
 	}

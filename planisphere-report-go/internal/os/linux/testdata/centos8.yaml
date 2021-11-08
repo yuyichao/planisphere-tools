@@ -1,7 +1,8 @@
 ---
 name: "CentOS 8"
+mac_addresses:
+  - "01:02:03:30:20:10"
 command_output:
-  "/usr/sbin/scutil --get LocalHostName": "test-hostname"
   "dmidecode -s bios-vendor": "VMware, Inc."
   "dmidecode -s system-product-name": "VMware7,1"
   "dmidecode -s system-serial-number": "my-awesome-fake-serial"
@@ -34,3 +35,11 @@ file_contents:
     BUG_REPORT_URL="https://bugzilla.redhat.com/"
     REDHAT_SUPPORT_PRODUCT="Red Hat Enterprise Linux 8"
     REDHAT_SUPPORT_PRODUCT_VERSION="CentOS Stream"
+  "/sys/class/dmi/id/product_serial":
+    "my-awesome-fake-serial"
+  "/sys/class/dmi/id/bios_vendor":
+    VMware, Inc.
+  "/sys/class/dmi/id/product_name":
+    VMware7,1
+  "/sys/class/dmi/id/chassis_type":
+    "1"

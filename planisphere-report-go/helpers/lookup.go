@@ -40,13 +40,6 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 	} else {
 		l.Commander = *c.Commander
 	}
-	// File contents slurper for mocking file reads
-	if c.Slurper == nil {
-		l.Slurper = cmdr.RealSlurper{}
-	} else {
-		l.Slurper = *c.Slurper
-	}
-
 	// Super generic bits here
 	l.Payload.LastActive = time.Now()
 
@@ -83,7 +76,6 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 		{"DeviceType", nil, setDeviceTypeWrapper, fancyLookup.GetDeviceType},
 		{"DiskEncrypted", nil, setDiskEncryptedWrapper, fancyLookup.GetDiskEncrypted},
 		{"UsageType", setUsageTypeWrapper, nil, nil},
-		{"MacAddressses", setMacAddressesWrapper, nil, nil},
 		{"Username", setUsernameWrapper, nil, nil},
 		{"OSFamily", nil, setOSFamilyWrapper, fancyLookup.GetOSFamily},
 		{"Status", setStatusWrapper, nil, nil},
@@ -95,6 +87,7 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 		{"ExtraData", setExtraDataWrapper, nil, nil},
 		{"Hostname", nil, setHostnameWrapper, fancyLookup.GetHostname},
 		{"OSFullName", nil, setOSFullNameWrapper, fancyLookup.GetOSFullName},
+		{"MacAddressses", setMacAddressesWrapper, nil, nil},
 	}
 
 	var wg1 sync.WaitGroup
@@ -140,7 +133,7 @@ func getMacAddr() ([]string, error) {
 }
 
 func setPlatformSerialWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("serial")
+	defer l.MarkChecked("serial")
 	if item, ok := l.Overrides["serial"]; ok {
 		l.Payload.Data.Serial = item.(string)
 	} else {
@@ -154,7 +147,7 @@ func setPlatformSerialWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) 
 }
 
 func setManufacturerWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("manufacturer")
+	defer l.MarkChecked("manufacturer")
 	if item, ok := l.Overrides["manufacturer"]; ok {
 		l.Payload.Data.Manufacturer = item.(string)
 	} else {
@@ -169,7 +162,7 @@ func setManufacturerWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (i
 }
 
 func setModelWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("model")
+	defer l.MarkChecked("model")
 	if item, ok := l.Overrides["model"]; ok {
 		l.Payload.Data.Model = item.(string)
 	} else {
@@ -184,7 +177,7 @@ func setModelWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interfac
 }
 
 func setDiskEncryptedWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("disk_encrypted")
+	defer l.MarkChecked("disk_encrypted")
 	if item, ok := l.Overrides["disk_encrypted"]; ok {
 		l.Payload.Data.DiskEncrypted = item.(bool)
 	} else {
@@ -202,7 +195,7 @@ func setDiskEncryptedWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (
 // "All aloooooone in the moooooon liiiiiight"
 //   - 😺
 func setMemoryWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("memory_mb")
+	defer l.MarkChecked("memory_mb")
 	if item, ok := l.Overrides["memory_mb"]; ok {
 		l.Payload.Data.MemoryMB = uint64(item.(int))
 	} else {
@@ -220,7 +213,7 @@ func setMemoryWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interfa
 // "I don't have friends, I got Family"
 //   - Dominic Toretto 🚗💨
 func setOSFamilyWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("os_family")
+	defer l.MarkChecked("os_family")
 	if item, ok := l.Overrides["os_family"]; ok {
 		l.Payload.Data.OsFamily = item.(string)
 	} else {
@@ -235,7 +228,7 @@ func setOSFamilyWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (inter
 }
 
 func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("device_type")
+	defer l.MarkChecked("device_type")
 	if item, ok := l.Overrides["device_type"]; ok {
 		l.Payload.Data.DeviceType = item.(string)
 	} else {
@@ -250,7 +243,7 @@ func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 }
 
 func setOSFullNameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("os_fullname")
+	defer l.MarkChecked("os_fullname")
 	if item, ok := l.Overrides["os_fullname"]; ok {
 		l.Payload.Data.OsFullname = item.(string)
 	} else {
@@ -265,7 +258,7 @@ func setOSFullNameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 }
 
 func setHostnameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("hostname")
+	defer l.MarkChecked("hostname")
 
 	// Hostname Field
 	if hostname, ok := l.Overrides["hostname"]; ok {
@@ -281,35 +274,35 @@ func setHostnameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (inter
 }
 
 func setInstanceKeyWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("instance_key")
+	defer l.MarkChecked("instance_key")
 	if instanceKey, ok := l.Overrides["instance_key"]; ok {
 		l.Payload.Key = instanceKey.(string)
 	}
 }
 
 func setDepartmentKeyWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("department_key")
+	defer l.MarkChecked("department_key")
 	if departmentKey, ok := l.Overrides["department_key"]; ok {
 		l.Payload.Data.DepartmentKey = departmentKey.(string)
 	}
 }
 
 func setSupportGroupIDWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("support_group_id")
+	defer l.MarkChecked("support_group_id")
 	if supportGroupID, ok := l.Overrides["support_group_id"]; ok {
 		l.Payload.Data.SupportGroupId = uint64(supportGroupID.(int))
 	}
 }
 
 func setSupportGroupNameWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("support_group_name")
+	defer l.MarkChecked("support_group_name")
 	if supportGroupName, ok := l.Overrides["support_group_name"]; ok {
 		l.Payload.Data.SupportGroupName = supportGroupName.(string)
 	}
 }
 
 func setUsageTypeWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("usage_type")
+	defer l.MarkChecked("usage_type")
 
 	// Usage Type
 	if usageType, ok := l.Overrides["usage_type"]; ok {
@@ -318,7 +311,7 @@ func setUsageTypeWrapper(l *lookups.Lookuper) {
 }
 
 func setUsernameWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("username")
+	defer l.MarkChecked("username")
 
 	if usageType, ok := l.Overrides["username"]; ok {
 		l.Payload.Data.Username = usageType.(string)
@@ -326,7 +319,7 @@ func setUsernameWrapper(l *lookups.Lookuper) {
 }
 
 func setStatusWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("status")
+	defer l.MarkChecked("status")
 	// Status: deployed, rma, etc
 	if status, ok := l.Overrides["status"]; ok {
 		l.Payload.Data.Status = status.(string)
@@ -337,14 +330,15 @@ func setStatusWrapper(l *lookups.Lookuper) {
 // "Most Dope"
 //   - Mac Miller ✌️
 func setMacAddressesWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("mac_addresses")
+	defer l.MarkChecked("mac_addresses")
 
 	if macAddresses, ok := l.Overrides["mac_addresses"]; ok {
 		for _, item := range macAddresses.([]interface{}) {
 			l.Payload.Data.MacAddresses = append(l.Payload.Data.MacAddresses, item.(string))
 		}
 	} else {
-		macs, err := getMacAddr()
+		// macs, err := getMacAddr()
+		macs, err := l.Commander.GetMacAddrs()
 		if err != nil {
 			log.Warning("Could not detect mac_addresses: ", err)
 		}
@@ -353,7 +347,7 @@ func setMacAddressesWrapper(l *lookups.Lookuper) {
 }
 
 func setExtraDataWrapper(l *lookups.Lookuper) {
-	defer lookups.MarkChecked("extra_data")
+	defer l.MarkChecked("extra_data")
 	// Extra data
 	l.Payload.ExtraData = map[string]string{}
 	if extraData, ok := l.Overrides["extra_data"]; ok {
@@ -369,7 +363,7 @@ func setExtraDataWrapper(l *lookups.Lookuper) {
 }
 
 func setInstalledSoftwareWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
-	defer lookups.MarkChecked("installed_software")
+	defer l.MarkChecked("installed_software")
 
 	// Not sure why someone would wanna override this, but just in case...
 	if installedSoftware, ok := l.Overrides["installed_software"]; ok {

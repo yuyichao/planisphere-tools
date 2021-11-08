@@ -2,12 +2,10 @@ package linux
 
 import "strings"
 
-func ParseRPMOutput(rpmOut []byte) ([][]string, error) {
+func ParsePackageOutput(rpmOut []byte) ([][]string, error) {
 	softwareTable := [][]string{}
 	lines := []string{}
 	trimmed := strings.Trim(string(rpmOut), "\n")
-	// RPM can run successfully, but output nothing. Handle this by checking for a new line for now. See:
-	// https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/-/issues/3 for more info
 	if strings.Contains(trimmed, "\n") {
 		// Consider empty if just a new line return
 		lines = strings.Split(trimmed, "\n")
@@ -21,9 +19,9 @@ func ParseRPMOutput(rpmOut []byte) ([][]string, error) {
 		lines = append(lines, trimmed)
 	}
 	for _, line := range lines {
-		pieces := strings.Split(line, " ")
+		pieces := strings.Fields(line)
 		if len(pieces) != 2 {
-			return nil, ErrMalformedRPMOutput
+			return nil, ErrMalformedPackageOutput
 		}
 		name := pieces[0]
 		version := pieces[1]

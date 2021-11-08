@@ -22,7 +22,7 @@ Is there anything we actually want to do here globally?
 var ioregExpert map[string]string
 
 func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
-	lookups.WaitForChecked("model")
+	l.WaitForChecked("model")
 	if strings.Contains(l.Payload.Data.Model, "MacBook") {
 		return "laptop", nil
 	}
@@ -200,35 +200,6 @@ func GetSysctl(target string, l *lookups.Lookuper) (int64, error) {
 	return v, nil
 }
 
-/*
-func GetIORegValue(tree, item string, l *lookups.Lookuper) (string, error) {
-	out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
-	if err != nil {
-		return "", err
-	}
-	for _, line := range strings.Split(string(out), "\n") {
-		stripLine := strings.TrimSpace(line)
-		if !strings.HasPrefix(stripLine, "\"") {
-			continue
-		}
-		pieces := strings.Split(stripLine, " = ")
-		// Strip off head and tail "s
-		key := pieces[0]
-		key = strings.ReplaceAll(key, "\"", "")
-
-		// Strip < > from value
-		value := pieces[1]
-		value = strings.TrimLeft(value, "<")
-		value = strings.TrimRight(value, ">")
-		value = strings.ReplaceAll(value, "\"", "")
-		if key == item {
-			return value, nil
-		}
-	}
-	return "", nil
-}
-*/
-
 func GetIORegTree(tree string, l *lookups.Lookuper) (map[string]string, error) {
 	r := make(map[string]string)
 	// out, err := exec.Command("/usr/sbin/ioreg", "-rd1", "-c", tree).Output()
@@ -287,14 +258,4 @@ func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 		log.Warning("Could not detect memory")
 	}
 	return uint64(memory), nil
-}
-
-func GetHostname(l *lookups.Lookuper) (interface{}, error) {
-	out, err := l.Commander.Output("/usr/sbin/scutil", "--get", "LocalHostName")
-	if err != nil {
-		log.Warning("Error running 'scutil --get LocalHostName' to determine the hostname")
-		return nil, err
-	}
-	trimmed := strings.Trim(string(out), "\n")
-	return trimmed, nil
 }

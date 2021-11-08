@@ -17,10 +17,15 @@ type (
 	// MockSlurper   struct{}
 )
 
-var (
-	commander cmdr.Commander
-	slurper   cmdr.Slurper
-)
+var commander cmdr.Commander
+
+func (c MockCommander) GetMacAddrs() ([]string, error) {
+	return []string{"00:00:00:00:00:00"}, nil
+}
+
+func (c MockCommander) Slurp(filepath string) ([]byte, error) {
+	return []byte(""), nil
+}
 
 func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
 	joined := fmt.Sprintf("%v %v", command, strings.Join(args, " "))

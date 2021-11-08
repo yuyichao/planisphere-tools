@@ -1,6 +1,10 @@
 package util_test
 
 import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,4 +25,15 @@ func TestContainsString(t *testing.T) {
 		got := util.ContainsString(test.s, test.e)
 		require.Equal(t, test.r, got)
 	}
+}
+
+func TestExists(t *testing.T) {
+	file, err := ioutil.TempFile("", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	notafile := fmt.Sprintf("%v-not-a-file", file.Name())
+	require.True(t, util.Exists(file.Name()))
+	require.False(t, util.Exists(notafile))
 }
