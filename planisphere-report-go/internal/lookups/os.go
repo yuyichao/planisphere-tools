@@ -12,10 +12,8 @@ import (
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
-var (
-	CheckedItems      []string
-	checkedItemsMutex sync.Mutex
-)
+// CheckedItems      []string
+var checkedItemsMutex sync.Mutex
 
 type OSLookup interface {
 	ApplyPlatformDetections(l *Lookuper) error
@@ -32,10 +30,10 @@ type OSLookup interface {
 }
 
 type Lookuper struct {
-	Overrides map[string]interface{}
-	Payload   planisphere.SelfReportPayload
-	Commander cmdr.Commander
-	Slurper   cmdr.Slurper
+	Overrides    map[string]interface{}
+	Payload      planisphere.SelfReportPayload
+	Commander    cmdr.Commander
+	CheckedItems []string
 }
 
 type LookuperConfig struct {
@@ -43,10 +41,36 @@ type LookuperConfig struct {
 	OS        string // darwin, linux, windows, etc
 	// CLI Interface for test mocking
 	Commander *cmdr.Commander
-	Slurper   *cmdr.Slurper
+}
+
+func (l *Lookuper) WaitForChecked(item string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	for {
+		if !util.ContainsString(l.CheckedItems, item) {
+			ci := l.CheckedItems
+			sort.Strings(ci)
+			log.Debugf("Waiting for %v to be checked...so far found: %v", item, ci)
+			time.Sleep(1 * time.Second)
+			if ctx.Err() != nil {
+				log.Warningf("Timed out waiting for %v to be checked", item)
+				break
+			}
+		} else {
+			break
+		}
+	}
+}
+
+func (l *Lookuper) MarkChecked(i string) {
+	checkedItemsMutex.Lock()
+	l.CheckedItems = append(l.CheckedItems, i)
+	checkedItemsMutex.Unlock()
+	log.Debugf("Marked %v as checked", i)
 }
 
 // Wait for all items in wi to exist before continuing
+/*
 func WaitForChecked(item string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -67,8 +91,9 @@ func WaitForChecked(item string) {
 }
 
 func MarkChecked(i string) {
-	log.Debugf("Marked %v as checked", i)
 	checkedItemsMutex.Lock()
 	CheckedItems = append(CheckedItems, i)
 	checkedItemsMutex.Unlock()
+	log.Warnf("Marked %v as checked", i)
 }
+*/

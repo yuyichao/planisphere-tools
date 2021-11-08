@@ -1,3 +1,4 @@
 planisphere-report-go/dist
 planisphere-report-go/gl-code-quality-report.json
 *.swp
+*go-carpet-coverage-out*

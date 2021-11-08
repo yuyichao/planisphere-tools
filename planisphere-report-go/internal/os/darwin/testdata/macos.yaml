@@ -1,0 +1,81 @@
+---
+
+name: "macOS"
+mac_addresses: []
+command_output:
+  "/usr/sbin/scutil --get LocalHostName": "test-hostname"
+  "/usr/sbin/sysctl -n hw.memsize": "8388608"
+  "/usr/local/bin/brew list --versions": |
+    unixodbc 2.3.9_1
+    utf8proc 2.6.1
+    utimer 0.4_1
+  "/usr/sbin/ioreg -rd1 -c IOPlatformExpertDevice": |
+    {
+      "IOInterruptSpecifiers" = (<0900000005000000>)
+      "IOPolledInterface" = "SMCPolledInterface is not serializable"
+      "IOPlatformUUID" = "15A89B8F-8BE9-4E84-B425-A8D35D6A3D7B"
+      "serial-number" = <4d443657000000000000000000000000000000000000000000000000000000>
+      "platform-feature" = <3200000000000000>
+      "IOPlatformSystemSleepPolicy" = <0000000000000a0008000000080000000000000000000000050000000000000005010000010000000000400000004000000010000000100007000000000000000fdd8701000000002000000020000000000000000000000005$
+      "IOBusyInterest" = "IOCommand is not serializable"
+      "target-type" = <"Mac">
+      "IOInterruptControllers" = ("io-apic-0")
+      "name" = <"/">
+      "version" = <"1.0">
+      "manufacturer" = <"Apple Inc.">
+      "compatible" = <"MacBookPro16,1">
+      "product-name" = <"MacBookPro16,1">
+      "IOPlatformSerialNumber" = "serial-yo"
+      "IOConsoleSecurityInterest" = "IOCommand is not serializable"
+      "clock-frequency" = <0084d717>
+      "model" = <"MacBookPro16,1">
+      "board-id" = <"Mac-someid">
+      "bridge-model" = <"J152fAP">
+      "IOGeneralInterest" = "IOCommand is not serializable"
+      "system-type" = <02>
+    }
+  "/usr/sbin/system_profiler SPApplicationsDataType -json": |
+    "SPApplicationsDataType" : [
+     {
+      "_name" : "Installer",
+      "arch_kind" : "arch_arm_i64",
+      "lastModified" : "2021-10-18T03:30:38Z",
+      "obtained_from" : "apple",
+      "path" : "/System/Library/CoreServices/Installer.app",
+      "signed_by" : [
+      "Software Signing",
+      "Apple Code Signing Certification Authority",
+      "Apple Root CA"
+      ],
+      "version" : "6.2.0"
+      },
+      {
+      "_name" : "TextEdit",
+      "arch_kind" : "arch_arm_i64",
+      "lastModified" : "2021-10-18T03:30:38Z",
+      "obtained_from" : "apple",
+      "path" : "/System/Applications/TextEdit.app",
+      "signed_by" : [
+      "Software Signing",
+      "Apple Code Signing Certification Authority",
+      "Apple Root CA"
+      ],
+      "version" : "1.17"
+      }]}
+  "/usr/sbin/system_profiler SPSoftwareDataType -json": |
+      {
+      "SPSoftwareDataType" : [
+      {
+      "_name" : "os_overview",
+      "boot_mode" : "normal_boot",
+      "boot_volume" : "Macintosh HD",
+      "kernel_version" : "Darwin 21.1.0",
+      "local_host_name" : "test-hostname",
+      "os_version" : "macOS 12.0.1 (21A559)",
+      "secure_vm" : "secure_vm_enabled",
+      "system_integrity" : "integrity_enabled",
+      "uptime" : "up 0:16:15:15",
+      "user_name" : "Joe User (joeu)"
+      }
+      ]
+      }

@@ -1,0 +1,32 @@
+---
+name: "Raspberry Pi"
+mac_addresses:
+  - "b8:27:eb:30:20:10"
+command_output:
+  "/usr/bin/dpkg-query -W": |
+    vim-common  2:8.1.2269-1ubuntu5.3
+    vim-runtime 2:8.1.2269-1ubuntu5.3
+    vim-tiny    2:8.1.2269-1ubuntu5.3
+    wamerican   2018.04.16-1
+file_contents:
+  "/proc/cpuinfo": |
+    processor	: 0
+    model name	: ARMv7 Processor rev 4 (v7l)
+    Revision: 000e
+  "/proc/meminfo": |
+    MemTotal:       32699692 kB
+    MemFree:          961964 kB
+    MemAvailable:   16718876 kB
+    Buffers:             932 kB
+  "/sys/class/dmi/id/product_serial":
+    "my-awesome-fake-serial"
+  "/etc/os-release": |
+    PRETTY_NAME="Raspbian GNU/Linux 8 (jessie)"
+    NAME="Raspbian GNU/Linux"
+    VERSION_ID="8"
+    VERSION="8 (jessie)"
+    ID=raspbian
+    ID_LIKE=debian
+    HOME_URL="http://www.raspbian.org/"
+    SUPPORT_URL="http://www.raspbian.org/RaspbianForums"
+    BUG_REPORT_URL="http://www.raspbian.org/RaspbianBugs"
