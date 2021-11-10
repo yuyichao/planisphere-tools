@@ -71,5 +71,5 @@ func TestNewLookup(t *testing.T) {
 	require.Equal(t, "FreeBSD", l.Payload.Data.OsFamily)
 	require.Equal(t, "FreeBSD 11.1-RELEASE-p4 amd64", l.Payload.Data.OsFullname)
 	require.Equal(t, "N/A", l.Payload.Data.Model)
-	require.Equal(t, "Other", l.Payload.Data.DeviceType)
+	require.Equal(t, "", l.Payload.Data.DeviceType)
 }

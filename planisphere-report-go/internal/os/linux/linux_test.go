@@ -21,7 +21,7 @@ func TestNewLookup(t *testing.T) {
 	require.Equal(t, "Linux", l.Payload.Data.OsFamily)
 	require.Equal(t, "CentOS Stream 8", l.Payload.Data.OsFullname)
 	require.Equal(t, "VMware7,1", l.Payload.Data.Model)
-	require.Equal(t, "Other", l.Payload.Data.DeviceType)
+	require.Equal(t, "", l.Payload.Data.DeviceType)
 	require.Equal(t, "my-awesome-fake-serial", l.Payload.Data.Serial)
 	require.Contains(t, l.Payload.Data.MacAddresses, "01:02:03:30:20:10")
 }
@@ -39,7 +39,7 @@ func TestPiLookup(t *testing.T) {
 	require.Equal(t, "Linux", l.Payload.Data.OsFamily)
 	require.Equal(t, "Raspbian GNU/Linux 8 (jessie)", l.Payload.Data.OsFullname)
 	require.Equal(t, "B", l.Payload.Data.Model)
-	require.Equal(t, "Other", l.Payload.Data.DeviceType)
+	require.Equal(t, "", l.Payload.Data.DeviceType)
 	require.Equal(t, "Raspberry Pi", l.Payload.Data.Manufacturer)
 	require.Equal(t, "my-awesome-fake-serial", l.Payload.Data.Serial)
 	require.Equal(t, int(31933), int(l.Payload.Data.MemoryMB))

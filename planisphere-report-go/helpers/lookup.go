@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"runtime"
@@ -13,6 +14,7 @@ import (
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/darwin"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/freebsd"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/linux"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 /* Lookuper will do the more advanced lookups. Using a custom struct for this so we
@@ -229,17 +231,23 @@ func setOSFamilyWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (inter
 
 func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
 	defer l.MarkChecked("device_type")
+	var t string
 	if item, ok := l.Overrides["device_type"]; ok {
-		l.Payload.Data.DeviceType = item.(string)
+		t = item.(string)
 	} else {
 		item, err := f(l)
 		if err != nil {
 			return err
 		}
-		l.Payload.Data.DeviceType = item.(string)
+		t = item.(string)
 	}
-
-	return nil
+	validTypes := []string{"desktop", "laptop", "server", "server_physical", "vm"}
+	if util.ContainsString(validTypes, t) {
+		l.Payload.Data.DeviceType = t
+		return nil
+	}
+	log.Warningf("%v is an invalid device type, must be one of: %v", t, validTypes)
+	return errors.New("InvalidDeviceType")
 }
 
 func setOSFullNameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {

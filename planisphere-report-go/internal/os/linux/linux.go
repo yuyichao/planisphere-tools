@@ -146,27 +146,11 @@ func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
 }
 
 func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
-	var chassisType string
-	l.WaitForChecked("manufacturer")
-	switch l.Payload.Data.Manufacturer {
-	case "Raspberry Pi":
-		chassisType = "Other"
-	default:
-		out, err := l.Commander.Slurp("/sys/class/dmi/id/chassis_type")
-		if err != nil {
-			return nil, err
-		}
-		cid, err := strconv.ParseUint(strings.TrimSpace(string(out)), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		if val, ok := hardware.ChassisType[uint(cid)]; ok {
-			chassisType = val
-		} else {
-			chassisType = "Other"
-		}
+	l.WaitForChecked("serial")
+	if strings.Contains(l.Payload.Data.Serial, "VMware") {
+		return "vm", nil
 	}
-	return chassisType, nil
+	return "", nil
 }
 
 func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
