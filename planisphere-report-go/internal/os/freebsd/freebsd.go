@@ -81,16 +81,11 @@ func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
 }
 
 func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
-	cmdPath, err := l.Commander.LookPath("dmidecode")
-	if err != nil {
-		return "", errors.New("dmidecode is needed to look up model")
+	l.WaitForChecked("serial")
+	if strings.Contains(l.Payload.Data.Serial, "VMware") {
+		return "vm", nil
 	}
-	cmdOut, err := l.Commander.Output(cmdPath, "-s", "chassis-type")
-	if err != nil {
-		return "", errors.New("Issue running dmidecode to get the chassis-type")
-	}
-	trimmed := strings.Trim(string(cmdOut), "\n")
-	return trimmed, nil
+	return "", nil
 }
 
 func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
