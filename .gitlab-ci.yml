@@ -10,6 +10,9 @@ unit_tests:
   script:
     - cd planisphere-report-go
     - go test ./...
+  retry:
+    max: 2
+    when: runner_system_failure
 
 # Need to run this on all oses, or at least linux for this to work
 coverage:
@@ -19,6 +22,9 @@ coverage:
     - cd planisphere-report-go
     - go mod tidy
     - go test -v ./... -coverprofile .testCoverage.txt
+  retry:
+    max: 2
+    when: runner_system_failure
 
 lint:
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
@@ -36,6 +42,9 @@ lint:
       codequality: planisphere-report-go/gl-code-quality-report.json
     paths:
       - planisphere-report-go/gl-code-quality-report.json
+  retry:
+    max: 2
+    when: runner_system_failure
 
 release:
   stage: release
@@ -54,3 +63,6 @@ release:
   script:
     - cd planisphere-report-go
     - goreleaser release --rm-dist
+  retry:
+    max: 2
+    when: runner_system_failure

@@ -95,7 +95,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 		return "", errors.New("Could not run freebsd-version successfully")
 	}
 	trimmed := strings.Trim(string(out), "\n")
-	return trimmed, nil
+	return fmt.Sprintf("FreeBSD %v", trimmed), nil
 }
 
 type BSDSoftware struct {
