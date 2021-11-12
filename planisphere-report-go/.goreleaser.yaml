@@ -6,6 +6,12 @@ release:
   gitlab:
     owner: devil-ops
     name: planisphere-tools
+  name_template: "Planisphere-report Go {{.Tag}}"
+  header: |
+    ## Planisphere-report Go ({{ .Date }})
+
+    This Go version should be used for non-windows based operating systems
+
 project_name: planisphere-report
 builds:
   - env:
@@ -26,9 +32,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    ignore:
-      - goos: darwin
-        goarch: '386'
     binary: 'planisphere-report'
 universal_binaries:
   - replace: false
