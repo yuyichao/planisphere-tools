@@ -185,7 +185,7 @@ nfpms:
 #     preremove: "packaging/scripts/preremove.sh"
 #     postremove: "packaging/scripts/postremove.sh"
 uploads:
-  - name: production
+  - name: productionrpm
     target: https://oneget.oit.duke.edu/rpm/devil-ops-rpms/
     method: PUT
     mode: archive
@@ -193,7 +193,7 @@ uploads:
       X-ApiKey: "{{ .Env.UPLOAD_PRODUCTION_SECRET }}"
     ids:
       - rpms
-  - name: production
+  - name: productiondeb
     target: https://oneget.oit.duke.edu/debian-packages/upload/devil-ops-debs/main/
     method: PUT
     mode: archive
