@@ -189,8 +189,7 @@ uploads:
     target: https://oneget.oit.duke.edu/rpm/devil-ops-rpms/
     method: PUT
     mode: archive
-    custom_headers:
-      X-ApiKey: "{{ .Env.UPLOAD_PRODUCTION_SECRET }}"
+    username: api
     ids:
       - rpms
   - name: productiondeb
