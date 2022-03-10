@@ -10,6 +10,8 @@ unit_tests:
   script:
     - cd planisphere-report-go
     - go test ./...
+  rules:
+    - if: '$CI_COMMIT_TAG !~ /v[0-9]+\.[0-9]+\.[0-9]+/ '
   retry:
     max: 2
     when: runner_system_failure
@@ -22,6 +24,8 @@ coverage:
     - cd planisphere-report-go
     - go mod tidy
     - go test -v ./... -coverprofile .testCoverage.txt
+  rules:
+    - if: '$CI_COMMIT_TAG !~ /v[0-9]+\.[0-9]+\.[0-9]+/ '
   retry:
     max: 2
     when: runner_system_failure
@@ -42,6 +46,8 @@ lint:
       codequality: planisphere-report-go/gl-code-quality-report.json
     paths:
       - planisphere-report-go/gl-code-quality-report.json
+  rules:
+    - if: '$CI_COMMIT_TAG !~ /v[0-9]+\.[0-9]+\.[0-9]+/ '
   retry:
     max: 2
     when: runner_system_failure
