@@ -35,6 +35,9 @@ This will set up a cronjob to run at a random hour and minute daily.
 
 ## About
 
+Find your appropriate self report key from your profile, linked
+[here](https://planisphere.oit.duke.edu/help/self_report)
+
 Do some minimal setup by adding a `~/.planisphere-report.yaml`
 
 Configuration can also be added to `/etc/planisphere-report.[extension]`
