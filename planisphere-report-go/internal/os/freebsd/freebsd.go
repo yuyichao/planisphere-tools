@@ -150,3 +150,7 @@ func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	}
 	return hostname, nil
 }
+
+func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
+	return nil, nil
+}

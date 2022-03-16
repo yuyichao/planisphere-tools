@@ -187,3 +187,13 @@ func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	}
 	return hostname, nil
 }
+
+func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
+	ids := map[string]string{}
+	aidOut, err := l.Commander.Output("/opt/CrowdStrike/falconctl", "-g", "--aid")
+	if err != nil {
+		return nil, err
+	}
+	ids["crowdstrike_aid"] = strings.TrimSuffix(strings.TrimPrefix(string(aidOut), "aid=\""), "\".\n")
+	return ids, nil
+}
