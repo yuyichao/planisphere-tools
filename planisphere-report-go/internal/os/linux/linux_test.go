@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
@@ -23,7 +24,7 @@ func TestNewLookup(t *testing.T) {
 	require.Equal(t, "VMware7,1", l.Payload.Data.Model)
 	require.Equal(t, "", l.Payload.Data.DeviceType)
 	require.Equal(t, "my-awesome-fake-serial", l.Payload.Data.Serial)
-	require.Equal(t, map[string]string{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
+	require.Equal(t, planisphere.ExternalOSIdentifiers{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
 	require.Contains(t, l.Payload.Data.MacAddresses, "01:02:03:30:20:10")
 }
 
@@ -64,6 +65,6 @@ func TestFailingLookup(t *testing.T) {
 	require.Equal(t, "", l.Payload.Data.Model)
 	require.Equal(t, "", l.Payload.Data.DeviceType)
 	require.Equal(t, "", l.Payload.Data.Serial)
-	require.Equal(t, map[string]string(nil), l.Payload.Data.ExternalOSIdentifiers)
+	require.Equal(t, planisphere.ExternalOSIdentifiers(nil), l.Payload.Data.ExternalOSIdentifiers)
 	// require.Contains(t, l.Payload.Data.MacAddresses, "b8:27:eb:30:20:10")
 }

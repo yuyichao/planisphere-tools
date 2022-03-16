@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/darwin"
@@ -39,7 +40,7 @@ func TestNewLookup(t *testing.T) {
 	require.Equal(t, int(8), int(l.Payload.Data.MemoryMB))
 	require.Equal(t, "MacBookPro16,1", l.Payload.Data.Model)
 	require.Equal(t, "laptop", l.Payload.Data.DeviceType)
-	require.Equal(t, map[string]string{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
+	require.Equal(t, planisphere.ExternalOSIdentifiers{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
 }
 
 func TestFailingLookup(t *testing.T) {
