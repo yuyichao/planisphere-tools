@@ -3,6 +3,13 @@
 name: "macOS"
 mac_addresses: []
 command_output:
+  "/Applications/Falcon.app/Contents/Resources/falconctl stats agent_info": |
+    === agent_info ===
+
+    version: 6.36.14903.0
+    agentID: d3bcdcaf1604426b9ad6a421e1a5ad40
+    customerID: foo-bar-baz
+    Sensor operational: true
   "/usr/sbin/scutil --get LocalHostName": "test-hostname"
   "/usr/sbin/sysctl -n hw.memsize": "8388608"
   "/usr/local/bin/brew list --versions": |

@@ -72,6 +72,7 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 
 	genericSetters := []setter{
 		{"Model", nil, setModelWrapper, fancyLookup.GetModel},
+		{"ExternalOSIdentifiers", nil, setExternalOSIdentifersWrapper, fancyLookup.GetExternalOSIdentifiers},
 		{"Memory", nil, setMemoryWrapper, fancyLookup.GetMemory},
 		{"Serial", nil, setPlatformSerialWrapper, fancyLookup.GetSerial},
 		{"Manufacturer", nil, setManufacturerWrapper, fancyLookup.GetManufacturer},
@@ -391,5 +392,22 @@ func setInstalledSoftwareWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookupe
 		l.Payload.Data.InstalledSoftware = item.([][]string)
 	}
 
+	return nil
+}
+
+func setExternalOSIdentifersWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+	defer l.MarkChecked("external_os_identifiers")
+	// Status: deployed, rma, etc
+	if item, ok := l.Overrides["external_os_identifiers"]; ok {
+		l.Payload.Data.ExternalOSIdentifiers = item.(map[string]string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		}
+		if item != nil {
+			l.Payload.Data.ExternalOSIdentifiers = item.(map[string]string)
+		}
+	}
 	return nil
 }

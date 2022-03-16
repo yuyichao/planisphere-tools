@@ -3,6 +3,9 @@ name: "CentOS 8"
 mac_addresses:
   - "01:02:03:30:20:10"
 command_output:
+  "/opt/CrowdStrike/falconctl -g --aid": |
+    aid="d3bcdcaf1604426b9ad6a421e1a5ad40".
+
   "dmidecode -s bios-vendor": "VMware, Inc."
   "dmidecode -s system-product-name": "VMware7,1"
   "dmidecode -s system-serial-number": "my-awesome-fake-serial"
@@ -43,3 +46,7 @@ file_contents:
     VMware7,1
   "/sys/class/dmi/id/chassis_type":
     "1"
+  "/proc/meminfo": |
+    MemTotal:        1801564 kB
+    MemFree:          176684 kB
+    MemAvailable:    1078432 kB

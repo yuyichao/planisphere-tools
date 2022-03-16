@@ -27,6 +27,7 @@ type OSLookup interface {
 	GetDiskEncrypted(l *Lookuper) (interface{}, error)
 	GetManufacturer(l *Lookuper) (interface{}, error)
 	GetSerial(l *Lookuper) (interface{}, error)
+	GetExternalOSIdentifiers(l *Lookuper) (interface{}, error)
 }
 
 type Lookuper struct {
@@ -68,32 +69,3 @@ func (l *Lookuper) MarkChecked(i string) {
 	checkedItemsMutex.Unlock()
 	log.Debugf("Marked %v as checked", i)
 }
-
-// Wait for all items in wi to exist before continuing
-/*
-func WaitForChecked(item string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-	for {
-		if !util.ContainsString(CheckedItems, item) {
-			ci := CheckedItems
-			sort.Strings(ci)
-			log.Debugf("Waiting for %v to be checked...so far found: %v", item, ci)
-			time.Sleep(1 * time.Second)
-			if ctx.Err() != nil {
-				log.Warningf("Timed out waiting for %v to be checked", item)
-				break
-			}
-		} else {
-			break
-		}
-	}
-}
-
-func MarkChecked(i string) {
-	checkedItemsMutex.Lock()
-	CheckedItems = append(CheckedItems, i)
-	checkedItemsMutex.Unlock()
-	log.Warnf("Marked %v as checked", i)
-}
-*/
