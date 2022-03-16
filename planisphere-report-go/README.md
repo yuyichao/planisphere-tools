@@ -7,7 +7,7 @@
 Make sure you have the devil-ops tap intstalled with:
 
 ```bash
-brew tap devil-ops/devil-ops git@gitlab.oit.duke.edu:devil-ops/homebrew-devil-ops.git
+brew tap devil-ops/devil-ops https://gitlab.oit.duke.edu/devil-ops/homebrew-devil-ops.git
 ```
 
 Install using:
