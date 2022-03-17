@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/apex/log"
+	"github.com/google/uuid"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
@@ -68,7 +69,7 @@ func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error)
 func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	out, err := l.Commander.Output("/usr/sbin/scutil", "--get", "LocalHostName")
 	if err != nil {
-		log.Warning("Error running 'scutil --get LocalHostName' to determine the hostname")
+		log.Warn("Error running 'scutil --get LocalHostName' to determine the hostname")
 		return nil, err
 	}
 	trimmed := strings.Trim(string(out), "\n")
@@ -120,7 +121,7 @@ func GetPSApplicationData(l *lookups.Lookuper) (SPApplicationData, error) {
 	var s SPApplicationData
 	out, err := l.Commander.Output("/usr/sbin/system_profiler", "SPApplicationsDataType", "-json")
 	if err != nil {
-		log.Warning("Error converting apps: ", err)
+		log.WithError(err).Warn("Error converting apps")
 	}
 	if err != nil {
 		return s, err
@@ -150,7 +151,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	*/
 	brewOut, err := l.Commander.Output("/usr/local/bin/brew", "list", "--versions")
 	if err != nil {
-		log.Warning("Homebrew package lookup failed")
+		log.Warn("Homebrew package lookup failed")
 	} else {
 		trimmed := strings.Trim(string(brewOut), "\n")
 		for _, line := range strings.Split(trimmed, "\n") {
@@ -175,7 +176,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 		return nil, err
 	}
 	if err != nil {
-		log.Warning("Could not get app date: ", err)
+		log.WithError(err).Warn("Could not get app date")
 		return nil, err
 	}
 	for _, item := range data.SPApplicationsDataType {
@@ -194,7 +195,7 @@ func GetSysctl(target string, l *lookups.Lookuper) (int64, error) {
 
 	v, err := strconv.ParseInt(outClean, 10, 64)
 	if err != nil {
-		log.Warning("Error doing sysctl: ", err)
+		log.WithError(err).Warn("Error doing sysctl")
 		return 0, err
 	}
 	return v, nil
@@ -247,7 +248,7 @@ func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
-		log.Warning("Could not detect disk encryption state: ", err)
+		log.WithError(err).Warn("Could not detect disk encryption state")
 	}
 	return encrypted, nil
 }
@@ -255,9 +256,26 @@ func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 	memory, err := GetMemory(l)
 	if err != nil {
-		log.Warning("Could not detect memory")
+		log.Warn("Could not detect memory")
 	}
 	return uint64(memory), nil
+}
+
+func extractCrowdstrikeAID(output []byte) (string, error) {
+	// macOS prints this out with a bunch of junk...tryin to do this efficently
+	// Looking up "agentID: <ActualID>\n"
+	startMarker := "agentID: "
+	aidStart := strings.Index(string(output), startMarker)
+	aidPrefix := string(output)[aidStart+len(startMarker):]
+	aidEnd := strings.Index(aidPrefix, "\n")
+	aid := aidPrefix[:aidEnd]
+	_, err := uuid.Parse(aid)
+	if err != nil {
+		return "", err
+	}
+	// Use the linux aid format, no uppercase/dashes
+	aid = strings.ReplaceAll(strings.ToLower(aid), "-", "")
+	return aid, nil
 }
 
 func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
@@ -268,11 +286,10 @@ func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, er
 	}
 	// macOS prints this out with a bunch of junk...tryin to do this efficently
 	// Looking up "agentID: <ActualID>\n"
-	startMarker := "agentID: "
-	aidStart := strings.Index(string(aidOut), startMarker)
-	aidPrefix := string(aidOut)[aidStart+len(startMarker):]
-	aidEnd := strings.Index(aidPrefix, "\n")
-	aid := aidPrefix[:aidEnd]
+	aid, err := extractCrowdstrikeAID(aidOut)
+	if err != nil {
+		return nil, err
+	}
 	ids["crowdstrike_aid"] = aid
 	return ids, nil
 }

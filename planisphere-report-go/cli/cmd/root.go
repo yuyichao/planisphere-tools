@@ -4,8 +4,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
@@ -30,6 +31,7 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		log.SetHandler(cli.Default)
 		// planisphereKey := viper.GetString("key")
 		// Are we talky?
 		if Verbose {
@@ -41,14 +43,14 @@ var rootCmd = &cobra.Command{
 		if planisphereKey == "" {
 			log.Fatal("Must set your Planisphere Key in the config file or env. See README.md for details")
 		}
-		log.Debug("Using Key: ", planisphereKey)
+		log.WithField("planisphere_key", planisphereKey).Debug("Using Key")
 
 		// Set URL if needed
 		planisphereURL = viper.GetString("url")
 		if planisphereURL == "" {
 			planisphereURL = "https://planisphere.oit.duke.edu/self_report"
 		}
-		log.Debug("Using URL: ", planisphereURL)
+		log.WithField("url", planisphereURL).Debug("Using URL")
 	},
 }
 
@@ -87,13 +89,13 @@ func initConfig() {
 		viper.AddConfigPath("/etc/")
 		viper.SetConfigName("planisphere-report")
 		err = viper.ReadInConfig()
-		log.Debug(err)
+		log.WithError(err).Debug("Error reading config")
 
 		// Search config in home directory with name ".planisphere-report" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".planisphere-report")
 		err = viper.MergeInConfig()
-		log.Debug(err)
+		log.WithError(err).Debug("Error doing merge config")
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
@@ -133,6 +135,6 @@ $ export PLANISPHERE_REPORT_KEY=your-key`)
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		log.Debug("Using config file:", viper.ConfigFileUsed())
+		log.WithField("config_file", viper.ConfigFileUsed()).Debug("Using config file")
 	}
 }

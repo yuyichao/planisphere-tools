@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/apex/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
@@ -54,7 +54,7 @@ func (l *Lookuper) WaitForChecked(item string) {
 			log.Debugf("Waiting for %v to be checked...so far found: %v", item, ci)
 			time.Sleep(1 * time.Second)
 			if ctx.Err() != nil {
-				log.Warningf("Timed out waiting for %v to be checked", item)
+				log.WithField("item", item).Warn("Timed out waiting for check")
 				break
 			}
 		} else {

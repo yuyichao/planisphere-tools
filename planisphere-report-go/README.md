@@ -57,7 +57,8 @@ key: foo
 # url: https://planisphere-test.oit.duke.edu/self_report
 
 ## Overrides will always take precedence over auto-detected values
-## Here are some examples:
+## Here are some examples (Note: The values below are likely to be different for
+## your environment. Please adjust accordingly):
 overrides:
     instance_key: "foo"
     os_family: "macOS"
@@ -80,3 +81,11 @@ overrides:
 Check out the files in `internal/os`. Create a new folder for your OS, as well
 as some tests. To get going quickly, you can copy from an existing OS we already
 support
+
+## Troubleshooting
+
+If you run in to issues, there are a few things you can try:
+
+* Run with `--verbose`. This will give you some additional output that may provide additional information on what's failing
+
+* Run the `diagnostics` subcommand. This will generate a gz file you can attach to an Issue report in the GitLab project. This will be encrypted to the ssi-systems team by default.

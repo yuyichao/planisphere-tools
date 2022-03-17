@@ -3,7 +3,7 @@ Description=Run planisphere-report daily
 Requires=network-online.target
 
 [Timer]
-OnUnitActiveSec=86400
+OnUnitActiveSec=3600
 OnActiveSec=60
 Persistent=true
 

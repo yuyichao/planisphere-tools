@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/apex/log"
 	"github.com/stretchr/testify/require"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
@@ -47,7 +47,7 @@ func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
 	case "/sbin/sysctl -n vm.kmem_size":
 		return []byte("8388608"), nil
 	default:
-		log.Warningf("Unknown command: %v", joined)
+		log.WithField("command", joined).Warn("Unknown command")
 		return []byte("fell through"), nil
 	}
 }

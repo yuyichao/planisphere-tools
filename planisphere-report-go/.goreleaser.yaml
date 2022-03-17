@@ -11,7 +11,6 @@ release:
     ## Planisphere-report Go ({{ .Date }})
 
     This Go version should be used for non-windows based operating systems
-
 project_name: planisphere-report
 builds:
   - env:
@@ -135,10 +134,14 @@ nfpms:
         dst: /usr/lib/systemd/system/planisphere-report.service
         file_info:
           mode: 0644
+          group: root
+          owner: root
       - src: packaging/systemd/planisphere-report.timer
         dst: /usr/lib/systemd/system/planisphere-report.timer
         file_info:
           mode: 0644
+          group: root
+          owner: root
     scripts:
       postinstall: "packaging/scripts/postinstall.sh"
       preremove: "packaging/scripts/preremove.sh"
