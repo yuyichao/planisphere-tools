@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/apex/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 
 	"github.com/spf13/cobra"
@@ -34,13 +34,13 @@ var installCronCmd = &cobra.Command{
 		hour := r1.Intn(23)
 		minute := r1.Intn(59)
 		content := fmt.Sprintf("%v %v * * * %v report\n", minute, hour, ex)
-		log.Println("Creating cron:")
+		log.Info("Creating cron:")
 		fmt.Println(content)
 
 		err = os.WriteFile(cronFile, []byte(content), 0o644)
 
 		cobra.CheckErr(err)
-		log.Println("Successfully installed cron! If it's not to your liking, feel free to edit.")
+		log.Info("Successfully installed cron! If it's not to your liking, feel free to edit.")
 	},
 }
 

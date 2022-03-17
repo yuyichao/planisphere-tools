@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/apex/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/darwin"
@@ -53,7 +53,7 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 	} else {
 		detectOS = c.OS
 	}
-	log.Debug("Using OS:", detectOS)
+	log.WithField("os", detectOS).Debug("Detected OS")
 	switch detectOS {
 	case "darwin":
 		fancyLookup = darwin.OSLookup{}
@@ -101,12 +101,12 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 			if gs.wrapperE == nil {
 				// Simple setter operations
 				gs.wrapper(l)
-				log.Debug("Ran", gs.name)
+				log.WithField("setter", gs.name).Debug("Ran setter")
 			} else {
 				// Enhanced setter operations
 				err := gs.wrapperE(l, gs.wrapperEF)
 				if err != nil {
-					log.Warning(err)
+					log.WithError(err).Warn("Error running setter")
 				}
 			}
 		}(gs)
@@ -247,7 +247,10 @@ func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 		l.Payload.Data.DeviceType = t
 		return nil
 	}
-	log.Warningf("%v is an invalid device type, must be one of: %v", t, validTypes)
+	log.WithFields(log.Fields{
+		"device_type": t,
+		"valid_types": validTypes,
+	}).Warn("Invalid device type")
 	return errors.New("InvalidDeviceType")
 }
 
@@ -349,7 +352,7 @@ func setMacAddressesWrapper(l *lookups.Lookuper) {
 		// macs, err := getMacAddr()
 		macs, err := l.Commander.GetMacAddrs()
 		if err != nil {
-			log.Warning("Could not detect mac_addresses: ", err)
+			log.WithError(err).Warn("Could not detect mac_addresses")
 		}
 		l.Payload.Data.MacAddresses = macs
 	}
@@ -366,7 +369,7 @@ func setExtraDataWrapper(l *lookups.Lookuper) {
 				l.Payload.ExtraData[k] = v.(string)
 			}
 		} else {
-			log.Warning("No extra_data to parse, yet extra_data section exists")
+			log.Warn("No extra_data to parse, yet extra_data section exists")
 		}
 	}
 }
