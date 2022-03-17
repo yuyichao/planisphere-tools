@@ -18,7 +18,7 @@ brew install planisphere-report
 
 ### Linux Packages
 
-Download the appropriate package from the releases page and install. These
+Download the appropriate package from the [releases page](https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/-/releases) and install. These
 packages all install a systemd timer, set to run once a day
 
 ### Other
