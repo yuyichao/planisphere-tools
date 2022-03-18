@@ -22,14 +22,20 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/apex/log"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/gpg"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gopkg.in/yaml.v2"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // diagnosticsCmd represents the diagnostics command
@@ -48,15 +54,23 @@ it with whatever public keys you choose as well.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext, err := cmd.Flags().GetBool("plaintext")
 		cobra.CheckErr(err)
+		stdout, err := cmd.Flags().GetBool("stdout")
+		cobra.CheckErr(err)
 		type cmdDiagnostic struct {
 			Command string `yaml:"command"`
 			StdOut  string `yaml:"stdout"`
 			StdErr  string `yaml:"stderr"`
 		}
 		type diagnostic struct {
-			Hostname string          `yaml:"hostname"`
-			Version  string          `yaml:"version"`
-			Commands []cmdDiagnostic `yaml:"commands"`
+			Hostname  string                        `yaml:"hostname"`
+			Version   string                        `yaml:"version"`
+			User      string                        `yaml:"user"`
+			TimeStamp time.Time                     `yaml:"time"`
+			Instance  string                        `yaml:"instance"`
+			KeyHash   string                        `yaml:"key_hash"`
+			Overrides map[string]interface{}        `yaml:"overrides"`
+			Payload   planisphere.SelfReportPayload `yaml:"payload"`
+			Commands  []cmdDiagnostic               `yaml:"commands"`
 		}
 		cmdMap := map[string][][]string{
 			"darwin": {
@@ -87,12 +101,21 @@ it with whatever public keys you choose as well.`,
 			log.WithField("os", runtime.GOOS).Fatal("No commands available for this OS")
 		}
 
-		hostname, err := os.Hostname()
-		if err != nil {
-			log.WithError(err).Warn("Could not get hostname")
-		}
+		hostname, _ := os.Hostname()
+		now := time.Now()
 		d := diagnostic{
-			Hostname: hostname,
+			Hostname:  hostname,
+			Version:   version,
+			Instance:  planisphereURL,
+			TimeStamp: now,
+			KeyHash:   helpers.HashString(planisphereKey),
+			Overrides: viper.GetStringMap("overrides"),
+		}
+		u, err := user.Current()
+		if err != nil {
+			log.WithError(err).Warn("Could not get username")
+		} else {
+			d.User = u.Username
 		}
 		c := make(chan cmdDiagnostic)
 		for _, cmd := range cmds {
@@ -119,6 +142,19 @@ it with whatever public keys you choose as well.`,
 		for i := 0; i < len(cmds); i++ {
 			d.Commands = append(d.Commands, <-c)
 		}
+
+		// Try to get a real report as well, and toss it in for good measure
+		lc := &lookups.LookuperConfig{
+			Overrides: viper.GetStringMap("overrides"),
+		}
+		lu, err := helpers.NewLookuper(lc)
+		if err == nil {
+			d.Payload = lu.Payload
+		} else {
+			log.WithError(err).Warn("Issues getting lookups")
+		}
+
+		// Marshal the diagnostic
 		b, err := yaml.Marshal(d)
 		cobra.CheckErr(err)
 
@@ -155,6 +191,9 @@ it with whatever public keys you choose as well.`,
 		fmt.Printf("Wrote diagnostics to: %v\n", diagFile.Name())
 		fmt.Println("Please describe the issue you are running in to, and attach this diagnostic file to a new 'Issue' report at the URL below")
 		fmt.Println("https://duke.is/z9nxa")
+		if stdout {
+			fmt.Println(string(b))
+		}
 	},
 }
 
@@ -170,4 +209,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	diagnosticsCmd.PersistentFlags().BoolP("plaintext", "p", false, "Use plaintext, don't encrypt")
+	diagnosticsCmd.PersistentFlags().BoolP("stdout", "s", false, "Send output to stdout in addition to the tmpfile")
 }
