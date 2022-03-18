@@ -19,17 +19,17 @@ var reportCmd = &cobra.Command{
 	Short: "Report back to Planisphere",
 	Long:  `Look up local information and send it up to Planisphere self report`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL)
+		dryrun, err := cmd.Flags().GetBool("dryrun")
+		cobra.CheckErr(err)
+		log.Debugf("Dryrun is set to: %v", dryrun)
+
+		err = os.Setenv("PLANISPHEREREPORT_URL", planisphereURL)
 		if err != nil {
 			log.WithError(err).Fatal("Error setting url")
 		}
-		dryrun, _ := cmd.Flags().GetBool("dryrun")
-		log.Debugf("Dryrun is set to: %v", dryrun)
-
-		overrides := viper.GetStringMap("overrides")
 
 		c := &lookups.LookuperConfig{
-			Overrides: overrides,
+			Overrides: viper.GetStringMap("overrides"),
 		}
 		l, err := helpers.NewLookuper(c)
 		if err != nil {
