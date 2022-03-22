@@ -6,7 +6,7 @@ stages:
 # Need to run this on all oses, or at least linux for this to work
 unit_tests:
   stage: test
-  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
+  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.18
   script:
     - cd planisphere-report-go
     - go test ./...
@@ -19,7 +19,7 @@ unit_tests:
 # Need to run this on all oses, or at least linux for this to work
 coverage:
   stage: test
-  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.17
+  image: image-mirror-prod-registry.cloud.duke.edu/library/golang:1.18
   script:
     - cd planisphere-report-go
     - go mod tidy
