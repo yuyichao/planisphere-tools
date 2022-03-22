@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os/exec"
+	"os/user"
 	"strconv"
 	"strings"
 
@@ -280,16 +281,22 @@ func extractCrowdstrikeAID(output []byte) (string, error) {
 
 func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
 	ids := map[string]string{}
-	aidOut, err := l.Commander.Output("/Applications/Falcon.app/Contents/Resources/falconctl", "stats", "agent_info")
+	user, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
-	// macOS prints this out with a bunch of junk...tryin to do this efficently
-	// Looking up "agentID: <ActualID>\n"
-	aid, err := extractCrowdstrikeAID(aidOut)
-	if err != nil {
-		return nil, err
+	if user.Uid == "0" {
+		aidOut, err := l.Commander.Output("/Applications/Falcon.app/Contents/Resources/falconctl", "stats", "agent_info")
+		if err != nil {
+			return nil, err
+		}
+		// macOS prints this out with a bunch of junk...tryin to do this efficently
+		// Looking up "agentID: <ActualID>\n"
+		aid, err := extractCrowdstrikeAID(aidOut)
+		if err != nil {
+			return nil, err
+		}
+		ids["crowdstrike_aid"] = aid
 	}
-	ids["crowdstrike_aid"] = aid
 	return ids, nil
 }
