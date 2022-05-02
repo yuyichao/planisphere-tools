@@ -65,8 +65,13 @@ release:
   variables:
     # Disable shallow cloning so that goreleaser can diff between tags to
     # generate a changelog.
+    VAULT_ADDR: https://vault-mgmt.oit.duke.edu
     GIT_DEPTH: 0
   script:
+    - apk add vault
+    - VAULT_TOKEN=$(vault write -field=token auth/global/gitlab/login role=ssi-systems-planisphere-tools-packaging jwt=${CI_JOB_JWT})
+    - export VAULT_TOKEN
+    - vault kv get -field=key ssi-systems/kv/devil-ops/package-signing/gpg > /tmp/key.txt
     - cd planisphere-report-go
     - goreleaser release --rm-dist
   retry:
