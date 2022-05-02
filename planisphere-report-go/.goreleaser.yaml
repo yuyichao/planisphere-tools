@@ -107,6 +107,9 @@ nfpms:
     priority: optional
     homepage: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools
     maintainer: Drew Stinnett <drew.stinnett@duke.edu>
+    rpm:
+      signature:
+        key_file: /tmp/key.txt
     formats:
       - rpm
     contents:

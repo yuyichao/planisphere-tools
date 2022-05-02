@@ -21,6 +21,10 @@ brew install planisphere-report
 Download the appropriate package from the [releases page](https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/-/releases) and install. These
 packages all install a systemd timer, set to run once a day
 
+You can validate the rpm gpg signature by importing
+[this](https://gitlab.oit.duke.edu/devil-ops/installing-devil-ops-packages/-/raw/main/pubkeys/RPM-GPG-KEY-DEVIL-OPS-2022-05-02)
+key either inside of your yum configuration, or using `rpm --import <keyfile>`
+
 ### Other
 
 Download the appropriate binary from the releases page
