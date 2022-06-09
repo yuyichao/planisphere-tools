@@ -115,8 +115,16 @@ nfpms:
     contents:
       - src: packaging/systemd/planisphere-report.service
         dst: /usr/lib/systemd/system/planisphere-report.service
+        file_info:
+          mode: 0644
+          group: root
+          owner: root
       - src: packaging/systemd/planisphere-report.timer
         dst: /usr/lib/systemd/system/planisphere-report.timer
+        file_info:
+          mode: 0644
+          group: root
+          owner: root
     scripts:
       postinstall: "packaging/scripts/postinstall.sh"
       preremove: "packaging/scripts/preremove.sh"
@@ -163,8 +171,16 @@ nfpms:
     contents:
       - src: packaging/systemd/planisphere-report.service
         dst: /usr/lib/systemd/system/planisphere-report.service
+        file_info:
+          mode: 0644
+          group: root
+          owner: root
       - src: packaging/systemd/planisphere-report.timer
         dst: /usr/lib/systemd/system/planisphere-report.timer
+        file_info:
+          mode: 0644
+          group: root
+          owner: root
     scripts:
       postinstall: "packaging/scripts/postinstall.sh"
       preremove: "packaging/scripts/preremove.sh"
