@@ -1,6 +1,6 @@
 package hardware
 
-var ChassisType = map[uint]string{
+var ChassisType = map[int]string{
 	3:  "desktop",
 	4:  "desktop",
 	5:  "desktop",
