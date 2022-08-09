@@ -150,6 +150,20 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 	if strings.Contains(l.Payload.Data.Serial, "VMware") {
 		return "vm", nil
 	}
+	ct, err := l.Commander.Slurp("/sys/class/dmi/id/chassis_type")
+	if err != nil {
+		return nil, err
+	}
+	// ct as an integer
+	cti, err := strconv.Atoi(string(ct))
+	if err != nil {
+		return nil, err
+	}
+	// Is the chassis type integer in the deviceTypeTable?
+	if _, ok := hardware.ChassisType[cti]; ok {
+		return hardware.ChassisType[cti], nil
+	}
+
 	return "", nil
 }
 
