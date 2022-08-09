@@ -44,8 +44,7 @@ file_contents:
     VMware, Inc.
   "/sys/class/dmi/id/product_name":
     VMware7,1
-  "/sys/class/dmi/id/chassis_type":
-    "10"
+  "/sys/class/dmi/id/chassis_type": "10\n"
   "/proc/meminfo": |
     MemTotal:        1801564 kB
     MemFree:          176684 kB

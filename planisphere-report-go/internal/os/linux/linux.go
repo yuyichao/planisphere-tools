@@ -154,8 +154,10 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// ct as an integer
-	cti, err := strconv.Atoi(string(ct))
+	// Strip the newline please
+	ctt := strings.TrimSpace(string(ct))
+	// ctt as an integer
+	cti, err := strconv.Atoi(ctt)
 	if err != nil {
 		return nil, err
 	}
