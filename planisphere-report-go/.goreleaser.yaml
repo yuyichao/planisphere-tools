@@ -185,27 +185,6 @@ nfpms:
       postinstall: "packaging/scripts/postinstall.sh"
       preremove: "packaging/scripts/preremove.sh"
       postremove: "packaging/scripts/postremove.sh"
-# This should be supported in goreleaser soon, as it's already in nfpm
-# - id: aurs
-#   bindir: /usr/bin
-#   license: MIT
-#   description: Planisphere Self Report Tool
-#   vendor: Duke University
-#   section: admin
-#   priority: optional
-#   homepage: https://gitlab.oit.duke.edu/devil-ops/planisphere-tools
-#   maintainer: Drew Stinnett <drew.stinnett@duke.edu>
-#   formats:
-#     - aur
-#   contents:
-#     - src: packaging/systemd/planisphere-report.service
-#       dst: /usr/lib/systemd/system/planisphere-report.service
-#     - src: packaging/systemd/planisphere-report.timer
-#       dst: /usr/lib/systemd/system/planisphere-report.timer
-#   scripts:
-#     postinstall: "packaging/scripts/postinstall.sh"
-#     preremove: "packaging/scripts/preremove.sh"
-#     postremove: "packaging/scripts/postremove.sh"
 uploads:
   - name: productionrpm
     target: https://oneget.oit.duke.edu/rpm/devil-ops-rpms/
@@ -221,3 +200,7 @@ uploads:
     username: api
     ids:
       - debs
+signs:
+- cmd: cosign
+  args: ["sign-blob", "--key=hashivault://package-signing", "--output-signature=${signature}", "${artifact}"]
+  artifacts: all
