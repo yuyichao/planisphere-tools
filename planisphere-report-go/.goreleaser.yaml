@@ -70,7 +70,7 @@ brews:
           <string>com.duke.planisphere.report</string>
           <key>ProgramArguments</key>
           <array>
-              <string>/usr/local/bin/planisphere-report</string>
+              <string>#{bin}/planisphere-report</string>
               <string>report</string>
           </array>
           <key>RunAtLoad</key>
