@@ -17,6 +17,7 @@ var cfgFile string
 var (
 	planisphereKey string
 	planisphereURL string
+	version        = "dev"
 )
 
 // Verbose Logging
@@ -24,9 +25,10 @@ var Verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "planisphere-report",
-	Short: "Self report tool for Planisphere",
-	Long:  `Self report tool for Planisphere. Currently supported on macOS, Linux and FreeBSD`,
+	Use:     "planisphere-report",
+	Short:   "Self report tool for Planisphere",
+	Long:    `Self report tool for Planisphere. Currently supported on macOS, Linux and FreeBSD`,
+	Version: version,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
