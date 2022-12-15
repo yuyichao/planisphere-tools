@@ -2,7 +2,6 @@ package util_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -28,7 +27,7 @@ func TestContainsString(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	file, err := ioutil.TempFile("", "")
+	file, err := os.CreateTemp("", "")
 	if err != nil {
 		log.Fatal(err)
 	}

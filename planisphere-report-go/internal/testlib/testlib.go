@@ -3,7 +3,7 @@ package testlib
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -52,7 +52,7 @@ func MockMacGet(d *MockData) ([]string, error) {
 
 func NewMockData(filePath string) (*MockData, error) {
 	var d MockData
-	yamlFile, err := ioutil.ReadFile(filePath)
+	yamlFile, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}

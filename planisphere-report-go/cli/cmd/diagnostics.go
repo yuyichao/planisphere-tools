@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -133,7 +132,10 @@ it with whatever public keys you choose as well.`,
 				if err != nil {
 					log.Debug().Err(err).Interface("cmd", cmd).Msg("Error running command")
 				}
-				oCmd.Wait()
+				err = oCmd.Wait()
+				if err != nil {
+					log.Warn().Err(err).Msg("Command errored out")
+				}
 
 				cd := cmdDiagnostic{
 					Command: strings.Join(cmd, " "),
@@ -177,7 +179,10 @@ it with whatever public keys you choose as well.`,
 		}
 
 		// Write data out
-		zw.Write(b)
+		_, err = zw.Write(b)
+		if err != nil {
+			log.Warn().Err(err).Msg("Error writing out")
+		}
 		zw.Close()
 
 		// fmt.Println(string(encrypted))
@@ -190,7 +195,7 @@ it with whatever public keys you choose as well.`,
 		}
 		diagFile, err := os.CreateTemp("", fExt)
 		cobra.CheckErr(err)
-		err = ioutil.WriteFile(diagFile.Name(), buf.Bytes(), os.ModePerm)
+		err = os.WriteFile(diagFile.Name(), buf.Bytes(), os.ModePerm)
 		cobra.CheckErr(err)
 		fmt.Printf("Wrote diagnostics to: %v\n", diagFile.Name())
 		fmt.Println("Please describe the issue you are running in to, and attach this diagnostic file to a new 'Issue' report at the URL below")
