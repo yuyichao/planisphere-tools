@@ -72,7 +72,7 @@ var reportCmd = &cobra.Command{
 				if err != nil {
 					log.Fatal().Err(err).Msg("Error submitting payload")
 				}
-				fmt.Println("Submitted report, thanks for keeping Duke Safe! ❤️")
+				log.Info().Msg("Submitted report, thanks for keeping Duke Safe! ❤️")
 			}
 			if interval.Seconds() == 0 {
 				return
