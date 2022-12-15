@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,7 +37,7 @@ func MockFileGet(d *MockData, fp string) ([]byte, error) {
 		if val, ok := d.FileContents[fp]; ok {
 			return []byte(val), nil
 		}
-		log.WithField("mock_file", fp).Warn("Missing mock file")
+		log.Warn().Str("mock_file", fp).Msg("Missing mock file")
 		return []byte("unknown-mock-file"), errors.New("unknown-mock-file")
 	}
 	return []byte(""), nil

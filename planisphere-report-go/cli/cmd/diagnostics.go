@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/gpg"
@@ -102,7 +102,7 @@ it with whatever public keys you choose as well.`,
 
 		cmds := cmdMap[runtime.GOOS]
 		if cmds == nil {
-			log.WithField("os", runtime.GOOS).Fatal("No commands available for this OS")
+			log.Fatal().Str("os", runtime.GOOS).Msg("No commands available for this OS")
 		}
 
 		hostname, _ := os.Hostname()
@@ -117,7 +117,7 @@ it with whatever public keys you choose as well.`,
 		}
 		u, err := user.Current()
 		if err != nil {
-			log.WithError(err).Warn("Could not get username")
+			log.Warn().Err(err).Msg("Could not get username")
 		} else {
 			d.User = u.Username
 		}
@@ -131,7 +131,7 @@ it with whatever public keys you choose as well.`,
 
 				err := oCmd.Run()
 				if err != nil {
-					log.WithError(err).WithField("cmd", cmd).Debug("Error running command")
+					log.Debug().Err(err).Interface("cmd", cmd).Msg("Error running command")
 				}
 				oCmd.Wait()
 
@@ -155,7 +155,7 @@ it with whatever public keys you choose as well.`,
 		if err == nil {
 			d.Payload = lu.Payload
 		} else {
-			log.WithError(err).Warn("Issues getting lookups")
+			log.Warn().Err(err).Msg("Issues getting lookups")
 		}
 
 		// Marshal the diagnostic

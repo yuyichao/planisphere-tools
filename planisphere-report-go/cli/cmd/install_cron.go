@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 
 	"github.com/spf13/cobra"
@@ -20,7 +20,7 @@ var installCronCmd = &cobra.Command{
 		cronFile, _ := cmd.Flags().GetString("cron-file")
 		force, _ := cmd.Flags().GetBool("force")
 		if util.Exists(cronFile) && !force {
-			log.Fatalf("Cronfile %v already exists. Use -f/--force to overwrite it", cronFile)
+			log.Fatal().Str("file", cronFile).Msg("Cronfile already exists. Use -f/--force to overwrite it")
 		}
 		// Figure out out path
 		ex, err := os.Executable()
@@ -34,13 +34,13 @@ var installCronCmd = &cobra.Command{
 		hour := r1.Intn(23)
 		minute := r1.Intn(59)
 		content := fmt.Sprintf("%v %v * * * %v report\n", minute, hour, ex)
-		log.Info("Creating cron:")
+		log.Info().Msg("Creating cron:")
 		fmt.Println(content)
 
 		err = os.WriteFile(cronFile, []byte(content), 0o644)
 
 		cobra.CheckErr(err)
-		log.Info("Successfully installed cron! If it's not to your liking, feel free to edit.")
+		log.Info().Msg("Successfully installed cron! If it's not to your liking, feel free to edit.")
 	},
 }
 

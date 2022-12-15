@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/apex/log"
 	"github.com/r3labs/diff"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
@@ -22,10 +22,10 @@ the 'report' command for that`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL+"/test")
 		if err != nil {
-			log.WithError(err).Fatal("Error setting url")
+			log.Fatal().Err(err).Msg("Error setting url")
 		}
 		dryrun, _ := cmd.Flags().GetBool("dryrun")
-		log.Debugf("Dryrun is set to: %v", dryrun)
+		log.Debug().Bool("dryrun", dryrun).Msg("Dryrun setting")
 
 		overrides := viper.GetStringMap("overrides")
 
@@ -34,17 +34,17 @@ the 'report' command for that`,
 		}
 		l, err := helpers.NewLookuper(c)
 		if err != nil {
-			log.WithError(err).Fatal("Could not initialize Lookuper 😭☠️")
+			log.Fatal().Err(err).Msg("Could not initialize Lookuper 😭☠️")
 		}
 
 		// Add version to extra data
 		l.Payload.ExtraData["selfreport_version"] = version
 		payloadResp, err := l.Payload.SubmitTest(planisphereKey)
 		if err != nil {
-			log.WithError(err).Fatal("Error submitting test payload")
+			log.Fatal().Err(err).Msg("Error submitting test payload")
 		}
 		if payloadResp.Status != "success" {
-			log.Fatalf("Could not send this data in as test data, got back: %v", payloadResp)
+			log.Fatal().Interface("response", payloadResp).Msg("Could not send this data in as test data")
 		}
 		changelog, _ := diff.Diff(l.Payload, payloadResp.ProcessedRecord)
 		if len(changelog) > 0 {
@@ -53,7 +53,7 @@ the 'report' command for that`,
 				fmt.Printf("%+v\n", change)
 			}
 		} else {
-			log.Info("Wooooow, no changes!")
+			log.Info().Msg("Wooooow, no changes!")
 		}
 	},
 }

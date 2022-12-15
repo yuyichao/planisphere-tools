@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
@@ -22,9 +22,7 @@ var reportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)
-		log.WithFields(log.Fields{
-			"dryrun": dryrun,
-		}).Debug("Dryrun mode")
+		log.Debug().Bool("dryrun", dryrun).Msg("Dryrun mode")
 
 		interval, err := cmd.Flags().GetDuration("interval")
 		cobra.CheckErr(err)
@@ -32,7 +30,7 @@ var reportCmd = &cobra.Command{
 		for {
 			err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL)
 			if err != nil {
-				log.WithError(err).Fatal("Error setting url")
+				log.Fatal().Err(err).Msg("Error setting url")
 			}
 
 			c := &lookups.LookuperConfig{
@@ -40,7 +38,7 @@ var reportCmd = &cobra.Command{
 			}
 			l, err := helpers.NewLookuper(c)
 			if err != nil {
-				log.WithError(err).Fatal("Could not initialize Lookuper 😭☠️")
+				log.Fatal().Err(err).Msg("Could not initialize Lookuper 😭☠️")
 			}
 
 			// Add version to extra data
@@ -72,16 +70,14 @@ var reportCmd = &cobra.Command{
 			if !dryrun {
 				err := l.Payload.Submit(planisphereKey)
 				if err != nil {
-					log.WithError(err).Fatal("Error submitting payload")
+					log.Fatal().Err(err).Msg("Error submitting payload")
 				}
 				fmt.Println("Submitted report, thanks for keeping Duke Safe! ❤️")
 			}
 			if interval.Seconds() == 0 {
 				return
 			}
-			log.WithFields(log.Fields{
-				"interval": interval,
-			}).Info("Sleeping until next run")
+			log.Info().Str("interval", fmt.Sprint(interval)).Msg("Sleeping until next run")
 			time.Sleep(interval)
 		}
 	},

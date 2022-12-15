@@ -4,11 +4,11 @@ go 1.19
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20220730123233-d6ffb7692adf
-	github.com/apex/log v1.9.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/r3labs/diff v1.1.0
+	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.7.2
@@ -20,10 +20,10 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
+	github.com/apex/log v1.9.0 // indirect
 	github.com/cloudflare/circl v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect

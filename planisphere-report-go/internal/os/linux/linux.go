@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/hardware"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
@@ -40,19 +40,19 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 		args := softwareQuery[1:]
 		binPath, err := l.Commander.LookPath(cmd)
 		if err == nil {
-			log.WithField("query", softwareQuery).Debug("Running software query")
+			log.Debug().Strs("query", softwareQuery).Msg("Running software query")
 			binOut, err := l.Commander.Output(binPath, args...)
 			if err != nil {
-				log.WithField("command", cmd).Warn("Could not do alisting even though the rpm command exists")
+				log.Warn().Str("command", cmd).Msg("Could not do alisting even though the rpm command exists")
 			}
 			binSoftware, err := ParsePackageOutput(binOut)
 			if err != nil {
-				log.WithField("command", cmd).Warn("Could not parse the command output")
+				log.Warn().Str("command", cmd).Msg("Could not parse the command output")
 			} else {
 				softwareTable = append(softwareTable, binSoftware...)
 			}
 		} else {
-			log.Debugf("No %v command installed\n", cmd)
+			log.Debug().Str("cmd", cmd).Msg("command installed")
 		}
 	}
 
@@ -91,7 +91,7 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 		if strings.HasPrefix(mac, "b8:27:eb") {
 			cpuDat, err := l.Commander.Slurp("/proc/cpuinfo")
 			if err != nil {
-				log.WithError(err).Warn("Could not get Raspberry Pi CPU info")
+				log.Warn().Err(err).Msg("Could not get Raspberry Pi CPU info")
 				continue
 			} else {
 				trimmed := strings.Trim(string(cpuDat), "\n")
