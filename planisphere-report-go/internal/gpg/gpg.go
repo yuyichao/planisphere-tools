@@ -19,7 +19,7 @@ import (
 // Encrypt the provided bytes for the provided encryption
 // keys recipients. Returns the encrypted content bytes.
 func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
-	var buffer *bytes.Buffer = &bytes.Buffer{}
+	buffer := &bytes.Buffer{}
 	var armoredWriter io.WriteCloser
 	var cipheredWriter io.WriteCloser
 	var err error
