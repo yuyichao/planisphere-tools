@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
 )
@@ -31,7 +31,7 @@ func setup() {
 	var err error
 	macOSData, err = testlib.NewMockData("testdata/macos.yaml")
 	if err != nil {
-		log.WithError(err).Fatal("Error setting macOS data")
+		log.Fatal().Err(err).Msg("Error setting macOS data")
 	}
 }
 

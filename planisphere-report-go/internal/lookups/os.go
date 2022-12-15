@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
@@ -51,10 +51,10 @@ func (l *Lookuper) WaitForChecked(item string) {
 		if !util.ContainsString(l.CheckedItems, item) {
 			ci := l.CheckedItems
 			sort.Strings(ci)
-			log.Debugf("Waiting for %v to be checked...so far found: %v", item, ci)
+			log.Debug().Msgf("Waiting for %v to be checked...so far found: %v", item, ci)
 			time.Sleep(1 * time.Second)
 			if ctx.Err() != nil {
-				log.WithField("item", item).Warn("Timed out waiting for check")
+				log.Warn().Str("item", item).Msg("Timed out waiting for check")
 				break
 			}
 		} else {
@@ -67,5 +67,5 @@ func (l *Lookuper) MarkChecked(i string) {
 	checkedItemsMutex.Lock()
 	l.CheckedItems = append(l.CheckedItems, i)
 	checkedItemsMutex.Unlock()
-	log.Debugf("Marked %v as checked", i)
+	log.Debug().Str("item", i).Msg("Marked as checked")
 }

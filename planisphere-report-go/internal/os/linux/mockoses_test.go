@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
@@ -36,11 +36,11 @@ func setup() {
 	var err error
 	centos8Data, err = testlib.NewMockData("testdata/centos8.yaml")
 	if err != nil {
-		log.WithError(err).Fatal("Error setting centos8 data")
+		log.Fatal().Err(err).Msg("Error setting centos8 data")
 	}
 	piData, err = testlib.NewMockData("testdata/raspberrypi.yaml")
 	if err != nil {
-		log.WithError(err).Fatal("Error setting pi data")
+		log.Fatal().Err(err).Msg("Error setting pi data")
 	}
 }
 

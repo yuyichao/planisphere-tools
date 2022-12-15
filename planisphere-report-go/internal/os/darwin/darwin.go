@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apex/log"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
@@ -70,7 +70,7 @@ func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error)
 func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	out, err := l.Commander.Output("/usr/sbin/scutil", "--get", "LocalHostName")
 	if err != nil {
-		log.Warn("Error running 'scutil --get LocalHostName' to determine the hostname")
+		log.Warn().Msg("Error running 'scutil --get LocalHostName' to determine the hostname")
 		return nil, err
 	}
 	trimmed := strings.Trim(string(out), "\n")
@@ -122,7 +122,7 @@ func GetPSApplicationData(l *lookups.Lookuper) (SPApplicationData, error) {
 	var s SPApplicationData
 	out, err := l.Commander.Output("/usr/sbin/system_profiler", "SPApplicationsDataType", "-json")
 	if err != nil {
-		log.WithError(err).Warn("Error converting apps")
+		log.Warn().Err(err).Msg("Error converting apps")
 	}
 	if err != nil {
 		return s, err
@@ -152,7 +152,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	*/
 	brewOut, err := l.Commander.Output("/usr/local/bin/brew", "list", "--versions")
 	if err != nil {
-		log.Warn("Homebrew package lookup failed")
+		log.Warn().Msg("Homebrew package lookup failed")
 	} else {
 		trimmed := strings.Trim(string(brewOut), "\n")
 		for _, line := range strings.Split(trimmed, "\n") {
@@ -177,7 +177,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 		return nil, err
 	}
 	if err != nil {
-		log.WithError(err).Warn("Could not get app date")
+		log.Warn().Err(err).Msg("Could not get app date")
 		return nil, err
 	}
 	for _, item := range data.SPApplicationsDataType {
@@ -196,7 +196,7 @@ func GetSysctl(target string, l *lookups.Lookuper) (int64, error) {
 
 	v, err := strconv.ParseInt(outClean, 10, 64)
 	if err != nil {
-		log.WithError(err).Warn("Error doing sysctl")
+		log.Warn().Err(err).Msg("Error doing sysctl")
 		return 0, err
 	}
 	return v, nil
@@ -249,7 +249,7 @@ func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
-		log.WithError(err).Warn("Could not detect disk encryption state")
+		log.Warn().Err(err).Msg("Could not detect disk encryption state")
 	}
 	return encrypted, nil
 }
@@ -257,7 +257,7 @@ func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
 func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 	memory, err := GetMemory(l)
 	if err != nil {
-		log.Warn("Could not detect memory")
+		log.Warn().Msg("Could not detect memory")
 	}
 	return uint64(memory), nil
 }

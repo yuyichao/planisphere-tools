@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apex/log"
+	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
@@ -110,7 +110,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	if err == nil {
 		cmdOut, err := l.Commander.Output(cmdPath, "info", "--raw", "-a", "--raw-format", "json-compact")
 		if err != nil {
-			log.Warn("Could not do a pkg info, even though the pkg command exists")
+			log.Warn().Msg("Could not do a pkg info, even though the pkg command exists")
 		}
 		trimmed := strings.Trim(string(cmdOut), "\n")
 
@@ -128,7 +128,7 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 			softwareTable = append(softwareTable, []string{name, version})
 		}
 	} else {
-		log.Info("No pkg command installed")
+		log.Info().Msg("No pkg command installed")
 	}
 
 	return softwareTable, nil
