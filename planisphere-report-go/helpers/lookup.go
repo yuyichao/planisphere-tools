@@ -3,7 +3,6 @@ package helpers
 import (
 	"errors"
 	"fmt"
-	"net"
 	"runtime"
 	"sync"
 	"time"
@@ -114,25 +113,6 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 	wg1.Wait()
 
 	return l, nil
-}
-
-/*
-This is pretty OS agnostic, but if we need to later, we can break it out in to
-OS specific functions
-*/
-func getMacAddr() ([]string, error) {
-	ifas, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	var as []string
-	for _, ifa := range ifas {
-		a := ifa.HardwareAddr.String()
-		if a != "" {
-			as = append(as, a)
-		}
-	}
-	return as, nil
 }
 
 func setPlatformSerialWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {

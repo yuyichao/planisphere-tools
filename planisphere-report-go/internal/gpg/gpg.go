@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -70,7 +69,7 @@ func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 	if fp == "" {
 		gitlabKeysURL := "https://gitlab.oit.duke.edu/oit-ssi-systems/staff-public-keys.git"
 		subDir := "linux"
-		tmpdir, err := ioutil.TempDir("", "gpg-pub-tmpdir")
+		tmpdir, err := os.MkdirTemp("", "gpg-pub-tmpdir")
 		defer os.RemoveAll(tmpdir)
 		if err != nil {
 			return nil, err
