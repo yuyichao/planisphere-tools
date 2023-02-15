@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -22,7 +23,9 @@ var reportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)
-		log.Debug().Bool("dryrun", dryrun).Msg("Dryrun mode")
+
+		hideSummary, err := cmd.Flags().GetBool("hide-summary")
+		cobra.CheckErr(err)
 
 		interval, err := cmd.Flags().GetDuration("interval")
 		cobra.CheckErr(err)
@@ -48,8 +51,9 @@ var reportCmd = &cobra.Command{
 			if Verbose {
 				out, _ := yaml.Marshal(l.Payload)
 				fmt.Println(string(out))
-
-			} else {
+			} else if !hideSummary {
+				// If asked, print a little summary out
+				summaryText := strings.Builder{}
 				// In normal mode, just show a summary
 				e := reflect.ValueOf(&l.Payload.Data).Elem()
 				for i := 0; i < e.NumField(); i++ {
@@ -57,14 +61,14 @@ var reportCmd = &cobra.Command{
 					varValue := e.Field(i).Interface()
 					switch name := varName; name {
 					case "InstalledSoftware":
-						fmt.Printf("%v: %v items\n", varName, len(varValue.([][]string)))
+						summaryText.WriteString(fmt.Sprintf("%v: %v items\n", varName, len(varValue.([][]string))))
 					default:
-						fmt.Printf("%v: %v\n", varName, varValue)
+						summaryText.WriteString(fmt.Sprintf("%v: %v\n", varName, varValue))
 
 					}
 				}
-				fmt.Printf("ExtraData: %+v\n", l.Payload.ExtraData)
-
+				summaryText.WriteString(fmt.Sprintf("ExtraData: %+v\n", l.Payload.ExtraData))
+				fmt.Printf(summaryText.String())
 			}
 
 			if !dryrun {
@@ -72,7 +76,7 @@ var reportCmd = &cobra.Command{
 				if err != nil {
 					log.Fatal().Err(err).Msg("Error submitting payload")
 				}
-				log.Info().Msg("Submitted report, thanks for keeping Duke Safe! ❤️")
+				log.Info().Str("duration", fmt.Sprint(time.Since(startedAt))).Msg("Submitted report, thanks for keeping Duke Safe! ❤️")
 			}
 			if interval.Seconds() == 0 {
 				return
@@ -93,6 +97,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	reportCmd.Flags().BoolP("dryrun", "d", false, "Do a dry run, don't actually submit to planisphere")
+	reportCmd.Flags().Bool("hide-summary", false, "Don't print out a summary of the report")
 	reportCmd.Flags().DurationP("interval", "i", 0*time.Second, "Instead of running once and exiting, run continually while sleeping at the given interval. Must be compatible with https://pkg.go.dev/time#ParseDuration")
 	rootCmd.AddCommand(reportCmd)
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/rs/zerolog"
@@ -18,6 +19,7 @@ var (
 	planisphereKey string
 	planisphereURL string
 	version        = "dev"
+	startedAt      time.Time
 )
 
 // Verbose Logging
@@ -34,6 +36,7 @@ var rootCmd = &cobra.Command{
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Key is gonna be required
+		startedAt = time.Now()
 		planisphereKey = viper.GetString("key")
 		if planisphereKey == "" {
 			log.Fatal().Msg("Must set your Planisphere Key in the config file or env. See README.md for full details. Shortcut to link to your keys: https://duke.is/vywtw")
