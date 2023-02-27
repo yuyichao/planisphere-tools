@@ -51,11 +51,26 @@ lint:
   retry:
     max: 2
     when: runner_system_failure
-
+## check-releaser looks at some settings inside of the .goreleaser.yaml file and
+## ensures that all the requirements are set correctly
+check-release:
+  stage: test
+  image:
+    name: gitlab-registry.oit.duke.edu/devil-ops/goreleaser:v0.5.8
+    entrypoint: ['']
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - cd planisphere-report-go
+    - /scripts/packaging-validation.sh
+    - eval $(/scripts/vault-env.sh ssi-systems-${CI_PROJECT_NAME}-packaging)
+    - goreleaser check
+  rules:
+    - if: '$CI_COMMIT_TAG !~ /v[0-9]+\.[0-9]+\.[0-9]+/ '
 release:
   stage: release
   image:
-    name: gitlab-registry.oit.duke.edu/devil-ops/goreleaser:v0-1-8
+    name: gitlab-registry.oit.duke.edu/devil-ops/goreleaser:v0.5.8
     entrypoint: ['']
   rules:
     - if: '$CI_COMMIT_TAG =~ /v[0-9]+\.[0-9]+\.[0-9]+/ '
