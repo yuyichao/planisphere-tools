@@ -68,7 +68,7 @@ var reportCmd = &cobra.Command{
 					}
 				}
 				summaryText.WriteString(fmt.Sprintf("ExtraData: %+v\n", l.Payload.ExtraData))
-				fmt.Printf(summaryText.String())
+				fmt.Print(summaryText.String())
 			}
 
 			if !dryrun {
