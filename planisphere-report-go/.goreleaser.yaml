@@ -35,15 +35,27 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm
       - arm64
+    goarm:
+      - "6"
+      - "7"
     binary: 'planisphere-report'
 universal_binaries:
   - replace: false
 archives:
   - format: tar.gz
-    name_template: 'planisphere-report-{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    replacements:
-      darwin: macOS
+    #name_template: 'planisphere-report-{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    name_template: >-
+      planisphere-report_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
 checksum:
   name_template: 'planisphere-report-{{ .Version }}_SHA256SUMS'
   algorithm: sha256
