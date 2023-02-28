@@ -78,8 +78,9 @@ brews:
       run [bin/"planisphere-report", "report"]
       run_type :interval
       interval 3600
-      log_path "/usr/local/var/log/planisphere-report.log"
-      error_log_path "/usr/local/var/log/planisphere-report.err"
+      working_dir HOMEBREW_PREFIX
+      log_path var/"log/planisphere-report.log"
+      error_log_path var/"log/planisphere-report.err"
     caveats: |
       Please make sure to update your configuration file with your Planisphere
       Self Report Key and any overrides or extra data before (re)starting the
