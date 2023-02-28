@@ -97,9 +97,9 @@ brews:
       Not sure why this is sometimes needed, but like...patches welcome! 😁
 
       Log files are available at
-        /usr/local/var/log/planisphere-report.log
+        $(brew --prefix)/var/log/planisphere-report.log
       and
-        /usr/local/var/log/planisphere-report.err
+        $(brew --prefix)/var/log/planisphere-report.err
 nfpms:
   - id: rpms
     bindir: /usr/bin
