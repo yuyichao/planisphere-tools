@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os/exec"
 	"os/user"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -32,7 +33,7 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 }
 
 func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
-	return ioregExpert["product-name"], nil
+	return ioregExpert["model"], nil
 }
 
 func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
@@ -150,7 +151,13 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	/*
 		Homebrew packages reported here
 	*/
-	brewOut, err := l.Commander.Output("/usr/local/bin/brew", "list", "--versions")
+	var brewp string
+	if strings.HasPrefix(runtime.GOARCH, "arm") {
+		brewp = "/opt/homebrew/bin/brew"
+	} else {
+		brewp = "/usr/local/bin/brew"
+	}
+	brewOut, err := l.Commander.Output(brewp, "list", "--versions")
 	if err != nil {
 		log.Warn().Msg("Homebrew package lookup failed")
 	} else {
