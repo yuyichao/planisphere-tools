@@ -21,6 +21,9 @@ var reportCmd = &cobra.Command{
 	Short: "Report back to Planisphere",
 	Long:  `Look up local information and send it up to Planisphere self report`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Note: We are printing the time to stdout so that we can
+		// collect this in the non-error log, which is stdout on macOS
+		fmt.Printf("%v Starting report collection\n", time.Now())
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)
 
@@ -69,6 +72,7 @@ var reportCmd = &cobra.Command{
 				}
 				summaryText.WriteString(fmt.Sprintf("ExtraData: %+v\n", l.Payload.ExtraData))
 				fmt.Print(summaryText.String())
+				fmt.Printf("%v Completed report collection\n", time.Now())
 			}
 
 			if !dryrun {

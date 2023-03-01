@@ -75,7 +75,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: "2006-01-02T15:04:05.999Z07:00",
+	})
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if Verbose {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
