@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/user"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -19,6 +20,7 @@ var installCronCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cronFile, _ := cmd.Flags().GetString("cron-file")
 		force, _ := cmd.Flags().GetBool("force")
+		user, _ := cmd.Flags().GetString("user")
 		if util.Exists(cronFile) && !force {
 			log.Fatal().Str("file", cronFile).Msg("Cronfile already exists. Use -f/--force to overwrite it")
 		}
@@ -33,7 +35,7 @@ var installCronCmd = &cobra.Command{
 		r1 := rand.New(s1)
 		hour := r1.Intn(23)
 		minute := r1.Intn(59)
-		content := fmt.Sprintf("%v %v * * * %v report\n", minute, hour, ex)
+		content := fmt.Sprintf("%v %v * * * %v %v report\n", minute, hour, user, ex)
 		log.Info().Msg("Creating cron:")
 		fmt.Println(content)
 
@@ -48,11 +50,13 @@ func init() {
 	installCmd.AddCommand(installCronCmd)
 
 	// Here you will define your flags and configuration settings.
+	me, _ := user.Current()
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	installCronCmd.PersistentFlags().StringP("cron-file", "c", "/etc/cron.d/planisphere-report", "A help for foo")
 	installCronCmd.Flags().BoolP("force", "f", false, "Force override of existing file")
+	installCronCmd.Flags().String("user", me.Username, "User to run the cron as")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
