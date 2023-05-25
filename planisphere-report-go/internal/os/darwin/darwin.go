@@ -29,6 +29,9 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 	if strings.Contains(l.Payload.Data.Model, "MacBook") {
 		return "laptop", nil
 	}
+	if strings.Contains(l.Payload.Data.Model, "Mac") {
+		return "desktop", nil
+	}
 	return "", errors.New("Unknown type of mac")
 }
 
