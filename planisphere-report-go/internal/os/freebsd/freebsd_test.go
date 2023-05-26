@@ -23,7 +23,7 @@ func (c MockCommander) GetMacAddrs() ([]string, error) {
 	return []string{"00:00:00:00:00:00"}, nil
 }
 
-func (c MockCommander) Slurp(filepath string) ([]byte, error) {
+func (c MockCommander) Slurp(_ string) ([]byte, error) {
 	return []byte(""), nil
 }
 

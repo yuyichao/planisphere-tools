@@ -16,7 +16,7 @@ var ErrDmidecode = fmt.Errorf("Error running dmidecode, ensure it is installed a
 
 type OSLookup struct{}
 
-func (o OSLookup) ApplyPlatformDetections(l *lookups.Lookuper) error {
+func (o OSLookup) ApplyPlatformDetections(_ *lookups.Lookuper) error {
 	// Do initializing bits here
 	return nil
 }
@@ -56,7 +56,7 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 	return trimmed, nil
 }
 
-func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetDiskEncrypted(_ *lookups.Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return false, errors.New("DiskEcrypted not yet implemented")
 }
@@ -76,7 +76,7 @@ func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 	return memoryMB, nil
 }
 
-func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetOSFamily(_ *lookups.Lookuper) (interface{}, error) {
 	return "FreeBSD", nil
 }
 
@@ -142,7 +142,7 @@ func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error)
 	return apps, nil
 }
 
-func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetHostname(_ *lookups.Lookuper) (interface{}, error) {
 	// Hostname Field
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -151,6 +151,6 @@ func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
 	return hostname, nil
 }
 
-func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetExternalOSIdentifiers(_ *lookups.Lookuper) (interface{}, error) {
 	return nil, nil
 }

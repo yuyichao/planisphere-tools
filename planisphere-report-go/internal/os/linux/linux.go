@@ -3,6 +3,7 @@ package linux
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/hardware"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 var (
@@ -22,7 +24,7 @@ var (
 
 type OSLookup struct{}
 
-func (o OSLookup) ApplyPlatformDetections(l *lookups.Lookuper) error {
+func (o OSLookup) ApplyPlatformDetections(_ *lookups.Lookuper) error {
 	return nil
 }
 
@@ -93,16 +95,15 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 			if err != nil {
 				log.Warn().Err(err).Msg("Could not get Raspberry Pi CPU info")
 				continue
-			} else {
-				trimmed := strings.Trim(string(cpuDat), "\n")
-				for _, line := range strings.Split(trimmed, "\n") {
-					pieces := strings.SplitN(line, ":", 2)
-					key := strings.TrimSpace(pieces[0])
-					value := strings.TrimSpace(pieces[1])
-					if key == "Revision" {
-						if _, ok := hardware.RaspberryPiModels[value]; ok {
-							return hardware.RaspberryPiModels[value], nil
-						}
+			}
+			trimmed := strings.Trim(string(cpuDat), "\n")
+			for _, line := range strings.Split(trimmed, "\n") {
+				pieces := strings.SplitN(line, ":", 2)
+				key := strings.TrimSpace(pieces[0])
+				value := strings.TrimSpace(pieces[1])
+				if key == "Revision" {
+					if _, ok := hardware.RaspberryPiModels[value]; ok {
+						return hardware.RaspberryPiModels[value], nil
 					}
 				}
 			}
@@ -116,7 +117,7 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 	return productName, nil
 }
 
-func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetDiskEncrypted(_ *lookups.Lookuper) (interface{}, error) {
 	// TODO: Implement this
 	return false, errors.New("DiskEncrypted Not yet implemented")
 }
@@ -141,7 +142,7 @@ func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 	return memory / 1024, err
 }
 
-func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetOSFamily(_ *lookups.Lookuper) (interface{}, error) {
 	return "Linux", nil
 }
 
@@ -184,7 +185,38 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 			fullName = strings.Trim(m[1], `"`)
 		}
 	}
+	if strings.HasPrefix(fullName, "Ubuntu") {
+		if o.detectPro(l) {
+			fullName = util.MakeNamePro(fullName)
+		}
+	}
 	return fullName, nil
+}
+
+// detectPro attempts to determine if the ESM repos indicate that this server is
+// getting full 'Pro' support
+func (o OSLookup) detectPro(l *lookups.Lookuper) bool {
+	out, err := l.Commander.Output("/usr/bin/pro", "security-status", "--esm-infra", "--format", "json")
+	if err != nil {
+		// No pro yo
+		return false
+	}
+	var esm esmStatus
+	err = json.Unmarshal(out, &esm)
+	if err != nil {
+		// Unknown pro yo
+		return false
+	}
+	return esm.Summary.UA.Attached
+}
+
+// esmStatus is a minimal holder for the esm status
+type esmStatus struct {
+	Summary struct {
+		UA struct {
+			Attached bool `json:"attached"`
+		} `json:"ua"`
+	} `json:"summary"`
 }
 
 func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error) {
@@ -195,7 +227,7 @@ func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error)
 	return apps, nil
 }
 
-func (o OSLookup) GetHostname(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetHostname(_ *lookups.Lookuper) (interface{}, error) {
 	// Hostname Field
 	hostname, err := os.Hostname()
 	if err != nil {
