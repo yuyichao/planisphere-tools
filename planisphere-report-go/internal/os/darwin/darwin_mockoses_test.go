@@ -73,7 +73,7 @@ func (c FailCommander) LookPath(command string) (string, error) {
 	return fmt.Sprintf("/usr/bin/%v", command), nil
 }
 
-func (c FailCommander) Output(command string, args ...string) ([]byte, error) {
+func (c FailCommander) Output(_ string, _ ...string) ([]byte, error) {
 	return nil, errors.New("Always-fail")
 }
 

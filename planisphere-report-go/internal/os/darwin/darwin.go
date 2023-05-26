@@ -35,7 +35,7 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 	return "", errors.New("Unknown type of mac")
 }
 
-func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetModel(_ *lookups.Lookuper) (interface{}, error) {
 	return ioregExpert["model"], nil
 }
 
@@ -48,7 +48,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 	return softData.SPSoftwareDataType[0].OsVersion, nil
 }
 
-func (o OSLookup) GetOSFamily(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetOSFamily(_ *lookups.Lookuper) (interface{}, error) {
 	return "macOS", nil
 }
 
@@ -248,15 +248,15 @@ func GetDiskEncryptionStatus() (bool, error) {
 	return false, nil
 }
 
-func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetSerial(_ *lookups.Lookuper) (interface{}, error) {
 	return ioregExpert["IOPlatformSerialNumber"], nil
 }
 
-func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetManufacturer(_ *lookups.Lookuper) (interface{}, error) {
 	return ioregExpert["manufacturer"], nil
 }
 
-func (o OSLookup) GetDiskEncrypted(l *lookups.Lookuper) (interface{}, error) {
+func (o OSLookup) GetDiskEncrypted(_ *lookups.Lookuper) (interface{}, error) {
 	encrypted, err := GetDiskEncryptionStatus()
 	if err != nil {
 		log.Warn().Err(err).Msg("Could not detect disk encryption state")

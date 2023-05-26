@@ -36,3 +36,18 @@ func TestExists(t *testing.T) {
 	require.True(t, util.Exists(file.Name()))
 	require.False(t, util.Exists(notafile))
 }
+
+func TestMakeNamePro(t *testing.T) {
+	tests := map[string]struct {
+		given string
+		want  string
+	}{
+		"simple": {
+			given: "Ubuntu 18.04",
+			want:  "Ubuntu Pro 18.04",
+		},
+	}
+	for desc, tt := range tests {
+		require.Equal(t, tt.want, util.MakeNamePro(tt.given), desc)
+	}
+}
