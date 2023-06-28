@@ -18,7 +18,20 @@ brew install planisphere-report
 
 ### Linux Packages
 
-Download the appropriate package from the [releases page](https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/-/releases) and install. These
+For Ubuntu 22.04 and later, install the devil-ops-devs repo:
+
+```bash
+echo "deb [signed-by=/etc/apt/keyrings/devil-ops-debs.gpg] https://oneget.oit.duke.edu/ devil-ops-debs main" | sudo tee /etc/apt/sources.list.d/proget-devil-ops-deb.list
+wget -qO- https://oneget.oit.duke.edu/debian-feeds/devil-ops-debs.pub | gpg --dearmor -o /etc/apt/keyrings/devil-ops-debs.gpg
+```
+
+Then install using:
+
+```bash
+apt install planisphere-report
+
+```
+Instead of the repo, you can download the appropriate package from the [releases page](https://gitlab.oit.duke.edu/devil-ops/planisphere-tools/-/releases) and install. These
 packages all install a systemd timer, set to run once a day
 
 You can validate the rpm gpg signature by importing
