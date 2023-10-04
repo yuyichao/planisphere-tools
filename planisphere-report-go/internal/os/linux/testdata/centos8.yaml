@@ -40,7 +40,7 @@ file_contents:
     REDHAT_SUPPORT_PRODUCT_VERSION="CentOS Stream"
   "/sys/class/dmi/id/product_serial":
     "my-awesome-fake-serial"
-  "/sys/class/dmi/id/bios_vendor":
+  "/sys/class/dmi/id/sys_vendor":
     VMware, Inc.
   "/sys/class/dmi/id/product_name":
     VMware7,1
