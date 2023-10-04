@@ -78,7 +78,10 @@ func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 			return "Raspberry Pi", nil
 		}
 	}
-	out, err := l.Commander.Slurp("/sys/class/dmi/id/bios_vendor")
+
+	// bios_vendor isn't truly accurate on the linux hosts, moving to
+	// sys_vendor which seems to be more inline with the other EPM tools
+	out, err := l.Commander.Slurp("/sys/class/dmi/id/sys_vendor")
 	if err != nil {
 		return nil, err
 	}
