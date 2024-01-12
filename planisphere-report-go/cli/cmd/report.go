@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/sbom"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,11 +34,17 @@ var reportCmd = &cobra.Command{
 		interval, err := cmd.Flags().GetDuration("interval")
 		cobra.CheckErr(err)
 
+		// sbomTarget, err := cmd.Flags().GetStringArray("sbom-target")
+		// cobra.CheckErr(err)
+
 		for {
 			err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Error setting url")
 			}
+
+			sbomInfo := sbom.Create(".")
+			fmt.Println(sbomInfo)
 
 			c := &lookups.LookuperConfig{
 				Overrides: viper.GetStringMap("overrides"),
@@ -103,5 +110,6 @@ func init() {
 	reportCmd.Flags().BoolP("dryrun", "d", false, "Do a dry run, don't actually submit to planisphere")
 	reportCmd.Flags().Bool("hide-summary", false, "Don't print out a summary of the report")
 	reportCmd.Flags().DurationP("interval", "i", 0*time.Second, "Instead of running once and exiting, run continually while sleeping at the given interval. Must be compatible with https://pkg.go.dev/time#ParseDuration")
+	reportCmd.Flags().StringArray("sbom-target", []string{}, "Generate an SBOM for the given directory to include in the report")
 	rootCmd.AddCommand(reportCmd)
 }
