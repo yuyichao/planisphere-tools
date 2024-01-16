@@ -1,54 +1,62 @@
+/*
+Package lookups defines the OSLookup interface and other accompanying bits
+*/
 package lookups
 
 import (
 	"context"
 	"log/slog"
+	"slices"
 	"sort"
 	"sync"
 	"time"
 
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 // CheckedItems      []string
 var checkedItemsMutex sync.Mutex
 
-type OSLookup interface {
-	ApplyPlatformDetections(l *Lookuper) error
-	GetHostname(l *Lookuper) (interface{}, error)
-	GetInstalledSoftware(l *Lookuper) (interface{}, error)
-	GetOSFullName(l *Lookuper) (interface{}, error)
-	GetModel(l *Lookuper) (interface{}, error)
-	GetDeviceType(l *Lookuper) (interface{}, error)
-	GetOSFamily(l *Lookuper) (interface{}, error)
-	GetMemory(l *Lookuper) (interface{}, error)
-	GetDiskEncrypted(l *Lookuper) (interface{}, error)
-	GetManufacturer(l *Lookuper) (interface{}, error)
-	GetSerial(l *Lookuper) (interface{}, error)
-	GetExternalOSIdentifiers(l *Lookuper) (interface{}, error)
+// OSLookuper defines the interface needed to lookup OS info
+type OSLookuper interface {
+	ApplyPlatformDetections(l *Lookup) error
+	GetHostname(l *Lookup) (interface{}, error)
+	GetInstalledSoftware(l *Lookup) (interface{}, error)
+	GetOSFullName(l *Lookup) (interface{}, error)
+	GetModel(l *Lookup) (interface{}, error)
+	GetDeviceType(l *Lookup) (interface{}, error)
+	GetOSFamily(l *Lookup) (interface{}, error)
+	GetMemory(l *Lookup) (interface{}, error)
+	GetDiskEncrypted(l *Lookup) (interface{}, error)
+	GetManufacturer(l *Lookup) (interface{}, error)
+	GetSerial(l *Lookup) (interface{}, error)
+	GetExternalOSIdentifiers(l *Lookup) (interface{}, error)
 }
 
-type Lookuper struct {
+// Lookup is the generic thing that does OS lookups
+type Lookup struct {
 	Overrides    map[string]interface{}
 	Payload      planisphere.SelfReportPayload
 	Commander    cmdr.Commander
 	CheckedItems []string
 }
 
-type LookuperConfig struct {
+// LookupConfig is the configuration for a new Lookup item
+type LookupConfig struct {
 	Overrides map[string]interface{}
 	OS        string // darwin, linux, windows, etc
 	// CLI Interface for test mocking
 	Commander *cmdr.Commander
 }
 
-func (l *Lookuper) WaitForChecked(item string) {
+// WaitForChecked pauses the lookups until a specific item has been checked
+func (l *Lookup) WaitForChecked(item string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	for {
-		if !util.ContainsString(l.CheckedItems, item) {
+		// if !util.ContainsString(l.CheckedItems, item) {
+		if !slices.Contains(l.CheckedItems, item) {
 			ci := l.CheckedItems
 			sort.Strings(ci)
 			slog.Debug("waiting on check", "item", item, "checked", ci)
@@ -63,7 +71,8 @@ func (l *Lookuper) WaitForChecked(item string) {
 	}
 }
 
-func (l *Lookuper) MarkChecked(i string) {
+// MarkChecked marks an item as checked
+func (l *Lookup) MarkChecked(i string) {
 	checkedItemsMutex.Lock()
 	l.CheckedItems = append(l.CheckedItems, i)
 	checkedItemsMutex.Unlock()

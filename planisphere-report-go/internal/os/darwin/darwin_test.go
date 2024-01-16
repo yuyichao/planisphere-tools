@@ -11,7 +11,7 @@ import (
 
 func TestGetHostname(t *testing.T) {
 	macOSCommander = MockCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &macOSCommander,
 		OS:        "darwin",
 	}
@@ -26,7 +26,7 @@ func TestGetHostname(t *testing.T) {
 
 func TestNewLookup(t *testing.T) {
 	macOSCommander = MockCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &macOSCommander,
 		OS:        "darwin",
 	}
@@ -45,7 +45,7 @@ func TestNewLookup(t *testing.T) {
 
 func TestFailingLookup(t *testing.T) {
 	failCommander = FailCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &failCommander,
 		OS:        "darwin",
 	}

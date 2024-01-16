@@ -1,10 +1,9 @@
-package helpers_test
+package cmd
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 )
 
 func TestHashString(t *testing.T) {
@@ -21,7 +20,7 @@ func TestHashString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := helpers.HashString(tt.s)
+		got := hashString(tt.s)
 		require.Equal(t, tt.want, got)
 	}
 }

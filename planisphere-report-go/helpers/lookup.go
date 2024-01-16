@@ -1,3 +1,6 @@
+/*
+Package helpers are just generic helpers for the reporting
+*/
 package helpers
 
 import (
@@ -5,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime"
+	"slices"
 	"sync"
 	"time"
 
@@ -13,7 +17,6 @@ import (
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/darwin"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/freebsd"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/linux"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 /* Lookuper will do the more advanced lookups. Using a custom struct for this so we
@@ -23,29 +26,35 @@ don't have to make duplicate system calls to look at the system_profiler
 type setter struct {
 	name string
 	// Simple wrapper for just setting a value if it exists
-	wrapper func(*lookups.Lookuper)
+	wrapper func(*lookups.Lookup)
 	// Enhanced wrapper that also takes a function to do the setting
-	wrapperE func(*lookups.Lookuper, func(fl *lookups.Lookuper) (interface{}, error)) error
+	wrapperE func(*lookups.Lookup, func(fl *lookups.Lookup) (interface{}, error)) error
 	// Function to pass in to the enhanced wrapper
-	wrapperEF func(*lookups.Lookuper) (interface{}, error)
+	wrapperEF func(*lookups.Lookup) (interface{}, error)
 }
 
-func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
+var osLookupTable map[string]lookups.OSLookuper = map[string]lookups.OSLookuper{
+	"darwin":  darwin.OSLookup{},
+	"linux":   linux.OSLookup{},
+	"freebsd": freebsd.OSLookup{},
+}
+
+// NewLookuper returns a new lookuper based on the given config
+func NewLookuper(c *lookups.LookupConfig) (*lookups.Lookup, error) {
 	// var err error
-	l := &lookups.Lookuper{
+	l := &lookups.Lookup{
 		Overrides: c.Overrides,
 	}
 
-	if c.Commander == nil {
-		l.Commander = cmdr.RealCommander{}
-	} else {
+	l.Commander = cmdr.RealCommander{}
+	if c.Commander != nil {
 		l.Commander = *c.Commander
 	}
 	// Super generic bits here
 	l.Payload.LastActive = time.Now()
 
 	// Look up based on a given os, or detect runtime OS
-	var fancyLookup lookups.OSLookup
+	// var fancyLookup lookups.OSLookup
 	var detectOS string
 	if c.OS == "" {
 		detectOS = runtime.GOOS
@@ -53,50 +62,48 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 		detectOS = c.OS
 	}
 	slog.Debug("detected os", "os", detectOS)
-	switch detectOS {
-	case "darwin":
-		fancyLookup = darwin.OSLookup{}
-	case "linux":
-		fancyLookup = linux.OSLookup{}
-	case "freebsd":
-		fancyLookup = freebsd.OSLookup{}
-	default:
+	fancyLookup, ok := osLookupTable[detectOS]
+	if !ok {
 		return nil, fmt.Errorf("OS %s not supported", detectOS)
 	}
 
-	err := fancyLookup.ApplyPlatformDetections(l)
-	if err != nil {
+	if err := fancyLookup.ApplyPlatformDetections(l); err != nil {
 		return nil, err
 	}
 
-	genericSetters := []setter{
-		{"Model", nil, setModelWrapper, fancyLookup.GetModel},
-		{"ExternalOSIdentifiers", nil, setExternalOSIdentifersWrapper, fancyLookup.GetExternalOSIdentifiers},
-		{"Memory", nil, setMemoryWrapper, fancyLookup.GetMemory},
-		{"Serial", nil, setPlatformSerialWrapper, fancyLookup.GetSerial},
-		{"Manufacturer", nil, setManufacturerWrapper, fancyLookup.GetManufacturer},
-		{"DeviceType", nil, setDeviceTypeWrapper, fancyLookup.GetDeviceType},
-		{"DiskEncrypted", nil, setDiskEncryptedWrapper, fancyLookup.GetDiskEncrypted},
-		{"UsageType", setUsageTypeWrapper, nil, nil},
-		{"Username", setUsernameWrapper, nil, nil},
-		{"OSFamily", nil, setOSFamilyWrapper, fancyLookup.GetOSFamily},
-		{"Status", setStatusWrapper, nil, nil},
-		{"DepartmentKey", setDepartmentKeyWrapper, nil, nil},
-		{"SupportGroupID", setSupportGroupIDWrapper, nil, nil},
-		{"SupportGroupName", setSupportGroupNameWrapper, nil, nil},
-		{"InstanceKey", setInstanceKeyWrapper, nil, nil},
-		{"InstalledSoftware", nil, setInstalledSoftwareWrapper, fancyLookup.GetInstalledSoftware},
-		{"ExtraData", setExtraDataWrapper, nil, nil},
-		{"Hostname", nil, setHostnameWrapper, fancyLookup.GetHostname},
-		{"OSFullName", nil, setOSFullNameWrapper, fancyLookup.GetOSFullName},
-		{"MacAddressses", setMacAddressesWrapper, nil, nil},
-	}
+	runSetters(
+		[]setter{
+			{name: "Model", wrapper: nil, wrapperE: setModelWrapper, wrapperEF: fancyLookup.GetModel},
+			{name: "ExternalOSIdentifiers", wrapper: nil, wrapperE: setExternalOSIdentifersWrapper, wrapperEF: fancyLookup.GetExternalOSIdentifiers},
+			{name: "Memory", wrapper: nil, wrapperE: setMemoryWrapper, wrapperEF: fancyLookup.GetMemory},
+			{name: "Serial", wrapper: nil, wrapperE: setPlatformSerialWrapper, wrapperEF: fancyLookup.GetSerial},
+			{name: "Manufacturer", wrapper: nil, wrapperE: setManufacturerWrapper, wrapperEF: fancyLookup.GetManufacturer},
+			{name: "DeviceType", wrapper: nil, wrapperE: setDeviceTypeWrapper, wrapperEF: fancyLookup.GetDeviceType},
+			{name: "DiskEncrypted", wrapper: nil, wrapperE: setDiskEncryptedWrapper, wrapperEF: fancyLookup.GetDiskEncrypted},
+			{name: "UsageType", wrapper: setUsageTypeWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "Username", wrapper: setUsernameWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "OSFamily", wrapper: nil, wrapperE: setOSFamilyWrapper, wrapperEF: fancyLookup.GetOSFamily},
+			{name: "Status", wrapper: setStatusWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "DepartmentKey", wrapper: setDepartmentKeyWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "SupportGroupID", wrapper: setSupportGroupIDWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "SupportGroupName", wrapper: setSupportGroupNameWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "InstanceKey", wrapper: setInstanceKeyWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "InstalledSoftware", wrapper: nil, wrapperE: setInstalledSoftwareWrapper, wrapperEF: fancyLookup.GetInstalledSoftware},
+			{name: "ExtraData", wrapper: setExtraDataWrapper, wrapperE: nil, wrapperEF: nil},
+			{name: "Hostname", wrapper: nil, wrapperE: setHostnameWrapper, wrapperEF: fancyLookup.GetHostname},
+			{name: "OSFullName", wrapper: nil, wrapperE: setOSFullNameWrapper, wrapperEF: fancyLookup.GetOSFullName},
+			{name: "MacAddressses", wrapper: setMacAddressesWrapper, wrapperE: nil, wrapperEF: nil},
+		}, l)
 
-	var wg1 sync.WaitGroup
-	wg1.Add(len(genericSetters))
+	return l, nil
+}
+
+func runSetters(genericSetters []setter, l *lookups.Lookup) {
+	var wg sync.WaitGroup
+	wg.Add(len(genericSetters))
 	for _, gs := range genericSetters {
 		go func(gs setter) {
-			defer wg1.Done()
+			defer wg.Done()
 			if gs.wrapperE == nil {
 				// Simple setter operations
 				gs.wrapper(l)
@@ -110,12 +117,10 @@ func NewLookuper(c *lookups.LookuperConfig) (*lookups.Lookuper, error) {
 			}
 		}(gs)
 	}
-	wg1.Wait()
-
-	return l, nil
+	wg.Wait()
 }
 
-func setPlatformSerialWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setPlatformSerialWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("serial")
 	if item, ok := l.Overrides["serial"]; ok {
 		l.Payload.Data.Serial = item.(string)
@@ -129,7 +134,7 @@ func setPlatformSerialWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) 
 	return nil
 }
 
-func setManufacturerWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setManufacturerWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("manufacturer")
 	if item, ok := l.Overrides["manufacturer"]; ok {
 		l.Payload.Data.Manufacturer = item.(string)
@@ -144,7 +149,7 @@ func setManufacturerWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (i
 	return nil
 }
 
-func setModelWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setModelWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("model")
 	if item, ok := l.Overrides["model"]; ok {
 		l.Payload.Data.Model = item.(string)
@@ -159,7 +164,7 @@ func setModelWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interfac
 	return nil
 }
 
-func setDiskEncryptedWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setDiskEncryptedWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("disk_encrypted")
 	if item, ok := l.Overrides["disk_encrypted"]; ok {
 		l.Payload.Data.DiskEncrypted = item.(bool)
@@ -177,7 +182,7 @@ func setDiskEncryptedWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (
 // Memory
 // "All aloooooone in the moooooon liiiiiight"
 //   - 😺
-func setMemoryWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setMemoryWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("memory_mb")
 	if item, ok := l.Overrides["memory_mb"]; ok {
 		l.Payload.Data.MemoryMB = uint64(item.(int))
@@ -195,7 +200,7 @@ func setMemoryWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interfa
 // Operating System Stuff
 // "I don't have friends, I got Family"
 //   - Dominic Toretto 🚗💨
-func setOSFamilyWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setOSFamilyWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("os_family")
 	if item, ok := l.Overrides["os_family"]; ok {
 		l.Payload.Data.OsFamily = item.(string)
@@ -210,7 +215,7 @@ func setOSFamilyWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (inter
 	return nil
 }
 
-func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setDeviceTypeWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("device_type")
 	var t string
 	if item, ok := l.Overrides["device_type"]; ok {
@@ -223,7 +228,8 @@ func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 		t = item.(string)
 	}
 	validTypes := []string{"desktop", "laptop", "server", "server_physical", "vm"}
-	if util.ContainsString(validTypes, t) {
+	// if util.ContainsString(validTypes, t) {
+	if slices.Contains(validTypes, t) {
 		l.Payload.Data.DeviceType = t
 		return nil
 	}
@@ -231,7 +237,7 @@ func setDeviceTypeWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 	return errors.New("InvalidDeviceType")
 }
 
-func setOSFullNameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setOSFullNameWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("os_fullname")
 	if item, ok := l.Overrides["os_fullname"]; ok {
 		l.Payload.Data.OsFullname = item.(string)
@@ -246,7 +252,7 @@ func setOSFullNameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (int
 	return nil
 }
 
-func setHostnameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setHostnameWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("hostname")
 
 	// Hostname Field
@@ -262,35 +268,35 @@ func setHostnameWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (inter
 	return nil
 }
 
-func setInstanceKeyWrapper(l *lookups.Lookuper) {
+func setInstanceKeyWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("instance_key")
 	if instanceKey, ok := l.Overrides["instance_key"]; ok {
 		l.Payload.Key = instanceKey.(string)
 	}
 }
 
-func setDepartmentKeyWrapper(l *lookups.Lookuper) {
+func setDepartmentKeyWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("department_key")
 	if departmentKey, ok := l.Overrides["department_key"]; ok {
 		l.Payload.Data.DepartmentKey = departmentKey.(string)
 	}
 }
 
-func setSupportGroupIDWrapper(l *lookups.Lookuper) {
+func setSupportGroupIDWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("support_group_id")
 	if supportGroupID, ok := l.Overrides["support_group_id"]; ok {
 		l.Payload.Data.SupportGroupId = uint64(supportGroupID.(int))
 	}
 }
 
-func setSupportGroupNameWrapper(l *lookups.Lookuper) {
+func setSupportGroupNameWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("support_group_name")
 	if supportGroupName, ok := l.Overrides["support_group_name"]; ok {
 		l.Payload.Data.SupportGroupName = supportGroupName.(string)
 	}
 }
 
-func setUsageTypeWrapper(l *lookups.Lookuper) {
+func setUsageTypeWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("usage_type")
 
 	// Usage Type
@@ -299,7 +305,7 @@ func setUsageTypeWrapper(l *lookups.Lookuper) {
 	}
 }
 
-func setUsernameWrapper(l *lookups.Lookuper) {
+func setUsernameWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("username")
 
 	if usageType, ok := l.Overrides["username"]; ok {
@@ -307,7 +313,7 @@ func setUsernameWrapper(l *lookups.Lookuper) {
 	}
 }
 
-func setStatusWrapper(l *lookups.Lookuper) {
+func setStatusWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("status")
 	// Status: deployed, rma, etc
 	if status, ok := l.Overrides["status"]; ok {
@@ -318,7 +324,7 @@ func setStatusWrapper(l *lookups.Lookuper) {
 // Mac Addresses Field
 // "Most Dope"
 //   - Mac Miller ✌️
-func setMacAddressesWrapper(l *lookups.Lookuper) {
+func setMacAddressesWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("mac_addresses")
 
 	if macAddresses, ok := l.Overrides["mac_addresses"]; ok {
@@ -335,7 +341,7 @@ func setMacAddressesWrapper(l *lookups.Lookuper) {
 	}
 }
 
-func setExtraDataWrapper(l *lookups.Lookuper) {
+func setExtraDataWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("extra_data")
 	// Extra data
 	l.Payload.ExtraData = map[string]string{}
@@ -351,7 +357,7 @@ func setExtraDataWrapper(l *lookups.Lookuper) {
 	}
 }
 
-func setInstalledSoftwareWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setInstalledSoftwareWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("installed_software")
 
 	// Not sure why someone would wanna override this, but just in case...
@@ -375,7 +381,7 @@ func setInstalledSoftwareWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookupe
 	return nil
 }
 
-func setExternalOSIdentifersWrapper(l *lookups.Lookuper, f func(fl *lookups.Lookuper) (interface{}, error)) error {
+func setExternalOSIdentifersWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("external_os_identifiers")
 	// Status: deployed, rma, etc
 	if item, ok := l.Overrides["external_os_identifiers"]; ok {

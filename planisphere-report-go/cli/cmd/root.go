@@ -1,8 +1,12 @@
+/*
+Package cmd is the command line app for reporting
+*/
 package cmd
 
 import (
 	"log/slog"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -90,6 +94,10 @@ func initLogging() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	initLogging()
+	initViper()
+}
+
+func initViper() {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -114,7 +122,7 @@ func initConfig() {
 		if viper.GetString("key") == "" {
 			possibleKeyFiles := []string{"/etc/planisphere_key_file", "/etc/planisphere-report-key"}
 			for _, pkf := range possibleKeyFiles {
-				dat, err := os.ReadFile(pkf)
+				dat, err := os.ReadFile(path.Clean(pkf))
 				if err == nil {
 					viper.Set("key", strings.TrimSpace(string(dat)))
 					break

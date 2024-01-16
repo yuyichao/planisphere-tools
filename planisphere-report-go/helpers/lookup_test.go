@@ -10,7 +10,7 @@ import (
 
 func TestNewLookuper(t *testing.T) {
 	overrides := map[string]interface{}{}
-	c := &lookups.LookuperConfig{
+	c := &lookups.LookupConfig{
 		Overrides: overrides,
 	}
 	_, err := helpers.NewLookuper(c)
@@ -27,7 +27,7 @@ func TestGenericLookupOverrides(t *testing.T) {
 		"status":             "deployed",
 		"hostname":           "sumhost.local",
 	}
-	c := &lookups.LookuperConfig{
+	c := &lookups.LookupConfig{
 		Overrides: overrides,
 	}
 	l, _ := helpers.NewLookuper(c)
@@ -49,7 +49,7 @@ func TestOSSpecificLookupOverrides(t *testing.T) {
 		"os_family":      "Toretto",
 		"model":          "Bruno",
 	}
-	c := &lookups.LookuperConfig{
+	c := &lookups.LookupConfig{
 		Overrides: overrides,
 	}
 	l, _ := helpers.NewLookuper(c)

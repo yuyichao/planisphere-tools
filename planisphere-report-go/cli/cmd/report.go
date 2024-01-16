@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/sbom"
 	"gopkg.in/yaml.v2"
 )
 
@@ -21,8 +20,6 @@ var reportCmd = &cobra.Command{
 	Short: "Report back to Planisphere",
 	Long:  `Look up local information and send it up to Planisphere self report`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Note: We are printing the time to stdout so that we can
-		// collect this in the non-error log, which is stdout on macOS
 		logger.Info("starting report collection")
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)
@@ -42,10 +39,7 @@ var reportCmd = &cobra.Command{
 				logFatal("error setting url", err)
 			}
 
-			sbomInfo := sbom.Create(".")
-			fmt.Println(sbomInfo)
-
-			c := &lookups.LookuperConfig{
+			c := &lookups.LookupConfig{
 				Overrides: viper.GetStringMap("overrides"),
 			}
 			l, err := helpers.NewLookuper(c)
