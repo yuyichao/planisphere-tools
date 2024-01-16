@@ -2,7 +2,7 @@
 stages:
   - test
   - release
-image: gitlab-registry.oit.duke.edu/devil-ops/goreleaser:v0.5.8
+image: gitlab-registry.oit.duke.edu/devil-ops/goreleaser:v0.8.0
 default:
   retry:
     max: 2

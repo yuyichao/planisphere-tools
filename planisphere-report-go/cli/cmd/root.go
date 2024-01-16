@@ -1,13 +1,13 @@
 package cmd
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/mitchellh/go-homedir"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
@@ -20,6 +20,7 @@ var (
 	planisphereURL string
 	version        = "dev"
 	startedAt      time.Time
+	logger         *slog.Logger
 )
 
 // Verbose Logging
@@ -39,16 +40,16 @@ var rootCmd = &cobra.Command{
 		startedAt = time.Now()
 		planisphereKey = viper.GetString("key")
 		if planisphereKey == "" {
-			log.Fatal().Msg("Must set your Planisphere Key in the config file or env. See README.md for full details. Shortcut to link to your keys: https://duke.is/vywtw")
+			logFatal("Must set your Planisphere Key in the config file or env. See README.md for full details. Shortcut to link to your keys: https://duke.is/vywtw", nil)
 		}
-		log.Debug().Str("planisphere_key", planisphereKey).Msg("Using Key")
+		logger.Debug("using key", "key", planisphereKey)
 
 		// Set URL if needed
 		planisphereURL = viper.GetString("url")
 		if planisphereURL == "" {
 			planisphereURL = "https://planisphere.oit.duke.edu/self_report"
 		}
-		log.Debug().Str("url", planisphereURL).Msg("Using URL")
+		logger.Debug("using url", "url", planisphereURL)
 	},
 }
 
@@ -73,16 +74,22 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+func initLogging() {
+	lopts := log.Options{
+		Prefix:          "🕰 planisphere-report ",
+		ReportTimestamp: true,
+		TimeFormat:      time.Kitchen,
+	}
+	if Verbose {
+		lopts.Level = log.DebugLevel
+	}
+	logger = slog.New(log.NewWithOptions(os.Stderr, lopts))
+	slog.SetDefault(logger)
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: "2006-01-02T15:04:05.999Z07:00",
-	})
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if Verbose {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
+	initLogging()
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -95,13 +102,13 @@ func initConfig() {
 		viper.AddConfigPath("/etc/")
 		viper.SetConfigName("planisphere-report")
 		err = viper.ReadInConfig()
-		log.Debug().Err(err).Msg("Error reading config")
+		logger.Debug("error reading config", "error", err)
 
 		// Search config in home directory with name ".planisphere-report" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".planisphere-report")
 		err = viper.MergeInConfig()
-		log.Debug().Err(err).Msg("Error doing merge config")
+		logger.Debug("error doing mergeconfig", "error", err)
 
 		// If no key is yet set, load it in from a file
 		if viper.GetString("key") == "" {
@@ -115,7 +122,7 @@ func initConfig() {
 			}
 		}
 		if viper.GetString("key") == "" {
-			log.Fatal().Msg(`Could not find your planisphere key. Please set it in one of the following ways:
+			logFatal(`Could not find your planisphere key. Please set it in one of the following ways:
 
 In your planisphere-report.yaml file, use:
 
@@ -132,7 +139,7 @@ Option 3:
 
 Use an environment variable like:
 
-$ export PLANISPHERE_REPORT_KEY=your-key`)
+$ export PLANISPHERE_REPORT_KEY=your-key`, nil)
 		}
 	}
 
@@ -141,6 +148,15 @@ $ export PLANISPHERE_REPORT_KEY=your-key`)
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		log.Debug().Str("config_file", viper.ConfigFileUsed()).Msg("Using config file")
+		logger.Debug("using config file", "file", viper.ConfigFileUsed())
 	}
+}
+
+func logFatal(msg string, err error) {
+	if err != nil {
+		logger.Error(msg, "error", err)
+	} else {
+		logger.Error(msg)
+	}
+	os.Exit(2)
 }

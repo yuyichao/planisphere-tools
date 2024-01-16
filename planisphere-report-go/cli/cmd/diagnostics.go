@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/gpg"
@@ -101,7 +100,8 @@ it with whatever public keys you choose as well.`,
 
 		cmds := cmdMap[runtime.GOOS]
 		if cmds == nil {
-			log.Fatal().Str("os", runtime.GOOS).Msg("No commands available for this OS")
+			logger.Error("No commands available for this OS", "os", runtime.GOOS)
+			os.Exit(2)
 		}
 
 		hostname, _ := os.Hostname()
@@ -116,7 +116,7 @@ it with whatever public keys you choose as well.`,
 		}
 		u, err := user.Current()
 		if err != nil {
-			log.Warn().Err(err).Msg("Could not get username")
+			logger.Warn("Could not get username", "error", err)
 		} else {
 			d.User = u.Username
 		}
@@ -130,11 +130,11 @@ it with whatever public keys you choose as well.`,
 
 				err := oCmd.Run()
 				if err != nil {
-					log.Debug().Err(err).Interface("cmd", cmd).Msg("Error running command")
+					logger.Debug("error running command", "cmd", cmd)
 				}
 				err = oCmd.Wait()
 				if err != nil {
-					log.Warn().Err(err).Msg("Command errored out")
+					logger.Warn("command errored out", "error", err)
 				}
 
 				cd := cmdDiagnostic{
@@ -157,7 +157,7 @@ it with whatever public keys you choose as well.`,
 		if err == nil {
 			d.Payload = lu.Payload
 		} else {
-			log.Warn().Err(err).Msg("Issues getting lookups")
+			logger.Warn("issues getting lookups", "error", err)
 		}
 
 		// Marshal the diagnostic
@@ -181,7 +181,7 @@ it with whatever public keys you choose as well.`,
 		// Write data out
 		_, err = zw.Write(b)
 		if err != nil {
-			log.Warn().Err(err).Msg("Error writing out")
+			logger.Warn("error writing out", "error", err)
 		}
 		zw.Close()
 
