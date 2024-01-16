@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/hardware"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
@@ -42,19 +43,19 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 		args := softwareQuery[1:]
 		binPath, err := l.Commander.LookPath(cmd)
 		if err == nil {
-			log.Debug().Strs("query", softwareQuery).Msg("Running software query")
+			slog.Debug("running software query", "query", softwareQuery)
 			binOut, err := l.Commander.Output(binPath, args...)
 			if err != nil {
-				log.Warn().Str("command", cmd).Msg("Could not do alisting even though the rpm command exists")
+				slog.Warn("could not do a listing even though the rpm command exists", "command", cmd)
 			}
 			binSoftware, err := ParsePackageOutput(binOut)
 			if err != nil {
-				log.Warn().Str("command", cmd).Msg("Could not parse the command output")
+				slog.Warn("could not parse the command output", "command", cmd)
 			} else {
 				softwareTable = append(softwareTable, binSoftware...)
 			}
 		} else {
-			log.Debug().Str("cmd", cmd).Msg("command installed")
+			slog.Debug("command installed", "cmd", cmd)
 		}
 	}
 
@@ -96,7 +97,7 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 		if strings.HasPrefix(mac, "b8:27:eb") {
 			cpuDat, err := l.Commander.Slurp("/proc/cpuinfo")
 			if err != nil {
-				log.Warn().Err(err).Msg("Could not get Raspberry Pi CPU info")
+				slog.Warn("could not get Raspberry Pi CPU info", "error", err)
 				continue
 			}
 			trimmed := strings.Trim(string(cpuDat), "\n")
@@ -189,7 +190,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 		}
 	}
 	if strings.HasPrefix(fullName, "Ubuntu") {
-		if o.detectPro(l) {
+		if o.detectPro(l) || o.detectOITPro() {
 			fullName = util.MakeNamePro(fullName)
 		}
 	}
@@ -207,10 +208,25 @@ func (o OSLookup) detectPro(l *lookups.Lookuper) bool {
 	var esm esmStatus
 	err = json.Unmarshal(out, &esm)
 	if err != nil {
-		// Unknown pro yo
 		return false
 	}
 	return esm.Summary.UA.Attached
+}
+
+// detectOITPro attempts to determin if the ESM repos are included in an OIT managed host
+// OIT mirrors the pro repos locally instead of reaching out to the Ubuntu hosted packages.
+// Because of this, the pro command incorrectly reports that it is not attached.
+// We are instead checking to see if the local mirror repo exists, and assuming 'Pro' if
+// it's there.
+func (o OSLookup) detectOITPro() bool {
+	matches, err := filepath.Glob("/etc/apt/sources.list.d/*-infra-updates.list")
+	if err != nil {
+		slog.Warn("error checking for OIT pro repos", "error", err)
+	}
+	if len(matches) > 0 {
+		return true
+	}
+	return false
 }
 
 // esmStatus is a minimal holder for the esm status

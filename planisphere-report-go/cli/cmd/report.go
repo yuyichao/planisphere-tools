@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
@@ -24,7 +23,7 @@ var reportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Note: We are printing the time to stdout so that we can
 		// collect this in the non-error log, which is stdout on macOS
-		fmt.Printf("%v Starting report collection\n", time.Now())
+		logger.Info("starting report collection")
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)
 
@@ -40,7 +39,7 @@ var reportCmd = &cobra.Command{
 		for {
 			err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL)
 			if err != nil {
-				log.Fatal().Err(err).Msg("Error setting url")
+				logFatal("error setting url", err)
 			}
 
 			sbomInfo := sbom.Create(".")
@@ -51,7 +50,7 @@ var reportCmd = &cobra.Command{
 			}
 			l, err := helpers.NewLookuper(c)
 			if err != nil {
-				log.Fatal().Err(err).Msg("Could not initialize Lookuper 😭☠️")
+				logFatal("Could not initialize Lookuper 😭☠️", err)
 			}
 
 			// Add version to extra data
@@ -85,14 +84,14 @@ var reportCmd = &cobra.Command{
 			if !dryrun {
 				err := l.Payload.Submit(planisphereKey)
 				if err != nil {
-					log.Fatal().Err(err).Msg("Error submitting payload")
+					logFatal("error submitting payload", err)
 				}
-				log.Info().Str("duration", fmt.Sprint(time.Since(startedAt))).Msg("Submitted report, thanks for keeping Duke Safe! ❤️")
+				logger.Info("Submitted report, thanks for keeping Duke Safe! ❤️", "duration", fmt.Sprint(time.Since(startedAt)))
 			}
 			if interval.Seconds() == 0 {
 				return
 			}
-			log.Info().Str("interval", fmt.Sprint(interval)).Msg("Sleeping until next run")
+			logger.Info("sleeping until next run", "interval", fmt.Sprint(interval))
 			time.Sleep(interval)
 		}
 	},
