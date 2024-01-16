@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"slices"
 	"testing"
 
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 func TestMain(m *testing.M) {
@@ -83,7 +83,7 @@ func (c PiCommander) GetMacAddrs() ([]string, error) {
 
 func (c PiCommander) LookPath(command string) (string, error) {
 	availableCommands := []string{"dpkg-query"}
-	if util.ContainsString(availableCommands, command) {
+	if slices.Contains(availableCommands, command) {
 		return fmt.Sprintf("/usr/bin/%v", command), nil
 	}
 	return "", errors.New("Command not found")

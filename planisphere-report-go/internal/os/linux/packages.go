@@ -2,6 +2,7 @@ package linux
 
 import "strings"
 
+// ParsePackageOutput parses the output of rpm stuff
 func ParsePackageOutput(rpmOut []byte) ([][]string, error) {
 	softwareTable := [][]string{}
 	lines := []string{}

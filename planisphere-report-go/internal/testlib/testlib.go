@@ -1,3 +1,6 @@
+/*
+Package testlib provides some mock bits for testing things
+*/
 package testlib
 
 import (
@@ -5,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -16,6 +20,7 @@ and file output out of the test files, without creating waaaaay too many
 testdata files to read in
 */
 
+// MockData is the data definition for a mock
 type MockData struct {
 	Name          string            `yaml:"name,omitempty"`
 	CommandOutput map[string]string `yaml:"command_output,omitempty"`
@@ -23,6 +28,7 @@ type MockData struct {
 	MacAddresses  []string          `yaml:"mac_addresses,omitempty"`
 }
 
+// MockCommandGet yoinks a command out of the mock
 func MockCommandGet(d *MockData, command string, args ...string) ([]byte, error) {
 	joined := fmt.Sprintf("%v %v", command, strings.Join(args, " "))
 	joined = strings.TrimSpace(joined)
@@ -32,6 +38,7 @@ func MockCommandGet(d *MockData, command string, args ...string) ([]byte, error)
 	return []byte("unknown-command"), errors.New("unknown-mock-command")
 }
 
+// MockFileGet mocks the file get thing
 func MockFileGet(d *MockData, fp string) ([]byte, error) {
 	if d != nil {
 		if val, ok := d.FileContents[fp]; ok {
@@ -43,6 +50,7 @@ func MockFileGet(d *MockData, fp string) ([]byte, error) {
 	return []byte(""), nil
 }
 
+// MockMacGet mocks the mac address getter
 func MockMacGet(d *MockData) ([]string, error) {
 	if d != nil {
 		return d.MacAddresses, nil
@@ -50,9 +58,10 @@ func MockMacGet(d *MockData) ([]string, error) {
 	return []string{"00:00:00:11:22:33"}, nil
 }
 
+// NewMockData returns a new MockData object
 func NewMockData(filePath string) (*MockData, error) {
 	var d MockData
-	yamlFile, err := os.ReadFile(filePath)
+	yamlFile, err := os.ReadFile(path.Clean(filePath))
 	if err != nil {
 		return nil, err
 	}

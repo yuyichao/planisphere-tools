@@ -28,7 +28,7 @@ the 'report' command for that`,
 
 		overrides := viper.GetStringMap("overrides")
 
-		c := &lookups.LookuperConfig{
+		c := &lookups.LookupConfig{
 			Overrides: overrides,
 		}
 		l, err := helpers.NewLookuper(c)

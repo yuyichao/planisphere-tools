@@ -1,3 +1,6 @@
+/*
+Package linux defines how to interact with the Linux os stuff
+*/
 package linux
 
 import (
@@ -19,17 +22,22 @@ import (
 )
 
 var (
-	ErrEmptyOutput            = fmt.Errorf("Empty output")
-	ErrMalformedPackageOutput = fmt.Errorf("Malformed Package Output")
+	// ErrEmptyOutput is when there are no actual lines outputted
+	ErrEmptyOutput = fmt.Errorf("empty output")
+	// ErrMalformedPackageOutput is when the package output is bad
+	ErrMalformedPackageOutput = fmt.Errorf("malformed Package Output")
 )
 
+// OSLookup handles the Linux OS lookups
 type OSLookup struct{}
 
-func (o OSLookup) ApplyPlatformDetections(_ *lookups.Lookuper) error {
+// ApplyPlatformDetections satisfies the OSLookuper interface
+func (o OSLookup) ApplyPlatformDetections(_ *lookups.Lookup) error {
 	return nil
 }
 
-func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
+// GetInstalledSoftware returns the installed software
+func GetInstalledSoftware(l *lookups.Lookup) ([][]string, error) {
 	softwareTable := [][]string{}
 	softwareQueries := [][]string{
 		{"rpm", "-qa", "--qf", "%{NAME} %|EPOCH?{%{EPOCH}:}:{}|%{VERSION}-%{RELEASE}\n"},
@@ -62,7 +70,8 @@ func GetInstalledSoftware(l *lookups.Lookuper) ([][]string, error) {
 	return softwareTable, nil
 }
 
-func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
+// GetSerial satisfies the OSLookuper interface
+func (o OSLookup) GetSerial(l *lookups.Lookup) (interface{}, error) {
 	out, err := l.Commander.Slurp("/sys/class/dmi/id/product_serial")
 	if err != nil {
 		return nil, err
@@ -71,7 +80,8 @@ func (o OSLookup) GetSerial(l *lookups.Lookuper) (interface{}, error) {
 	return serial, nil
 }
 
-func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
+// GetManufacturer satisfies the OSLookuper interface
+func (o OSLookup) GetManufacturer(l *lookups.Lookup) (interface{}, error) {
 	// Is it a Raspberry Pi?
 	l.WaitForChecked("mac_addresses")
 	for _, mac := range l.Payload.Data.MacAddresses {
@@ -90,7 +100,8 @@ func (o OSLookup) GetManufacturer(l *lookups.Lookuper) (interface{}, error) {
 	return vendor, nil
 }
 
-func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
+// GetModel satisfies the OSLookuper interface
+func (o OSLookup) GetModel(l *lookups.Lookup) (interface{}, error) {
 	// Is it a Raspberry Pi?
 	l.WaitForChecked("mac_addresses")
 	for _, mac := range l.Payload.Data.MacAddresses {
@@ -121,12 +132,13 @@ func (o OSLookup) GetModel(l *lookups.Lookuper) (interface{}, error) {
 	return productName, nil
 }
 
-func (o OSLookup) GetDiskEncrypted(_ *lookups.Lookuper) (interface{}, error) {
-	// TODO: Implement this
+// GetDiskEncrypted satisfies the OSLookuper interface
+func (o OSLookup) GetDiskEncrypted(_ *lookups.Lookup) (interface{}, error) {
 	return false, errors.New("DiskEncrypted Not yet implemented")
 }
 
-func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
+// GetMemory satisfies the OSLookuper interface
+func (o OSLookup) GetMemory(l *lookups.Lookup) (interface{}, error) {
 	out, err := l.Commander.Slurp("/proc/meminfo")
 	if err != nil {
 		return nil, err
@@ -146,11 +158,13 @@ func (o OSLookup) GetMemory(l *lookups.Lookuper) (interface{}, error) {
 	return memory / 1024, err
 }
 
-func (o OSLookup) GetOSFamily(_ *lookups.Lookuper) (interface{}, error) {
+// GetOSFamily satisfies the OSLookuper interface
+func (o OSLookup) GetOSFamily(_ *lookups.Lookup) (interface{}, error) {
 	return "Linux", nil
 }
 
-func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
+// GetDeviceType satisfies the OSLookuper interface
+func (o OSLookup) GetDeviceType(l *lookups.Lookup) (interface{}, error) {
 	l.WaitForChecked("serial")
 	if strings.Contains(l.Payload.Data.Serial, "VMware") {
 		return "vm", nil
@@ -174,7 +188,8 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookuper) (interface{}, error) {
 	return "", nil
 }
 
-func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
+// GetOSFullName satisfies the OSLookuper interface
+func (o OSLookup) GetOSFullName(l *lookups.Lookup) (interface{}, error) {
 	osb, err := l.Commander.Slurp("/etc/os-release")
 	if err != nil {
 		return nil, err
@@ -199,7 +214,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 
 // detectPro attempts to determine if the ESM repos indicate that this server is
 // getting full 'Pro' support
-func (o OSLookup) detectPro(l *lookups.Lookuper) bool {
+func (o OSLookup) detectPro(l *lookups.Lookup) bool {
 	out, err := l.Commander.Output("/usr/bin/pro", "security-status", "--esm-infra", "--format", "json")
 	if err != nil {
 		// No pro yo
@@ -238,7 +253,8 @@ type esmStatus struct {
 	} `json:"summary"`
 }
 
-func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error) {
+// GetInstalledSoftware satisfies the OSLookuper interface
+func (o OSLookup) GetInstalledSoftware(l *lookups.Lookup) (interface{}, error) {
 	apps, err := GetInstalledSoftware(l)
 	if err != nil {
 		return nil, err
@@ -246,7 +262,8 @@ func (o OSLookup) GetInstalledSoftware(l *lookups.Lookuper) (interface{}, error)
 	return apps, nil
 }
 
-func (o OSLookup) GetHostname(_ *lookups.Lookuper) (interface{}, error) {
+// GetHostname satisfies the OSLookuper interface
+func (o OSLookup) GetHostname(_ *lookups.Lookup) (interface{}, error) {
 	// Hostname Field
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -255,7 +272,8 @@ func (o OSLookup) GetHostname(_ *lookups.Lookuper) (interface{}, error) {
 	return hostname, nil
 }
 
-func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookuper) (interface{}, error) {
+// GetExternalOSIdentifiers satisfies the OSLookuper interface
+func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookup) (interface{}, error) {
 	ids := map[string]string{}
 	aidOut, err := l.Commander.Output("/opt/CrowdStrike/falconctl", "-g", "--aid")
 	if err != nil {

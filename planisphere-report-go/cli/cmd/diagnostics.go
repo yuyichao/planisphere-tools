@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -111,7 +96,7 @@ it with whatever public keys you choose as well.`,
 			Version:   version,
 			Instance:  planisphereURL,
 			TimeStamp: now,
-			KeyHash:   helpers.HashString(planisphereKey),
+			KeyHash:   hashString(planisphereKey),
 			Overrides: viper.GetStringMap("overrides"),
 		}
 		u, err := user.Current()
@@ -123,18 +108,16 @@ it with whatever public keys you choose as well.`,
 		c := make(chan cmdDiagnostic)
 		for _, cmd := range cmds {
 			go func(cmd []string) {
-				oCmd := exec.Command(cmd[0], cmd[1:]...)
+				oCmd := exec.Command(cmd[0], cmd[1:]...) // nolint:gosec
 				var outbuf, errbuf strings.Builder
 				oCmd.Stdout = &outbuf
 				oCmd.Stderr = &errbuf
 
-				err := oCmd.Run()
-				if err != nil {
-					logger.Debug("error running command", "cmd", cmd)
+				if oerr := oCmd.Run(); oerr != nil {
+					logger.Debug("error running command", "cmd", cmd, "error", oerr)
 				}
-				err = oCmd.Wait()
-				if err != nil {
-					logger.Warn("command errored out", "error", err)
+				if oerr := oCmd.Wait(); oerr != nil {
+					logger.Warn("command errored out", "error", oerr)
 				}
 
 				cd := cmdDiagnostic{
@@ -150,7 +133,7 @@ it with whatever public keys you choose as well.`,
 		}
 
 		// Try to get a real report as well, and toss it in for good measure
-		lc := &lookups.LookuperConfig{
+		lc := &lookups.LookupConfig{
 			Overrides: viper.GetStringMap("overrides"),
 		}
 		lu, err := helpers.NewLookuper(lc)
@@ -172,8 +155,8 @@ it with whatever public keys you choose as well.`,
 
 		// Do we want to encrypt?
 		if !plaintext {
-			els, err := gpg.CollectGPGPubKeys("")
-			cobra.CheckErr(err)
+			els, cerr := gpg.CollectGPGPubKeys("")
+			cobra.CheckErr(cerr)
 			b, err = gpg.Encrypt(b, els)
 			cobra.CheckErr(err)
 		}
@@ -183,8 +166,9 @@ it with whatever public keys you choose as well.`,
 		if err != nil {
 			logger.Warn("error writing out", "error", err)
 		}
-		zw.Close()
-
+		if cerr := zw.Close(); cerr != nil {
+			logger.Warn("error closing item", "error", cerr)
+		}
 		// fmt.Println(string(encrypted))
 
 		var fExt string
