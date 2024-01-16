@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -189,7 +190,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookuper) (interface{}, error) {
 		}
 	}
 	if strings.HasPrefix(fullName, "Ubuntu") {
-		if o.detectPro(l) {
+		if o.detectPro(l) || o.detectOITPro() {
 			fullName = util.MakeNamePro(fullName)
 		}
 	}
@@ -207,10 +208,25 @@ func (o OSLookup) detectPro(l *lookups.Lookuper) bool {
 	var esm esmStatus
 	err = json.Unmarshal(out, &esm)
 	if err != nil {
-		// Unknown pro yo
 		return false
 	}
 	return esm.Summary.UA.Attached
+}
+
+// detectOITPro attempts to determin if the ESM repos are included in an OIT managed host
+// OIT mirrors the pro repos locally instead of reaching out to the Ubuntu hosted packages.
+// Because of this, the pro command incorrectly reports that it is not attached.
+// We are instead checking to see if the local mirror repo exists, and assuming 'Pro' if
+// it's there.
+func (o OSLookup) detectOITPro() bool {
+	matches, err := filepath.Glob("/etc/apt/sources.list.d/*-infra-updates.list")
+	if err != nil {
+		slog.Warn("error checking for OIT pro repos", "error", err)
+	}
+	if len(matches) > 0 {
+		return true
+	}
+	return false
 }
 
 // esmStatus is a minimal holder for the esm status
