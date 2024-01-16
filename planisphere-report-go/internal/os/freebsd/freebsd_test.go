@@ -59,7 +59,7 @@ func (c MockCommander) LookPath(command string) (string, error) {
 func TestNewLookup(t *testing.T) {
 	commander = MockCommander{}
 	// slurper = MockSlurper{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &commander,
 		OS:        "freebsd",
 		// Slurper:   &slurper,

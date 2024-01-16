@@ -1,5 +1,9 @@
+/*
+Package hardware defines some information about hardware data. This should probably be moved elsewhere, it doesn't need it's own module
+*/
 package hardware
 
+// ChassisType maps integers to planisphere server types
 var ChassisType = map[int]string{
 	3:  "desktop",
 	4:  "desktop",
@@ -18,6 +22,7 @@ var ChassisType = map[int]string{
 	25: "server_physical",
 }
 
+// RaspberryPiModels maps the bios number to actual model numbers
 var RaspberryPiModels = map[string]string{
 	"0002":   "B",
 	"0003":   "B",

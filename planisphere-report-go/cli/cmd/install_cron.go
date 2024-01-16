@@ -1,11 +1,11 @@
 package cmd
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"os"
 	"os/user"
-	"time"
 
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 
@@ -30,18 +30,21 @@ var installCronCmd = &cobra.Command{
 			panic(err)
 		}
 
-		// Semi random seeding
-		s1 := rand.NewSource(time.Now().UnixNano())
-		r1 := rand.New(s1)
-		hour := r1.Intn(23)
-		minute := r1.Intn(59)
-		content := fmt.Sprintf("%v %v * * * %v %v report\n", minute, hour, user, ex)
+		content := fmt.Sprintf("%v %v * * * %v %v report\n", mustRand(59), mustRand(23), user, ex)
 		logger.Info("creating cron:")
 		fmt.Println(content)
 
-		cobra.CheckErr(os.WriteFile(cronFile, []byte(content), 0o644))
+		cobra.CheckErr(os.WriteFile(cronFile, []byte(content), 0o600))
 		logger.Info("successfully installed cron! If it's not to your liking, feel free to edit.")
 	},
+}
+
+func mustRand(i int64) int64 {
+	n, err := rand.Int(rand.Reader, big.NewInt(i))
+	if err != nil {
+		panic(err)
+	}
+	return n.Int64()
 }
 
 func init() {

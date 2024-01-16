@@ -11,7 +11,7 @@ import (
 
 func TestNewLookup(t *testing.T) {
 	commander = MockCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &commander,
 		OS:        "linux",
 	}
@@ -24,14 +24,13 @@ func TestNewLookup(t *testing.T) {
 	require.Equal(t, "VMware7,1", l.Payload.Data.Model)
 	require.Equal(t, "laptop", l.Payload.Data.DeviceType)
 	require.Equal(t, "my-awesome-fake-serial", l.Payload.Data.Serial)
-	// require.Equal(t, "laptop", l.Payload.Data.DeviceType)
 	require.Equal(t, planisphere.ExternalOSIdentifiers{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
 	require.Contains(t, l.Payload.Data.MacAddresses, "01:02:03:30:20:10")
 }
 
 func TestPiLookup(t *testing.T) {
 	piCommander = PiCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &piCommander,
 		OS:        "linux",
 	}
@@ -53,7 +52,7 @@ func TestPiLookup(t *testing.T) {
 
 func TestFailingLookup(t *testing.T) {
 	failCommander = FailCommander{}
-	c := lookups.LookuperConfig{
+	c := lookups.LookupConfig{
 		Commander: &failCommander,
 		OS:        "linux",
 	}

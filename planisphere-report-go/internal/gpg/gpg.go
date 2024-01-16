@@ -1,3 +1,6 @@
+/*
+Package gpg handles gpg operations
+*/
 package gpg
 
 import (
@@ -28,34 +31,38 @@ func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 	// buffer
 	armoredWriter, err = armor.Encode(buffer, "PGP MESSAGE", nil)
 	if err != nil {
-		return nil, errors.New("Bad Writer")
+		return nil, errors.New("bad writer")
 	}
 
 	// Create an encrypted writer using the provided encryption keys
 	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
 	if err != nil {
-		return nil, errors.New("Bad Cipher")
+		return nil, errors.New("bad cipher")
 	}
 
 	// Write (encrypts on the fly) the provided bytes to
 	// cipheredWriter
 	_, err = cipheredWriter.Write(d)
 	if err != nil {
-		return nil, errors.New("Bad Ciphered Writer")
+		return nil, errors.New("bad ciphered writer")
 	}
 
-	cipheredWriter.Close()
-	armoredWriter.Close()
+	if err := cipheredWriter.Close(); err != nil {
+		slog.Warn("error closing ciphered writer", "error", err)
+	}
+	if err := armoredWriter.Close(); err != nil {
+		slog.Warn("error closing armored writer", "error", err)
+	}
 
 	return buffer.Bytes(), nil
 }
 
-func ReadEntity(name string) (*openpgp.Entity, error) {
-	f, err := os.Open(name)
+func readEntity(name string) (*openpgp.Entity, error) {
+	f, err := os.Open(path.Clean(name))
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer dclose(f)
 	block, err := armor.Decode(f)
 	if err != nil {
 		return nil, err
@@ -63,6 +70,7 @@ func ReadEntity(name string) (*openpgp.Entity, error) {
 	return openpgp.ReadEntity(packet.NewReader(block.Body))
 }
 
+// CollectGPGPubKeys returns an EntityList from a given url
 func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 	var els openpgp.EntityList
 
@@ -70,10 +78,10 @@ func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 		gitlabKeysURL := "https://gitlab.oit.duke.edu/oit-ssi-systems/staff-public-keys.git"
 		subDir := "linux"
 		tmpdir, err := os.MkdirTemp("", "gpg-pub-tmpdir")
-		defer os.RemoveAll(tmpdir)
 		if err != nil {
 			return nil, err
 		}
+		defer dRemoveAll(tmpdir)
 		_, err = git.PlainClone(tmpdir, false, &git.CloneOptions{
 			URL:               gitlabKeysURL,
 			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
@@ -90,7 +98,7 @@ func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 		return nil, err
 	}
 	for _, pubKeyFile := range matches {
-		e, err := ReadEntity(pubKeyFile)
+		e, err := readEntity(pubKeyFile)
 		if err != nil {
 			slog.Warn("error opening gpg file", "pubkey", pubKeyFile)
 			continue
@@ -98,7 +106,19 @@ func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 		els = append(els, e)
 	}
 	if len(els) == 0 {
-		return nil, errors.New("No gpg keys found")
+		return nil, errors.New("no gpg keys found")
 	}
 	return &els, nil
+}
+
+func dclose(c io.Closer) {
+	if err := c.Close(); err != nil {
+		fmt.Fprint(os.Stderr, "error closing file\n")
+	}
+}
+
+func dRemoveAll(path string) {
+	if err := os.RemoveAll(path); err != nil {
+		fmt.Fprintf(os.Stderr, "error removing path: %v\n", path)
+	}
 }
