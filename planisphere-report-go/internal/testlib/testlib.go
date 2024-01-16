@@ -3,10 +3,10 @@ package testlib
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,7 +37,7 @@ func MockFileGet(d *MockData, fp string) ([]byte, error) {
 		if val, ok := d.FileContents[fp]; ok {
 			return []byte(val), nil
 		}
-		log.Warn().Str("mock_file", fp).Msg("Missing mock file")
+		slog.Warn("missing mock file", "file", fp)
 		return []byte("unknown-mock-file"), errors.New("unknown-mock-file")
 	}
 	return []byte(""), nil

@@ -3,10 +3,10 @@ package darwin_test
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
 )
@@ -31,7 +31,8 @@ func setup() {
 	var err error
 	macOSData, err = testlib.NewMockData("testdata/macos.yaml")
 	if err != nil {
-		log.Fatal().Err(err).Msg("Error setting macOS data")
+		slog.Error("error setting macOS data", "error", err)
+		os.Exit(2)
 	}
 }
 

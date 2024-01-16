@@ -2,10 +2,10 @@ package freebsd_test
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
@@ -47,7 +47,7 @@ func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
 	case "/sbin/sysctl -n vm.kmem_size":
 		return []byte("8388608"), nil
 	default:
-		log.Warn().Str("command", joined).Msg("Unknown command")
+		slog.Warn("unknown command", "command", joined)
 		return []byte("fell through"), nil
 	}
 }

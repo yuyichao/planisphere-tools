@@ -3,10 +3,10 @@ package linux_test
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 
-	"github.com/rs/zerolog/log"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
@@ -36,11 +36,13 @@ func setup() {
 	var err error
 	centos8Data, err = testlib.NewMockData("testdata/centos8.yaml")
 	if err != nil {
-		log.Fatal().Err(err).Msg("Error setting centos8 data")
+		slog.Error("error setting centos8 data", "error", err)
+		os.Exit(2)
 	}
 	piData, err = testlib.NewMockData("testdata/raspberrypi.yaml")
 	if err != nil {
-		log.Fatal().Err(err).Msg("Error setting pi data")
+		slog.Error("error setting pi data", "error", err)
+		os.Exit(2)
 	}
 }
 
