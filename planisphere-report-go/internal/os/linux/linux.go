@@ -16,9 +16,8 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/hardware"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
 )
 
 var (
@@ -117,8 +116,8 @@ func (o OSLookup) GetModel(l *lookups.Lookup) (interface{}, error) {
 				key := strings.TrimSpace(pieces[0])
 				value := strings.TrimSpace(pieces[1])
 				if key == "Revision" {
-					if _, ok := hardware.RaspberryPiModels[value]; ok {
-						return hardware.RaspberryPiModels[value], nil
+					if _, ok := report.RaspberryPiModels[value]; ok {
+						return report.RaspberryPiModels[value], nil
 					}
 				}
 			}
@@ -173,16 +172,14 @@ func (o OSLookup) GetDeviceType(l *lookups.Lookup) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Strip the newline please
 	ctt := strings.TrimSpace(string(ct))
-	// ctt as an integer
 	cti, err := strconv.Atoi(ctt)
 	if err != nil {
 		return nil, err
 	}
 	// Is the chassis type integer in the deviceTypeTable?
-	if _, ok := hardware.ChassisType[cti]; ok {
-		return hardware.ChassisType[cti], nil
+	if _, ok := report.ChassisType[cti]; ok {
+		return report.ChassisType[cti], nil
 	}
 
 	return "", nil
@@ -206,7 +203,7 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookup) (interface{}, error) {
 	}
 	if strings.HasPrefix(fullName, "Ubuntu") {
 		if o.detectPro(l) || o.detectOITPro() {
-			fullName = util.MakeNamePro(fullName)
+			fullName = MakeNamePro(fullName)
 		}
 	}
 	return fullName, nil
@@ -281,4 +278,11 @@ func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookup) (interface{}, erro
 	}
 	ids["crowdstrike_aid"] = strings.TrimSuffix(strings.TrimPrefix(string(aidOut), "aid=\""), "\".\n")
 	return ids, nil
+}
+
+// MakeNamePro inserts 'Pro' after the first part of the string
+// so "Ubuntu 18.04" becomes "Ubuntu Pro 18.04"
+func MakeNamePro(s string) string {
+	pieces := strings.Split(s, " ")
+	return fmt.Sprintf("%s Pro %s", pieces[0], strings.Join(pieces[1:], " "))
 }

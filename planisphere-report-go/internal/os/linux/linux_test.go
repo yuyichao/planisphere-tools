@@ -7,6 +7,7 @@ import (
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
+	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/linux"
 )
 
 func TestNewLookup(t *testing.T) {
@@ -67,4 +68,19 @@ func TestFailingLookup(t *testing.T) {
 	require.Equal(t, "", l.Payload.Data.Serial)
 	require.Equal(t, planisphere.ExternalOSIdentifiers(nil), l.Payload.Data.ExternalOSIdentifiers)
 	// require.Contains(t, l.Payload.Data.MacAddresses, "b8:27:eb:30:20:10")
+}
+
+func TestMakeNamePro(t *testing.T) {
+	tests := map[string]struct {
+		given string
+		want  string
+	}{
+		"simple": {
+			given: "Ubuntu 18.04",
+			want:  "Ubuntu Pro 18.04",
+		},
+	}
+	for desc, tt := range tests {
+		require.Equal(t, tt.want, linux.MakeNamePro(tt.given), desc)
+	}
 }

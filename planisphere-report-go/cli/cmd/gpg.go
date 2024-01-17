@@ -1,7 +1,4 @@
-/*
-Package gpg handles gpg operations
-*/
-package gpg
+package cmd
 
 import (
 	"bytes"
@@ -19,9 +16,9 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
-// Encrypt the provided bytes for the provided encryption
+// encrypt the provided bytes for the provided encryption
 // keys recipients. Returns the encrypted content bytes.
-func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
+func encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	var armoredWriter io.WriteCloser
 	var cipheredWriter io.WriteCloser
@@ -70,8 +67,8 @@ func readEntity(name string) (*openpgp.Entity, error) {
 	return openpgp.ReadEntity(packet.NewReader(block.Body))
 }
 
-// CollectGPGPubKeys returns an EntityList from a given url
-func CollectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
+// collectGPGPubKeys returns an EntityList from a given url
+func collectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 	var els openpgp.EntityList
 
 	if fp == "" {

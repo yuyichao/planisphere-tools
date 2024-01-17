@@ -7,8 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 )
 
 func TestMain(m *testing.M) {
@@ -20,16 +19,16 @@ func TestMain(m *testing.M) {
 
 var (
 	// Stubs for centos8
-	macOSData      *testlib.MockData
-	macOSCommander cmdr.Commander
+	macOSData      *report.MockData
+	macOSCommander report.Commander
 
 	// Worlds worst command executor, always fail
-	failCommander cmdr.Commander
+	failCommander report.Commander
 )
 
 func setup() {
 	var err error
-	macOSData, err = testlib.NewMockData("testdata/macos.yaml")
+	macOSData, err = report.NewMockData("testdata/macos.yaml")
 	if err != nil {
 		slog.Error("error setting macOS data", "error", err)
 		os.Exit(2)
@@ -46,12 +45,12 @@ type (
 
 // Mock for Centos8 good stuff
 func (c MockCommander) Slurp(filepath string) ([]byte, error) {
-	res, err := testlib.MockFileGet(macOSData, filepath)
+	res, err := report.MockFileGet(macOSData, filepath)
 	return res, err
 }
 
 func (c MockCommander) GetMacAddrs() ([]string, error) {
-	addrs, err := testlib.MockMacGet(macOSData)
+	addrs, err := report.MockMacGet(macOSData)
 	return addrs, err
 }
 
@@ -60,13 +59,13 @@ func (c MockCommander) LookPath(command string) (string, error) {
 }
 
 func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
-	res, err := testlib.MockCommandGet(macOSData, command, args...)
+	res, err := report.MockCommandGet(macOSData, command, args...)
 	return res, err
 }
 
 // Mock up for failure cmds
 func (c FailCommander) GetMacAddrs() ([]string, error) {
-	addrs, err := testlib.MockMacGet(nil)
+	addrs, err := report.MockMacGet(nil)
 	return addrs, err
 }
 
@@ -79,6 +78,5 @@ func (c FailCommander) Output(_ string, _ ...string) ([]byte, error) {
 }
 
 func (c FailCommander) Slurp(filepath string) ([]byte, error) {
-	res, err := testlib.MockFileGet(nil, filepath)
-	return res, err
+	return report.MockFileGet(nil, filepath)
 }

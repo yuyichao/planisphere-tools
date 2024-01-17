@@ -175,6 +175,7 @@ linters-settings:
           - "github.com/stretchr/testify"
           - "github.com/stretchr/testify/require"
           - "gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
+          - "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
           - "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
           - "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
           - "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
