@@ -1,7 +1,4 @@
-/*
-Package cmdr defines the Commander interface and accompanying pieces
-*/
-package cmdr
+package report
 
 import (
 	"net"

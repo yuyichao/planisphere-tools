@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,4 +25,13 @@ func TestHashString(t *testing.T) {
 		got := hashString(tt.s)
 		require.Equal(t, tt.want, got)
 	}
+}
+
+func TestExists(t *testing.T) {
+	file, err := os.CreateTemp("", "")
+	require.NoError(t, err)
+	defer os.Remove(file.Name())
+	notafile := fmt.Sprintf("%v-not-a-file", file.Name())
+	require.True(t, exists(file.Name()))
+	require.False(t, exists(notafile))
 }

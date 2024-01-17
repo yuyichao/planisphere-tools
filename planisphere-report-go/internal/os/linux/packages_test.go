@@ -1,10 +1,9 @@
-package linux_test
+package linux
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/linux"
 )
 
 func TestPackageOutput(t *testing.T) {
@@ -38,7 +37,7 @@ device-mapper-libs 8:1.02.177-10.el8`),
 	}
 
 	for _, test := range tests {
-		o, err := linux.ParsePackageOutput(test.out)
+		o, err := ParsePackageOutput(test.out)
 		require.NoError(t, err)
 		require.Equal(t, test.expect, o)
 	}
@@ -55,7 +54,7 @@ func TestPackageEmptyOutput(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := linux.ParsePackageOutput(test.out)
-		require.EqualError(t, err, linux.ErrEmptyOutput.Error())
+		_, err := ParsePackageOutput(test.out)
+		require.EqualError(t, err, ErrEmptyOutput.Error())
 	}
 }

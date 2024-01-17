@@ -13,7 +13,6 @@ import (
 
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/gpg"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gopkg.in/yaml.v2"
 
@@ -155,9 +154,9 @@ it with whatever public keys you choose as well.`,
 
 		// Do we want to encrypt?
 		if !plaintext {
-			els, cerr := gpg.CollectGPGPubKeys("")
+			els, cerr := collectGPGPubKeys("")
 			cobra.CheckErr(cerr)
-			b, err = gpg.Encrypt(b, els)
+			b, err = encrypt(b, els)
 			cobra.CheckErr(err)
 		}
 

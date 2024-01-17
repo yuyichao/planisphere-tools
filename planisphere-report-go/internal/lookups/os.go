@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"gitlab.oit.duke.edu/devil-ops/planisphere-sdk/planisphere"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 )
 
 // CheckedItems      []string
@@ -38,7 +38,7 @@ type OSLookuper interface {
 type Lookup struct {
 	Overrides    map[string]interface{}
 	Payload      planisphere.SelfReportPayload
-	Commander    cmdr.Commander
+	Commander    report.Commander
 	CheckedItems []string
 }
 
@@ -47,7 +47,7 @@ type LookupConfig struct {
 	Overrides map[string]interface{}
 	OS        string // darwin, linux, windows, etc
 	// CLI Interface for test mocking
-	Commander *cmdr.Commander
+	Commander *report.Commander
 }
 
 // WaitForChecked pauses the lookups until a specific item has been checked

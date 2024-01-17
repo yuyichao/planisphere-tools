@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/darwin"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/os/freebsd"
@@ -46,7 +46,7 @@ func NewLookuper(c *lookups.LookupConfig) (*lookups.Lookup, error) {
 		Overrides: c.Overrides,
 	}
 
-	l.Commander = cmdr.RealCommander{}
+	l.Commander = report.RealCommander{}
 	if c.Commander != nil {
 		l.Commander = *c.Commander
 	}

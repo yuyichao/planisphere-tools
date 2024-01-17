@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/user"
 
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/util"
-
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +18,7 @@ var installCronCmd = &cobra.Command{
 		cronFile, _ := cmd.Flags().GetString("cron-file")
 		force, _ := cmd.Flags().GetBool("force")
 		user, _ := cmd.Flags().GetString("user")
-		if util.Exists(cronFile) && !force {
+		if exists(cronFile) && !force {
 			logger.Error("Cronfile already exists. Use -f/--force to overwrite it", "file", cronFile)
 			os.Exit(2)
 		}

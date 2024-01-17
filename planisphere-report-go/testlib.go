@@ -1,7 +1,4 @@
-/*
-Package testlib provides some mock bits for testing things
-*/
-package testlib
+package report
 
 import (
 	"errors"

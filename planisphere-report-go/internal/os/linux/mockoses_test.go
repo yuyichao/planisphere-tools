@@ -8,8 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/testlib"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 )
 
 func TestMain(m *testing.M) {
@@ -21,25 +20,25 @@ func TestMain(m *testing.M) {
 
 var (
 	// Stubs for centos8
-	centos8Data *testlib.MockData
-	commander   cmdr.Commander
+	centos8Data *report.MockData
+	commander   report.Commander
 
 	// Stubs for raspberry pi
-	piData      *testlib.MockData
-	piCommander cmdr.Commander
+	piData      *report.MockData
+	piCommander report.Commander
 
 	// Worlds worst command executor, always fail
-	failCommander cmdr.Commander
+	failCommander report.Commander
 )
 
 func setup() {
 	var err error
-	centos8Data, err = testlib.NewMockData("testdata/centos8.yaml")
+	centos8Data, err = report.NewMockData("testdata/centos8.yaml")
 	if err != nil {
 		slog.Error("error setting centos8 data", "error", err)
 		os.Exit(2)
 	}
-	piData, err = testlib.NewMockData("testdata/raspberrypi.yaml")
+	piData, err = report.NewMockData("testdata/raspberrypi.yaml")
 	if err != nil {
 		slog.Error("error setting pi data", "error", err)
 		os.Exit(2)
@@ -57,13 +56,11 @@ type (
 
 // Mock for Centos8 good stuff
 func (c MockCommander) Slurp(filepath string) ([]byte, error) {
-	res, err := testlib.MockFileGet(centos8Data, filepath)
-	return res, err
+	return report.MockFileGet(centos8Data, filepath)
 }
 
 func (c MockCommander) GetMacAddrs() ([]string, error) {
-	addrs, err := testlib.MockMacGet(centos8Data)
-	return addrs, err
+	return report.MockMacGet(centos8Data)
 }
 
 func (c MockCommander) LookPath(command string) (string, error) {
@@ -71,14 +68,12 @@ func (c MockCommander) LookPath(command string) (string, error) {
 }
 
 func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
-	res, err := testlib.MockCommandGet(centos8Data, command, args...)
-	return res, err
+	return report.MockCommandGet(centos8Data, command, args...)
 }
 
 // Mock up for raspberry pi
 func (c PiCommander) GetMacAddrs() ([]string, error) {
-	addrs, err := testlib.MockMacGet(piData)
-	return addrs, err
+	return report.MockMacGet(piData)
 }
 
 func (c PiCommander) LookPath(command string) (string, error) {
@@ -90,19 +85,16 @@ func (c PiCommander) LookPath(command string) (string, error) {
 }
 
 func (c PiCommander) Output(command string, args ...string) ([]byte, error) {
-	res, err := testlib.MockCommandGet(piData, command, args...)
-	return res, err
+	return report.MockCommandGet(piData, command, args...)
 }
 
 func (c PiCommander) Slurp(filepath string) ([]byte, error) {
-	res, err := testlib.MockFileGet(piData, filepath)
-	return res, err
+	return report.MockFileGet(piData, filepath)
 }
 
 // Mock up for failure cmds
 func (c FailCommander) GetMacAddrs() ([]string, error) {
-	addrs, err := testlib.MockMacGet(nil)
-	return addrs, err
+	return report.MockMacGet(nil)
 }
 
 func (c FailCommander) LookPath(command string) (string, error) {
@@ -110,11 +102,9 @@ func (c FailCommander) LookPath(command string) (string, error) {
 }
 
 func (c FailCommander) Output(_ string, _ ...string) ([]byte, error) {
-	// res, err := testlib.MockCommandGet(piData, command, args...)
 	return nil, errors.New("Always-fail")
 }
 
 func (c FailCommander) Slurp(filepath string) ([]byte, error) {
-	res, err := testlib.MockFileGet(nil, filepath)
-	return res, err
+	return report.MockFileGet(nil, filepath)
 }

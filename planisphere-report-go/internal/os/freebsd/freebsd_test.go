@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	report "gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/helpers"
-	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/cmdr"
 	"gitlab.oit.duke.edu/devil-ops/planisphere-tools/planisphere-report-go/internal/lookups"
 )
 
@@ -17,7 +17,7 @@ type (
 	// MockSlurper   struct{}
 )
 
-var commander cmdr.Commander
+var commander report.Commander
 
 func (c MockCommander) GetMacAddrs() ([]string, error) {
 	return []string{"00:00:00:00:00:00"}, nil
