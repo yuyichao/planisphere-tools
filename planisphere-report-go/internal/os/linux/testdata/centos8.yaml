@@ -23,6 +23,35 @@ command_output:
   "/usr/bin/pacman -Q": |
     foo 1.2.3
     bar 4.5.6
+  "/usr/bin/yum repolist -v enabled": |
+    Loaded plugins: builddep, changelog, config-manager, copr, debug, debuginfo-install, download, generate_completion_cache, groups-manager, needs-restarting, playground, repoclosure, repodiff, repograph, repomanage, reposync, system-upgrade, versionlock
+    YUM version: 4.14.0
+    cachedir: /var/cache/dnf
+    Last metadata expiration check: 1:48:28 ago on Tue 14 May 2024 07:10:38 AM EDT.
+    Repo-id            : baseos
+    Repo-name          : AlmaLinux 9 - BaseOS
+    Repo-revision      : 1715629172
+    Repo-updated       : Mon 13 May 2024 03:39:32 PM EDT
+    Repo-pkgs          : 1,180
+    Repo-available-pkgs: 1,180
+    Repo-size          : 1.8 G
+    Repo-mirrors       : https://mirrors.almalinux.org/mirrorlist/9/baseos
+    Repo-baseurl       : http://mirror.alma.iad1.serverforge.org/9.4/BaseOS/x86_64/os/ (9 more)
+    Repo-expire        : 86,400 second(s) (last: Tue 14 May 2024 07:10:37 AM EDT)
+    Repo-filename      : /etc/yum.repos.d/almalinux-baseos.repo
+
+    Repo-id            : crowdstrike-el9
+    Repo-name          : crowdstrike-el9
+    Repo-revision      : 789
+    Repo-updated       : Mon 13 May 2024 09:22:00 AM EDT
+    Repo-pkgs          : 55
+    Repo-available-pkgs: 55
+    Repo-size          : 1.7 G
+    Repo-baseurl       : https://oneget.oit.duke.edu/rpm/crowdstrike-el9/
+    Repo-expire        : 172,800 second(s) (last: Tue 14 May 2024 07:10:37 AM EDT)
+    Repo-filename      : /etc/yum.repos.d/crowdstrike.repo
+    Total packages: 32,721
+
 file_contents:
   "/etc/os-release": |
     NAME="CentOS Stream"

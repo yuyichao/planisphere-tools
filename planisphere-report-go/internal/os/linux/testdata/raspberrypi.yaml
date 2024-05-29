@@ -8,6 +8,25 @@ command_output:
     vim-runtime 2:8.1.2269-1ubuntu5.3
     vim-tiny    2:8.1.2269-1ubuntu5.3
     wamerican   2018.04.16-1
+  "/usr/bin/apt-cache policy": |
+    Package files:
+     100 /var/lib/dpkg/status
+         release a=now
+     500 https://apt.oit.duke.edu/vault/jammy jammy/main amd64 Packages
+         release o=Artifactory,a=jammy,n=jammy,l=vault/jammy jammy,c=main,b=amd64
+         origin apt.oit.duke.edu
+     500 http://apt.oit.duke.edu/oit/bionic bionic/main amd64 Packages
+         release o=oit/bionic bionic,a=bionic,n=bionic,l=oit/bionic bionic,c=main,b=amd64
+         origin apt.oit.duke.edu
+     500 https://apt.oit.duke.edu/puppet8/jammy jammy/puppet8 amd64 Packages
+         release o=Puppetlabs,a=jammy,n=jammy,l=puppet8/jammy jammy,c=puppet8,b=amd64
+         origin apt.oit.duke.edu
+     510 https://apt.oit.duke.edu jammy-infra-updates/main amd64 Packages
+         release o=UbuntuESM,a=jammy-infra-updates,n=jammy-infra-updates,l=. jammy-infra-updates,c=main,b=amd64
+         origin apt.oit.duke.edu
+     510 https://apt.oit.duke.edu jammy-infra-security/main amd64 Packages
+         release o=UbuntuESM,a=jammy-infra-security,n=jammy-infra-security,l=. jammy-infra-security,c=main,b=amd64
+         origin apt.oit.duke.edu
 file_contents:
   "/proc/cpuinfo": |
     processor	: 0

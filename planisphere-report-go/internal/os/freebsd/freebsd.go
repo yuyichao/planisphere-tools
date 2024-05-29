@@ -170,3 +170,8 @@ func (o OSLookup) GetHostname(_ *lookups.Lookup) (interface{}, error) {
 func (o OSLookup) GetExternalOSIdentifiers(_ *lookups.Lookup) (interface{}, error) {
 	return nil, nil
 }
+
+// GetExtendedOSSupport returns the vendor providing Extended OS Support for an operating system
+func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
+	return "", nil
+}

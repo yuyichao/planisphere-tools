@@ -93,6 +93,8 @@ func NewLookuper(c *lookups.LookupConfig) (*lookups.Lookup, error) {
 			{name: "Hostname", wrapper: nil, wrapperE: setHostnameWrapper, wrapperEF: fancyLookup.GetHostname},
 			{name: "OSFullName", wrapper: nil, wrapperE: setOSFullNameWrapper, wrapperEF: fancyLookup.GetOSFullName},
 			{name: "MacAddressses", wrapper: setMacAddressesWrapper, wrapperE: nil, wrapperEF: nil},
+
+			{name: "ExtendedOSSupport", wrapperE: setExtendedOSSupportWrapper, wrapperEF: fancyLookup.GetExtendedOSSupport},
 		}, l)
 
 	return l, nil
@@ -144,6 +146,21 @@ func setManufacturerWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (inter
 			return err
 		}
 		l.Payload.Data.Manufacturer = item.(string)
+	}
+
+	return nil
+}
+
+func setExtendedOSSupportWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
+	defer l.MarkChecked("os_extended_support")
+	if item, ok := l.Overrides["os_extended_support"]; ok {
+		l.Payload.Data.OSExtendedSupport = item.(string)
+	} else {
+		item, err := f(l)
+		if err != nil {
+			return err
+		}
+		l.Payload.Data.OSExtendedSupport = item.(string)
 	}
 
 	return nil
@@ -285,7 +302,7 @@ func setDepartmentKeyWrapper(l *lookups.Lookup) {
 func setSupportGroupIDWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("support_group_id")
 	if supportGroupID, ok := l.Overrides["support_group_id"]; ok {
-		l.Payload.Data.SupportGroupId = uint64(supportGroupID.(int))
+		l.Payload.Data.SupportGroupID = uint64(supportGroupID.(int))
 	}
 }
 

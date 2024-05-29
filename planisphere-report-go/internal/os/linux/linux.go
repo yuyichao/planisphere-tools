@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -33,6 +34,17 @@ type OSLookup struct{}
 // ApplyPlatformDetections satisfies the OSLookuper interface
 func (o OSLookup) ApplyPlatformDetections(_ *lookups.Lookup) error {
 	return nil
+}
+
+// GetEnabledRepos returns a list of enabled repositories on a given system
+func GetEnabledRepos(l *lookups.Lookup) ([]string, error) {
+	if _, err := l.Commander.LookPath("apt-cache"); err == nil {
+		return aptRepos(l)
+	}
+	if _, err := l.Commander.LookPath("yum"); err == nil {
+		return yumRepos(l)
+	}
+	return nil, errors.New("no apt-cache or yum found to look up enabled repositories")
 }
 
 // GetInstalledSoftware returns the installed software
@@ -67,6 +79,33 @@ func GetInstalledSoftware(l *lookups.Lookup) ([][]string, error) {
 	}
 
 	return softwareTable, nil
+}
+
+// GetExtendedOSSupport returns the vendor providing Extended OS Support for an operating system
+func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
+	repos, err := GetEnabledRepos(l)
+	if err != nil {
+		slog.Debug("could not find any repos to do an extended os support lookup on")
+		return "", nil
+	}
+
+	for _, repo := range repos {
+		for sp, regexes := range map[string][]regexp.Regexp{
+			"TuxCare": {},
+			"Ubuntu ESM": {
+				*regexp.MustCompile(`\/\/apt.oit.duke.edu\/dists\/\S+-infra-(updates|security).*`),
+				*regexp.MustCompile(`\/\/esm.ubuntu.com\/`),
+			},
+		} {
+			for _, re := range regexes {
+				if re.MatchString(repo) {
+					slog.Debug("found repo matching a support regex", "repo", repo, "support-provider", sp, "regex", re)
+					return sp, nil
+				}
+			}
+		}
+	}
+	return "", nil
 }
 
 // GetSerial satisfies the OSLookuper interface
@@ -207,6 +246,50 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookup) (interface{}, error) {
 		}
 	}
 	return fullName, nil
+}
+
+func aptRepos(l *lookups.Lookup) ([]string, error) {
+	out, err := l.Commander.Output("/usr/bin/apt-cache", "policy")
+	if err != nil {
+		return nil, errors.New("could not run apt-cache")
+	}
+	ret := []string{}
+	scanner := bufio.NewScanner(bytes.NewBuffer(out))
+	for scanner.Scan() {
+		txt := scanner.Text()
+		if strings.Contains(txt, "http") {
+			pieces := strings.Split(txt, " ")
+			ret = append(ret, fmt.Sprintf("%v/dists/%v", pieces[2], pieces[3]))
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	sort.Strings(ret)
+	return ret, nil
+}
+
+func yumRepos(l *lookups.Lookup) ([]string, error) {
+	out, err := l.Commander.Output("/usr/bin/yum", "repolist", "-v", "enabled")
+	if err != nil {
+		return nil, errors.New("could not run yum")
+	}
+	r := regexp.MustCompile(`^Repo-(baseurl|mirrors)\s+:\s(\S+).*$`)
+
+	ret := []string{}
+	scanner := bufio.NewScanner(bytes.NewBuffer(out))
+	for scanner.Scan() {
+		txt := scanner.Text()
+		match := r.FindStringSubmatch(txt)
+		if len(match) > 0 {
+			ret = append(ret, match[2])
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	sort.Strings(ret)
+	return ret, nil
 }
 
 // detectPro attempts to determine if the ESM repos indicate that this server is

@@ -64,7 +64,11 @@ func (c MockCommander) GetMacAddrs() ([]string, error) {
 }
 
 func (c MockCommander) LookPath(command string) (string, error) {
-	return fmt.Sprintf("/usr/bin/%v", command), nil
+	availableCommands := []string{"yum", "rpm"}
+	if slices.Contains(availableCommands, command) {
+		return fmt.Sprintf("/usr/bin/%v", command), nil
+	}
+	return "", errors.New("Command not found")
 }
 
 func (c MockCommander) Output(command string, args ...string) ([]byte, error) {
@@ -77,7 +81,7 @@ func (c PiCommander) GetMacAddrs() ([]string, error) {
 }
 
 func (c PiCommander) LookPath(command string) (string, error) {
-	availableCommands := []string{"dpkg-query"}
+	availableCommands := []string{"dpkg-query", "apt-cache"}
 	if slices.Contains(availableCommands, command) {
 		return fmt.Sprintf("/usr/bin/%v", command), nil
 	}

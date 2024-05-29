@@ -201,10 +201,6 @@ func GetInstalledSoftware(l *lookups.Lookup) ([][]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
-		slog.Warn("could not get app date", "error", err)
-		return nil, err
-	}
 	for _, item := range data.SPApplicationsDataType {
 		softwareTable = append(softwareTable, []string{item.Name, item.Version})
 	}
@@ -332,4 +328,9 @@ func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookup) (interface{}, erro
 		ids["crowdstrike_aid"] = aid
 	}
 	return ids, nil
+}
+
+// GetExtendedOSSupport returns the vendor providing Extended OS Support for an operating system
+func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
+	return "", nil
 }
