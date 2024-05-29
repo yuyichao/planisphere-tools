@@ -92,7 +92,7 @@ func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
 	for _, repo := range repos {
 		for sp, regexes := range map[string][]regexp.Regexp{
 			"TuxCare": {},
-			"Ubuntu ESM": {
+			"Ubuntu Pro": {
 				*regexp.MustCompile(`\/\/apt.oit.duke.edu\/dists\/\S+-infra-(updates|security).*`),
 				*regexp.MustCompile(`\/\/esm.ubuntu.com\/`),
 			},
