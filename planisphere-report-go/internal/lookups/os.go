@@ -32,6 +32,7 @@ type OSLookuper interface {
 	GetManufacturer(l *Lookup) (interface{}, error)
 	GetSerial(l *Lookup) (interface{}, error)
 	GetExternalOSIdentifiers(l *Lookup) (interface{}, error)
+	GetExtendedOSSupport(l *Lookup) (interface{}, error)
 }
 
 // Lookup is the generic thing that does OS lookups

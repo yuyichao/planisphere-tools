@@ -84,3 +84,49 @@ func TestMakeNamePro(t *testing.T) {
 		require.Equal(t, tt.want, linux.MakeNamePro(tt.given), desc)
 	}
 }
+
+func TestAptRepos(t *testing.T) {
+	commander = PiCommander{}
+	c := lookups.LookupConfig{
+		Commander: &commander,
+		OS:        "linux",
+	}
+	l, err := helpers.NewLookuper(&c)
+	require.NoError(t, err)
+	require.NotNil(t, l)
+
+	got, err := linux.GetEnabledRepos(l)
+	require.NoError(t, err)
+	require.Equal(t,
+		[]string{
+			"http://apt.oit.duke.edu/oit/bionic/dists/bionic/main",
+			"https://apt.oit.duke.edu/dists/jammy-infra-security/main",
+			"https://apt.oit.duke.edu/dists/jammy-infra-updates/main",
+			"https://apt.oit.duke.edu/puppet8/jammy/dists/jammy/puppet8",
+			"https://apt.oit.duke.edu/vault/jammy/dists/jammy/main",
+		},
+		got,
+	)
+}
+
+func TestYumRepos(t *testing.T) {
+	commander = MockCommander{}
+	c := lookups.LookupConfig{
+		Commander: &commander,
+		OS:        "linux",
+	}
+	l, err := helpers.NewLookuper(&c)
+	require.NoError(t, err)
+	require.NotNil(t, l)
+
+	got, err := linux.GetEnabledRepos(l)
+	require.NoError(t, err)
+	require.Equal(t,
+		[]string{
+			"http://mirror.alma.iad1.serverforge.org/9.4/BaseOS/x86_64/os/",
+			"https://mirrors.almalinux.org/mirrorlist/9/baseos",
+			"https://oneget.oit.duke.edu/rpm/crowdstrike-el9/",
+		},
+		got,
+	)
+}

@@ -33,7 +33,7 @@ func TestGenericLookupOverrides(t *testing.T) {
 	l, _ := helpers.NewLookuper(c)
 	require.Equal(t, "ringo", l.Payload.Key)
 	require.Equal(t, "foo", l.Payload.Data.DepartmentKey)
-	require.Equal(t, int(42), int(l.Payload.Data.SupportGroupId))
+	require.Equal(t, int(42), int(l.Payload.Data.SupportGroupID))
 	require.Equal(t, "Marty", l.Payload.Data.SupportGroupName)
 	require.Equal(t, "server", l.Payload.Data.UsageType)
 	require.Equal(t, "deployed", l.Payload.Data.Status)
