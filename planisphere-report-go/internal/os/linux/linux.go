@@ -6,12 +6,10 @@ package linux
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -91,7 +89,10 @@ func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
 
 	for _, repo := range repos {
 		for sp, regexes := range map[string][]regexp.Regexp{
-			"TuxCare": {},
+			"TuxCare": {
+				*regexp.MustCompile(`\/\/yum.oit.duke.edu\/patchmonkey\/el\d+\/centos-\d+-els\/`),
+				*regexp.MustCompile(`\/\/repo.tuxcare.com`),
+			},
 			"Ubuntu Pro": {
 				*regexp.MustCompile(`\/\/apt.oit.duke.edu\/dists\/\S+-infra-(updates|security).*`),
 				*regexp.MustCompile(`\/\/esm.ubuntu.com\/`),
@@ -240,11 +241,6 @@ func (o OSLookup) GetOSFullName(l *lookups.Lookup) (interface{}, error) {
 			fullName = strings.Trim(m[1], `"`)
 		}
 	}
-	if strings.HasPrefix(fullName, "Ubuntu") {
-		if o.detectPro(l) || o.detectOITPro() {
-			fullName = MakeNamePro(fullName)
-		}
-	}
 	return fullName, nil
 }
 
@@ -290,47 +286,6 @@ func yumRepos(l *lookups.Lookup) ([]string, error) {
 	}
 	sort.Strings(ret)
 	return ret, nil
-}
-
-// detectPro attempts to determine if the ESM repos indicate that this server is
-// getting full 'Pro' support
-func (o OSLookup) detectPro(l *lookups.Lookup) bool {
-	out, err := l.Commander.Output("/usr/bin/pro", "security-status", "--esm-infra", "--format", "json")
-	if err != nil {
-		// No pro yo
-		return false
-	}
-	var esm esmStatus
-	err = json.Unmarshal(out, &esm)
-	if err != nil {
-		return false
-	}
-	return esm.Summary.UA.Attached
-}
-
-// detectOITPro attempts to determin if the ESM repos are included in an OIT managed host
-// OIT mirrors the pro repos locally instead of reaching out to the Ubuntu hosted packages.
-// Because of this, the pro command incorrectly reports that it is not attached.
-// We are instead checking to see if the local mirror repo exists, and assuming 'Pro' if
-// it's there.
-func (o OSLookup) detectOITPro() bool {
-	matches, err := filepath.Glob("/etc/apt/sources.list.d/*-infra-updates.list")
-	if err != nil {
-		slog.Warn("error checking for OIT pro repos", "error", err)
-	}
-	if len(matches) > 0 {
-		return true
-	}
-	return false
-}
-
-// esmStatus is a minimal holder for the esm status
-type esmStatus struct {
-	Summary struct {
-		UA struct {
-			Attached bool `json:"attached"`
-		} `json:"ua"`
-	} `json:"summary"`
 }
 
 // GetInstalledSoftware satisfies the OSLookuper interface
