@@ -19,7 +19,7 @@ var reportCmd = &cobra.Command{
 	Use:   "report",
 	Short: "Report back to Planisphere",
 	Long:  `Look up local information and send it up to Planisphere self report`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		logger.Info("starting report collection")
 		dryrun, err := cmd.Flags().GetBool("dryrun")
 		cobra.CheckErr(err)

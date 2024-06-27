@@ -89,6 +89,9 @@ func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
 
 	for _, repo := range repos {
 		for sp, regexes := range map[string][]regexp.Regexp{
+			"Red Hat ELS": {
+				*regexp.MustCompile(`\/\/yum.oit.duke.edu\/patchmonkey\/rhel-\d+-server-els-rpms`),
+			},
 			"TuxCare": {
 				*regexp.MustCompile(`\/\/yum.oit.duke.edu\/patchmonkey\/el\d+\/centos-\d+-els\/`),
 				*regexp.MustCompile(`\/\/repo.tuxcare.com`),

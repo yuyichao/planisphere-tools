@@ -33,7 +33,7 @@ Default behavior is to encrypt this output to the ssi-systems team. If you would
 like to save it as plaintext, use the --plaintext flag. Feel free to re-encrypt
 it with whatever public keys you choose as well.`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		plaintext, err := cmd.Flags().GetBool("plaintext")
 		cobra.CheckErr(err)
 		stdout, err := cmd.Flags().GetBool("stdout")

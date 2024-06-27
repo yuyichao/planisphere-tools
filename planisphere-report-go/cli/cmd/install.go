@@ -11,7 +11,7 @@ var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install components used to run the report automatically",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("install called")
 	},
 }
