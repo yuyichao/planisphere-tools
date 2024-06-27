@@ -18,7 +18,7 @@ var testCmd = &cobra.Command{
 	Long: `Use the /self_report/test endpoint to see how the data you are submitting will
 be interpreted by Planisphere. Note that this does not actually submit your self report. Use
 the 'report' command for that`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		err := os.Setenv("PLANISPHEREREPORT_URL", planisphereURL+"/test")
 		if err != nil {
 			logFatal("error setting url", err)

@@ -14,7 +14,7 @@ import (
 var installCronCmd = &cobra.Command{
 	Use:   "cron",
 	Short: "Install cron runner",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		cronFile, _ := cmd.Flags().GetString("cron-file")
 		force, _ := cmd.Flags().GetBool("force")
 		user, _ := cmd.Flags().GetString("user")

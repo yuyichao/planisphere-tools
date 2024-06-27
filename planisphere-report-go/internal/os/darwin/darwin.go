@@ -331,6 +331,6 @@ func (o OSLookup) GetExternalOSIdentifiers(l *lookups.Lookup) (interface{}, erro
 }
 
 // GetExtendedOSSupport returns the vendor providing Extended OS Support for an operating system
-func (o OSLookup) GetExtendedOSSupport(l *lookups.Lookup) (interface{}, error) {
+func (o OSLookup) GetExtendedOSSupport(_ *lookups.Lookup) (interface{}, error) {
 	return "", nil
 }

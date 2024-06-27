@@ -29,7 +29,7 @@ run:
 
   # default is true. Enables skipping of directories:
   #   vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
-  skip-dirs-use-default: true
+  # skip-dirs-use-default: true
 
   # which files to skip: they will be analyzed, but issues from them
   # won't be reported. Default value is empty list, but there is
@@ -52,7 +52,7 @@ run:
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  format: line-number
+  # format: line-number
 
   # print lines of code with issue, default is true
   print-issued-lines: true
@@ -87,7 +87,7 @@ linters-settings:
 
   govet:
     # report about shadowed variables
-    check-shadowing: true
+    # check-shadowing: true
 
     # settings per analyzer
     settings:
@@ -105,9 +105,9 @@ linters-settings:
     # disable:
     #   - shadow
     # disable-all: false
-  golint:
+  # golint:
     # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
+    # min-confidence: 0.8
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
@@ -117,9 +117,9 @@ linters-settings:
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 20
-  maligned:
+  # maligned:
     # print struct with more effective memory layout or not, false by default
-    suggest-new: true
+    # suggest-new: true
   dupl:
     # tokens count to trigger issue, 150 by default
     threshold: 100
@@ -298,17 +298,19 @@ linters:
     - godox
     - gofmt
     - goimports
-    - golint
+    # - golint
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
+    # - interfacer
     - misspell
     - nakedret
-    - scopelint
+    - revive
+    # - scopelint
     - staticcheck
-    - structcheck
+    # - structcheck
+    - exportloopref
     - stylecheck
     - typecheck
     - unconvert
