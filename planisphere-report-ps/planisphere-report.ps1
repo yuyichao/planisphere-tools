@@ -1,4 +1,4 @@
-$script_date = "20211102"
+$script_date = "20240717"
 
 Function Send-PSReport {
 <#
@@ -196,6 +196,11 @@ Function Send-PSReport {
     # https://windowsserver.uservoice.com/forums/301869-powershell/suggestions/37195837-get-computerinfo-typo-in-csphyicallyinstalledmemor
     $installed_memory = [int]((&{If(Test-StringVar $info.CsPhysicallyInstalledMemory) {$info.CsPhysicallyInstalledMemory} Else {$info.CsPhyicallyInstalledMemory}}) / 1024)
 
+    # Apparently "WindowsProductName" and "WindowsVersion" have been abandoned and left as the old values on newer OSes. Use "OsName" and "OSDisplayVersion" if present.
+    $os_name = &{If(Test-StringVar $info.OsName) {$info.OsName} Else {$info.WindowsProductName}}
+    $os_version = &{If(Test-StringVar $info.OSDisplayVersion) {$info.OSDisplayVersion} Else {$info.WindowsVersion}}
+    $os_fullname = "$os_name ($os_version)"
+
     # If a UserName was not defined in a param...
     if (!(Test-StringVar $UserName)) {
         # ...analyze Security Event Log data for most frequent non-machine logins in the last week
@@ -246,7 +251,7 @@ Function Send-PSReport {
     $hash_data.Add("memory_mb", $installed_memory)
     $hash_data.Add("mac_addresses", $mac_addresses)
     $hash_data.Add("os_family", "Windows")
-    $hash_data.Add("os_fullname", "$($info.WindowsProductName) ($($info.WindowsVersion))")
+    $hash_data.Add("os_fullname", $os_fullname)
     $hash_data.Add("disk_encrypted", ((Get-BitLockerVolume -MountPoint C:).VolumeStatus -eq "FullyEncrypted"))
     $hash_data.Add("installed_software", $installed_software)
     $hash_data.Add("status", "deployed")
