@@ -6,6 +6,7 @@ package darwin
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os/exec"
 	"os/user"
@@ -287,7 +288,14 @@ func (o OSLookup) GetMemory(l *lookups.Lookup) (interface{}, error) {
 	if err != nil {
 		slog.Warn("could not detect memory")
 	}
-	return uint64(memory), nil
+	return safeInt64ToUint64(memory), nil
+}
+
+func safeInt64ToUint64(value int64) uint64 {
+	if value < 0 {
+		panic(fmt.Sprintf("cannot convert negative int64 (%d) to uint64", value))
+	}
+	return uint64(value)
 }
 
 func extractCrowdstrikeAID(output []byte) (string, error) {

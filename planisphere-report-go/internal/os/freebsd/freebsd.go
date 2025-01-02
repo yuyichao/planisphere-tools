@@ -80,9 +80,16 @@ func (o OSLookup) GetMemory(l *lookups.Lookup) (interface{}, error) {
 	if err != nil {
 		return 0, err
 	}
-	memoryMB := uint64(memory / 1024 / 1024)
+	memoryMB := safeInt64ToUint64(memory / 1024 / 1024)
 
 	return memoryMB, nil
+}
+
+func safeInt64ToUint64(value int64) uint64 {
+	if value < 0 {
+		panic(fmt.Sprintf("cannot convert negative int64 (%d) to uint64", value))
+	}
+	return uint64(value)
 }
 
 // GetOSFamily returns the OSFamily
