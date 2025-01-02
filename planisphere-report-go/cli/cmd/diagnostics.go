@@ -20,6 +20,23 @@ import (
 	"github.com/spf13/viper"
 )
 
+type cmdDiagnostic struct {
+	Command string `yaml:"command"`
+	StdOut  string `yaml:"stdout"`
+	StdErr  string `yaml:"stderr"`
+}
+type diagnostic struct {
+	Hostname  string                        `yaml:"hostname"`
+	Version   string                        `yaml:"version"`
+	User      string                        `yaml:"user"`
+	TimeStamp time.Time                     `yaml:"time"`
+	Instance  string                        `yaml:"instance"`
+	KeyHash   string                        `yaml:"key_hash"`
+	Overrides map[string]interface{}        `yaml:"overrides"`
+	Payload   planisphere.SelfReportPayload `yaml:"payload"`
+	Commands  []cmdDiagnostic               `yaml:"commands"`
+}
+
 // diagnosticsCmd represents the diagnostics command
 var diagnosticsCmd = &cobra.Command{
 	Use:     "diagnostics",
@@ -33,26 +50,14 @@ Default behavior is to encrypt this output to the ssi-systems team. If you would
 like to save it as plaintext, use the --plaintext flag. Feel free to re-encrypt
 it with whatever public keys you choose as well.`,
 
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		plaintext, err := cmd.Flags().GetBool("plaintext")
-		cobra.CheckErr(err)
-		stdout, err := cmd.Flags().GetBool("stdout")
-		cobra.CheckErr(err)
-		type cmdDiagnostic struct {
-			Command string `yaml:"command"`
-			StdOut  string `yaml:"stdout"`
-			StdErr  string `yaml:"stderr"`
+		if err != nil {
+			return err
 		}
-		type diagnostic struct {
-			Hostname  string                        `yaml:"hostname"`
-			Version   string                        `yaml:"version"`
-			User      string                        `yaml:"user"`
-			TimeStamp time.Time                     `yaml:"time"`
-			Instance  string                        `yaml:"instance"`
-			KeyHash   string                        `yaml:"key_hash"`
-			Overrides map[string]interface{}        `yaml:"overrides"`
-			Payload   planisphere.SelfReportPayload `yaml:"payload"`
-			Commands  []cmdDiagnostic               `yaml:"commands"`
+		stdout, err := cmd.Flags().GetBool("stdout")
+		if err != nil {
+			return err
 		}
 		cmdMap := map[string][][]string{
 			"darwin": {
@@ -84,8 +89,7 @@ it with whatever public keys you choose as well.`,
 
 		cmds := cmdMap[runtime.GOOS]
 		if cmds == nil {
-			logger.Error("No commands available for this OS", "os", runtime.GOOS)
-			os.Exit(2)
+			return fmt.Errorf("no commands available for this OS: %v", runtime.GOOS)
 		}
 
 		hostname, _ := os.Hostname()
@@ -112,11 +116,11 @@ it with whatever public keys you choose as well.`,
 				oCmd.Stdout = &outbuf
 				oCmd.Stderr = &errbuf
 
-				if oerr := oCmd.Run(); oerr != nil {
+				if oerr := oCmd.Start(); oerr != nil {
 					logger.Debug("error running command", "cmd", cmd, "error", oerr)
 				}
 				if oerr := oCmd.Wait(); oerr != nil {
-					logger.Warn("command errored out", "error", oerr)
+					logger.Debug("command errored out", "cmd", cmd, "error", oerr)
 				}
 
 				cd := cmdDiagnostic{
@@ -144,7 +148,9 @@ it with whatever public keys you choose as well.`,
 
 		// Marshal the diagnostic
 		b, err := yaml.Marshal(d)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		// Write out to temp file in gzip
 		var buf bytes.Buffer
@@ -155,9 +161,13 @@ it with whatever public keys you choose as well.`,
 		// Do we want to encrypt?
 		if !plaintext {
 			els, cerr := collectGPGPubKeys("")
-			cobra.CheckErr(cerr)
-			b, err = encrypt(b, els)
-			cobra.CheckErr(err)
+			if cerr != nil {
+				return cerr
+			}
+
+			if b, err = encrypt(b, els); err != nil {
+				return err
+			}
 		}
 
 		// Write data out
@@ -177,15 +187,19 @@ it with whatever public keys you choose as well.`,
 			fExt = "*.yaml.gpg.gz"
 		}
 		diagFile, err := os.CreateTemp("", fExt)
-		cobra.CheckErr(err)
-		err = os.WriteFile(diagFile.Name(), buf.Bytes(), os.ModePerm)
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(diagFile.Name(), buf.Bytes(), 0o600); err != nil {
+			return err
+		}
 		fmt.Printf("Wrote diagnostics to: %v\n", diagFile.Name())
 		fmt.Println("Please describe the issue you are running in to, and attach this diagnostic file to a new 'Issue' report at the URL below")
 		fmt.Println("https://duke.is/z9nxa")
 		if stdout {
 			fmt.Println(string(b))
 		}
+		return nil
 	},
 }
 

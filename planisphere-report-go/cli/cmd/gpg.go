@@ -18,7 +18,8 @@ import (
 
 // encrypt the provided bytes for the provided encryption
 // keys recipients. Returns the encrypted content bytes.
-func encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
+// func encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
+func encrypt(d []byte, encryptionKeys []*openpgp.Entity) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	var armoredWriter io.WriteCloser
 	var cipheredWriter io.WriteCloser
@@ -32,15 +33,14 @@ func encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 	}
 
 	// Create an encrypted writer using the provided encryption keys
-	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
+	cipheredWriter, err = openpgp.Encrypt(armoredWriter, encryptionKeys, nil, nil, nil)
 	if err != nil {
-		return nil, errors.New("bad cipher")
+		return nil, fmt.Errorf("bad cipher: %x", err)
 	}
 
 	// Write (encrypts on the fly) the provided bytes to
 	// cipheredWriter
-	_, err = cipheredWriter.Write(d)
-	if err != nil {
+	if _, err := cipheredWriter.Write(d); err != nil {
 		return nil, errors.New("bad ciphered writer")
 	}
 
@@ -68,9 +68,8 @@ func readEntity(name string) (*openpgp.Entity, error) {
 }
 
 // collectGPGPubKeys returns an EntityList from a given url
-func collectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
-	var els openpgp.EntityList
-
+// func collectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
+func collectGPGPubKeys(fp string) ([]*openpgp.Entity, error) {
 	if fp == "" {
 		gitlabKeysURL := "https://gitlab.oit.duke.edu/oit-ssi-systems/staff-public-keys.git"
 		subDir := "linux"
@@ -94,10 +93,19 @@ func collectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 	if err != nil {
 		return nil, err
 	}
+	els := []*openpgp.Entity{}
 	for _, pubKeyFile := range matches {
 		e, err := readEntity(pubKeyFile)
 		if err != nil {
 			slog.Warn("error opening gpg file", "pubkey", pubKeyFile)
+			continue
+		}
+		armoredWriter, err := armor.Encode(&bytes.Buffer{}, "PGP MESSAGE", nil)
+		if err != nil {
+			return nil, errors.New("bad writer")
+		}
+		if _, err := openpgp.Encrypt(armoredWriter, []*openpgp.Entity{e}, nil, nil, nil); err != nil {
+			slog.Warn("error testing encryption with key", "error", err)
 			continue
 		}
 		els = append(els, e)
@@ -105,7 +113,7 @@ func collectGPGPubKeys(fp string) (*openpgp.EntityList, error) {
 	if len(els) == 0 {
 		return nil, errors.New("no gpg keys found")
 	}
-	return &els, nil
+	return els, nil
 }
 
 func dclose(c io.Closer) {
