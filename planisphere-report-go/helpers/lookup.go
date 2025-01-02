@@ -202,7 +202,7 @@ func setDiskEncryptedWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (inte
 func setMemoryWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}, error)) error {
 	defer l.MarkChecked("memory_mb")
 	if item, ok := l.Overrides["memory_mb"]; ok {
-		l.Payload.Data.MemoryMB = uint64(item.(int))
+		l.Payload.Data.MemoryMB = safeIntToUint64(item.(int))
 	} else {
 		item, err := f(l)
 		if err != nil {
@@ -212,6 +212,13 @@ func setMemoryWrapper(l *lookups.Lookup, f func(fl *lookups.Lookup) (interface{}
 	}
 
 	return nil
+}
+
+func safeIntToUint64(value int) uint64 {
+	if value < 0 {
+		panic(fmt.Sprintf("cannot convert negative int (%d) to uint64", value))
+	}
+	return uint64(value)
 }
 
 // Operating System Stuff
@@ -302,7 +309,7 @@ func setDepartmentKeyWrapper(l *lookups.Lookup) {
 func setSupportGroupIDWrapper(l *lookups.Lookup) {
 	defer l.MarkChecked("support_group_id")
 	if supportGroupID, ok := l.Overrides["support_group_id"]; ok {
-		l.Payload.Data.SupportGroupID = uint64(supportGroupID.(int))
+		l.Payload.Data.SupportGroupID = safeIntToUint64(supportGroupID.(int))
 	}
 }
 
