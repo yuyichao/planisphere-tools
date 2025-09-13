@@ -207,6 +207,12 @@ func (o OSLookup) GetOSFamily(_ *lookups.Lookup) (interface{}, error) {
 
 // GetDeviceType satisfies the OSLookuper interface
 func (o OSLookup) GetDeviceType(l *lookups.Lookup) (interface{}, error) {
+	// First check if systemd-detect-virt indicates this is a VM
+	_, err := l.Commander.Output("systemd-detect-virt", "--vm", "--quiet")
+	if err == nil {
+		return "vm", nil
+	}
+
 	l.WaitForChecked("serial")
 	if strings.Contains(l.Payload.Data.Serial, "VMware") {
 		return "vm", nil

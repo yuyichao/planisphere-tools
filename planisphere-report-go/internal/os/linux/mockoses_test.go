@@ -27,6 +27,10 @@ var (
 	piData      *report.MockData
 	piCommander report.Commander
 
+	// Stubs for vm
+	vmData      *report.MockData
+	vmCommander report.Commander
+
 	// Worlds worst command executor, always fail
 	failCommander report.Commander
 )
@@ -43,6 +47,11 @@ func setup() {
 		slog.Error("error setting pi data", "error", err)
 		os.Exit(2)
 	}
+	vmData, err = report.NewMockData("testdata/vm.yaml")
+	if err != nil {
+		slog.Error("error setting vm data", "error", err)
+		os.Exit(2)
+	}
 }
 
 func teardown() {
@@ -51,6 +60,7 @@ func teardown() {
 type (
 	MockCommander struct{}
 	PiCommander   struct{}
+	VmCommander   struct{}
 	FailCommander struct{}
 )
 
@@ -94,6 +104,27 @@ func (c PiCommander) Output(command string, args ...string) ([]byte, error) {
 
 func (c PiCommander) Slurp(filepath string) ([]byte, error) {
 	return report.MockFileGet(piData, filepath)
+}
+
+// Mock up for raspberry vm
+func (c VmCommander) GetMacAddrs() ([]string, error) {
+	return report.MockMacGet(vmData)
+}
+
+func (c VmCommander) LookPath(command string) (string, error) {
+	availableCommands := []string{"yum", "rpm"}
+	if slices.Contains(availableCommands, command) {
+		return fmt.Sprintf("/usr/bin/%v", command), nil
+	}
+	return "", errors.New("Command not found")
+}
+
+func (c VmCommander) Output(command string, args ...string) ([]byte, error) {
+	return report.MockCommandGet(vmData, command, args...)
+}
+
+func (c VmCommander) Slurp(filepath string) ([]byte, error) {
+	return report.MockFileGet(vmData, filepath)
 }
 
 // Mock up for failure cmds

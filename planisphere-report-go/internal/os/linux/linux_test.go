@@ -51,6 +51,25 @@ func TestPiLookup(t *testing.T) {
 	require.Greater(t, len(l.Payload.Data.InstalledSoftware), 0, "No installed software found")
 }
 
+func TestVmLookup(t *testing.T) {
+	commander = VmCommander{}
+	c := lookups.LookupConfig{
+		Commander: &commander,
+		OS:        "linux",
+	}
+	l, err := helpers.NewLookuper(&c)
+	require.NoError(t, err)
+	require.NotNil(t, l)
+
+	require.Equal(t, "Linux", l.Payload.Data.OsFamily)
+	require.Equal(t, "CentOS Stream 8", l.Payload.Data.OsFullname)
+	require.Equal(t, "VMware7,1", l.Payload.Data.Model)
+	require.Equal(t, "vm", l.Payload.Data.DeviceType)
+	require.Equal(t, "my-awesome-fake-serial", l.Payload.Data.Serial)
+	require.Equal(t, planisphere.ExternalOSIdentifiers{"crowdstrike_aid": "d3bcdcaf1604426b9ad6a421e1a5ad40"}, l.Payload.Data.ExternalOSIdentifiers)
+	require.Contains(t, l.Payload.Data.MacAddresses, "01:02:03:30:20:10")
+}
+
 func TestFailingLookup(t *testing.T) {
 	failCommander = FailCommander{}
 	c := lookups.LookupConfig{
