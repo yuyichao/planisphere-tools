@@ -52,7 +52,7 @@ func TestPiLookup(t *testing.T) {
 }
 
 func TestVmLookup(t *testing.T) {
-	commander = VmCommander{}
+	commander = VMCommander{}
 	c := lookups.LookupConfig{
 		Commander: &commander,
 		OS:        "linux",
